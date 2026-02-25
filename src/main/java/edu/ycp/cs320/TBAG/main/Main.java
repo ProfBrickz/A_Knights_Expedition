@@ -1,4 +1,4 @@
-package edu.ycp.cs320.lab03.main;
+package edu.ycp.cs320.TBAG.main;
 
 import java.io.File;
 
@@ -12,7 +12,7 @@ public class Main {
 		
 		// get a server for port 8081
 		System.out.println("CREATING: web server on port 8081");
-		Server server = launcher.launch(true, 8081, warFile.getAbsolutePath(), "/lab03");
+		Server server = launcher.launch(true, 8081, warFile.getAbsolutePath(), "/tbag");
 
         // Start things up!		
 		System.out.println("STARTING: web server on port 8081");

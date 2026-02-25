@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'edu.ycp.cs320.lab03'
+group = 'edu.ycp.cs320.TBAG'
 version = '1.0-SNAPSHOT'
 
 repositories {
