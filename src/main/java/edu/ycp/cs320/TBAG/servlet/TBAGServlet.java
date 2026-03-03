@@ -34,10 +34,7 @@ public class TBAGServlet extends HttpServlet {
 		
 		// create GameEngine controller - controller does not persist between requests
 		// must recreate it each time a Post comes in
-		GameEngine engine = new GameEngine();
-		
-		// assign model reference to controller so that controller can access model
-		engine.setPlayer(player);
+		GameEngine gameEngine = new GameEngine(player);
 
 		// Get running dialog text
 		String dialog = req.getParameter("dialog");
@@ -47,7 +44,7 @@ public class TBAGServlet extends HttpServlet {
 		// Append user's command
 		dialog += command + "\n";
 		// Attempt to move player
-		if (!engine.movePlayer(command)) {
+		if (!gameEngine.movePlayer(command)) {
 			dialog += "Sorry, command not recognized.\n";
 		}
 
