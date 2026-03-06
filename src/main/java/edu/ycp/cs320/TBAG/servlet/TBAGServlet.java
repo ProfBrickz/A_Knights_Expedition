@@ -1,6 +1,7 @@
 package edu.ycp.cs320.TBAG.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import edu.ycp.cs320.TBAG.controller.GameEngine;
 import edu.ycp.cs320.TBAG.model.Player;
+import edu.ycp.cs320.TBAG.model.Room;
 
 public class TBAGServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -31,10 +33,12 @@ public class TBAGServlet extends HttpServlet {
 		
 		// create Player model
 		Player player = new Player();
+		// create room models
+		ArrayList<Room> rooms = new ArrayList<Room>();
 		
 		// create GameEngine controller - controller does not persist between requests
 		// must recreate it each time a Post comes in
-		GameEngine gameEngine = new GameEngine(player);
+		GameEngine gameEngine = new GameEngine(player, rooms);
 
 		// Get running dialog text
 		String dialog = req.getParameter("dialog");
