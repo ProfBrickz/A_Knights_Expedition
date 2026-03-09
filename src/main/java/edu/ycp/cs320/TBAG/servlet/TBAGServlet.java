@@ -1,41 +1,40 @@
 package edu.ycp.cs320.TBAG.servlet;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import edu.ycp.cs320.TBAG.controller.GameEngine;
+import edu.ycp.cs320.TBAG.model.Player;
+import edu.ycp.cs320.TBAG.model.Room;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import edu.ycp.cs320.TBAG.controller.GameEngine;
-import edu.ycp.cs320.TBAG.model.Player;
-import edu.ycp.cs320.TBAG.model.Room;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class TBAGServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		
-		System.out.println("TBAG Servlet: doGet");	
-		
+		throws ServletException, IOException {
+
+		System.out.println("TBAG Servlet: doGet");
+
 		// call JSP to generate empty form
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);
 	}
-	
+
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		
+		throws ServletException, IOException {
+
 		System.out.println("TBAG Servlet: doPost");
-		
+
 		// create Player model
 		Player player = new Player();
 		// create room models
 		ArrayList<Room> rooms = new ArrayList<Room>();
-		
+
 		// create GameEngine controller - controller does not persist between requests
 		// must recreate it each time a Post comes in
 		GameEngine gameEngine = new GameEngine(player, rooms);
@@ -44,17 +43,22 @@ public class TBAGServlet extends HttpServlet {
 		String dialog = req.getParameter("dialog");
 
 		// get direction command from jsp
-		String command = req.getParameter("command");
+		String input = req.getParameter("command");
 		// Append user's command
-		dialog += command + "\n";
-		// Attempt to move player
-		if (!gameEngine.movePlayer(command)) {
-			dialog += "Sorry, command not recognized.\n";
-		}
+		dialog += input + "\n";
+
+		String command = "";
+		ArrayList<String> arguments = new ArrayList<String>();
+
+		// TODO: seperate command from arguments
+
+
+		// Run command
+		dialog += gameEngine.inputCommand(command, arguments);
 
 		// the JSP will display updated dialog
 		req.setAttribute("dialog", dialog);
-		
+
 		// now call the JSP to render the new page
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);
 	}
