@@ -23,7 +23,7 @@ public class Room {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	public void addRoomConnection(Room room) {
+	public void addRoomConnection(String direction, Room room) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 }
