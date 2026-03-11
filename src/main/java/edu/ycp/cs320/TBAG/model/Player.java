@@ -9,7 +9,7 @@ public class Player {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	public void getRoom(Room room) {
+	public void setRoom(Room room) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
