@@ -1,7 +1,7 @@
 package edu.ycp.cs320.TBAG.model;
 
 public class Player {
-	public Player(Room startingRoom) {
+	public Player() {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
