@@ -69,7 +69,7 @@ public class Player {
 
 	public String getState() { return state; }
 	public void setState(String state) { this.state = state; }
-
+	
 	public HashMap<String, Integer> getInventory() { return inventory; }
 	public void setInventory(HashMap<String, Integer> inventory) { this.inventory = inventory; }
 }
