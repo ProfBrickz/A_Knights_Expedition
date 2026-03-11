@@ -32,6 +32,8 @@ public class GameEngine {
 	}
 
 	public String inputCommand(String command, ArrayList<String> arguments) {
+		command = command.trim().toLowerCase();
+
 		if (command.equals(Command.MOVE.getCommand())) {
 			return this.move(arguments);
 		} else if (command.equals(Command.LOOK.getCommand())) {
