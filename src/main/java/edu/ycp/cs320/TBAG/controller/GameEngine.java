@@ -34,6 +34,8 @@ public class GameEngine {
 	public String inputCommand(String command, ArrayList<String> arguments) {
 		if (command.equals(Command.MOVE.getCommand())) {
 			return this.move(arguments);
+		} else if (command.equals(Command.LOOK.getCommand())) {
+			return this.look(arguments);
 		} else {
 			return "Sorry, command not recognized.\n";
 		}
@@ -51,7 +53,15 @@ public class GameEngine {
 		}
 
 		this.playerController.move(direction);
-		
-		return this.player.getRoom().getDescription();
+
+		return this.player.getRoom().getDescription() + "\n";
+	}
+
+	private String look(ArrayList<String> arguments) {
+		if (arguments.size() != Command.LOOK.getArguments().size()) {
+			return "Invalid look command\nMust be in the format:\n" + Command.LOOK.getFormat() + "\n";
+		}
+
+		return this.player.getRoom().getDescription() + "\n";
 	}
 }
