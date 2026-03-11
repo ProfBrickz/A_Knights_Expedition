@@ -23,11 +23,12 @@ public enum Command {
 	}
 
 	public String getFormat() {
-		String format = this.command;
+		String format = "\"" + this.command;
 
 		for (String argument : this.arguments) {
 			format += " <" + argument + ">";
 		}
+		format += "\"";
 
 		return format;
 	}
