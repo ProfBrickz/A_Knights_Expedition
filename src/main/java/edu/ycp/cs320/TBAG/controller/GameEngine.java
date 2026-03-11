@@ -1,6 +1,5 @@
 package edu.ycp.cs320.TBAG.controller;
 
-import edu.ycp.cs320.TBAG.model.CommandType;
 import edu.ycp.cs320.TBAG.model.Player;
 import edu.ycp.cs320.TBAG.model.Room;
 
@@ -26,18 +25,26 @@ public class GameEngine {
 		return rooms;
 	}
 
-	// Check if a command is valid, return which command it is, or null if it is not valid
-	public CommandType parseCommand(String command) {
-		for (CommandType commandType : CommandType.values()) {
-			if (command.equals(commandType.getCommand())) return commandType;
+	public String inputCommand(String command, ArrayList<String> arguments) {
+		if (command.equals(Command.MOVE.getCommand())) {
+			return this.move(arguments);
+		} else {
+			return "Sorry, command not recognized.\n";
 		}
-
-		return null;
 	}
 
-	// Attempt to move player
-	public Boolean movePlayer(String direction) {
-		return false;
-		// return player.move(direction);
+	private String move(ArrayList<String> arguments) {
+		if (arguments.size() != Command.MOVE.getArguments().size()) {
+			return "Invalid move command\nMust be in the format:\n" + Command.MOVE.getFormat() + "\n";
+		}
+
+		final Boolean success = false;
+		//final Boolean success = this.player.move(arguments[0]);
+		if (!success) {
+			return "Invalid direction for this room\n";
+		}
+
+		return "new room\n";
+		//return this.player.getRoom().description;
 	}
 }
