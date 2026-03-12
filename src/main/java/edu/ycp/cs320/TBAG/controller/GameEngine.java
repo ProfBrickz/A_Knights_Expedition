@@ -4,30 +4,37 @@ import edu.ycp.cs320.TBAG.model.Player;
 import edu.ycp.cs320.TBAG.model.Room;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Controller for the TBAG game.
  */
 public class GameEngine {
 	private final Player player;
-	private final ArrayList<Room> rooms;
+	private final HashMap<String, Room> rooms;
 	private final PlayerController playerController;
 	private final RoomController roomController;
 
-	public GameEngine(Player player, ArrayList<Room> rooms) {
+	public GameEngine(Player player, HashMap<String, Room> rooms) {
 		this.player = player;
 		this.rooms = rooms;
 		this.playerController = new PlayerController(this.player);
-		this.roomController = new RoomController();
+		this.roomController = new RoomController(this.rooms);
 
-		this.player.setRoom(rooms.get(0));
+		if (this.rooms.isEmpty()) {
+			roomController.loadDemo();
+		}
+
+		if (this.player.getRoom() == null) {
+			this.player.setRoom(rooms.get("0"));
+		}
 	}
 
 	public Player getPlayer() {
 		return player;
 	}
 
-	public ArrayList<Room> getRooms() {
+	public HashMap<String, Room> getRooms() {
 		return rooms;
 	}
 
@@ -48,13 +55,16 @@ public class GameEngine {
 			return "Invalid move command\nMust be in the format:\n" + Command.MOVE.getFormat() + "\n";
 		}
 
-		String direction = arguments.get(0);
+		String direction = arguments.get(0).toLowerCase();
 
 		if (!this.roomController.isValidDirection(player.getRoom(), direction)) {
 			return "Invalid direction for this room\n";
 		}
 
-		this.playerController.move(direction);
+		Boolean successfulMove = this.playerController.move(direction);
+		if (!successfulMove) {
+			return "Move failed, either player, or player.getRoom() does not exist";
+		}
 
 		return this.player.getRoom().getDescription() + "\n";
 	}
