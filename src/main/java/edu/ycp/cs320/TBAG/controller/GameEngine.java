@@ -4,21 +4,22 @@ import edu.ycp.cs320.TBAG.model.Player;
 import edu.ycp.cs320.TBAG.model.Room;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Controller for the TBAG game.
  */
 public class GameEngine {
 	private final Player player;
-	private final ArrayList<Room> rooms;
+	private final HashMap<String, Room> rooms;
 	private final PlayerController playerController;
 	private final RoomController roomController;
 
-	public GameEngine(Player player, ArrayList<Room> rooms) {
+	public GameEngine(Player player, HashMap<String, Room> rooms) {
 		this.player = player;
 		this.rooms = rooms;
 		this.playerController = new PlayerController(this.player);
-		this.roomController = new RoomController();
+		this.roomController = new RoomController(this.rooms);
 
 		this.player.setRoom(rooms.get(0));
 	}
@@ -27,7 +28,7 @@ public class GameEngine {
 		return player;
 	}
 
-	public ArrayList<Room> getRooms() {
+	public HashMap<String, Room> getRooms() {
 		return rooms;
 	}
 

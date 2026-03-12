@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TBAGServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -33,7 +34,7 @@ public class TBAGServlet extends HttpServlet {
 		// create Player model
 		Player player = new Player();
 		// create room models
-		ArrayList<Room> rooms = new ArrayList<Room>();
+		HashMap<String, Room> rooms = new HashMap<String, Room>();
 
 		// create GameEngine controller - controller does not persist between requests
 		// must recreate it each time a Post comes in
