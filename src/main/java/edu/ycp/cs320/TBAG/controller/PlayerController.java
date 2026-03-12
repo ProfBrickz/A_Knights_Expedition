@@ -3,16 +3,16 @@ import edu.ycp.cs320.TBAG.model.Player;
 
 
 public class PlayerController{
-    private Player model;
+    private Player player;
 
-    public void setModel(Player model){
-        this.model = model;
+    public void setModel(Player player){
+        this.player = player;
     }
 
     public boolean move(String direction){
-        if (model == null){
+        if (player == null){
             return false;
         }
-        return model.move(direction);
+        return player.move(direction);
     }
 }

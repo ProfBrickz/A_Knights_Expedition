@@ -1,25 +1,22 @@
 package edu.ycp.cs320.TBAG.controller;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-
-import edu.ycp.cs320.TBAG.controller.GameEngine;
 import edu.ycp.cs320.TBAG.model.Player;
+import edu.ycp.cs320.TBAG.model.Room;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 public class GameEngineTest {
 	private Player player;
-	private GameEngine engine;
-	
+	private ArrayList<Room> rooms;
+	private GameEngine gameEngine;
+
 	@BeforeEach
 	public void setUp() {
 		player = new Player();
-		engine = new GameEngine();
-		
-		player.setRoomID(1);
-		
-		engine.setPlayer(player);
+		rooms = new ArrayList<Room>();
+		gameEngine = new GameEngine(player, rooms);
 	}
-	
-	
 }
