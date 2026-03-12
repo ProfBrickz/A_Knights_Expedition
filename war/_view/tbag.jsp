@@ -23,7 +23,7 @@
 					<td><input type="text" name="command" size="50" value="${command}" /></td>
 				</tr>
 			</table>
-			<input name="dialog" type="hidden" value="${dialog}" />
+			<input name="dialog" type="hidden" value="${fn:escapeXml(dialog)}" />
 		</form>
 	</body>
 </html>
