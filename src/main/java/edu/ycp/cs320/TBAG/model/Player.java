@@ -13,6 +13,11 @@ public class Player {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	// --- Movement ---
+	public Boolean move(String direction) {
+		// TODO: hook up to Room/RoomConnection logic
+		return false;
+	}
 	// Old code, in case you need to reuse it
 
 //	private Integer roomID;
