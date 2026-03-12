@@ -19,5 +19,4 @@ public class Player {
 	public void setRoom(Room room) {
 		this.room = room;
 	}
-
 }
