@@ -1,38 +1,30 @@
 package edu.ycp.cs320.TBAG.model;
 
 
-
+//replace id with room object
 
 public class RoomConnection {
 
-
-private String id, description;
+private Room room;
+private String description;
 private boolean traveled;
 
 
-   public RoomConnection(String id, String description) {
-       this.id = id;
+   public RoomConnection(Room room, String description) {
+       this.room = room;
        this.description = description;
        traveled = false;
    }
 
 
-   public RoomConnection(String id){
-       this.id = id;
+   public RoomConnection(Room room){
+       this.room = room;
        this.description = "NULL";
        traveled = false;
    }
 
-
-   public RoomConnection() {
-       this.id = "NULL";
-       this.description = "NULL";
-       traveled = false;
-   }
-
-
-   public String getID() {
-       return id;
+   public Room getRoom() {
+       return room;
    }
 
 
@@ -46,8 +38,8 @@ private boolean traveled;
    }
 
 
-   public void setID(String id){
-       this.id = id;
+   public void setRoom(Room room){
+       this.room = room;
    }
 
 
