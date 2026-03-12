@@ -10,13 +10,13 @@
 	<body>
 			<c:if test="${empty room}">
                 <div>
-                Welcome to the Matrix
+                A Knight's Expedition
                 </div>
             </c:if>
 			<div style="width: 500px; height: 500px; overflow: auto; border: 1px solid black; padding: 5px; text-align: left; white-space: pre-line;">
 				${fn:escapeXml(dialog)}
 			</div>
-		<form action="${pageContext.servletContext.contextPath}/tbag" method="post">
+		<form action="${pageContext.request.contextPath}/tbag" method="post">
 			<table>
 				<tr>
 					<td class="label">Command:</td>

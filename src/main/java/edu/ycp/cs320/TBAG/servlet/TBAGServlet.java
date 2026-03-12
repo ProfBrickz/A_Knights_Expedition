@@ -51,8 +51,13 @@ public class TBAGServlet extends HttpServlet {
 		String command = "";
 		ArrayList<String> arguments = new ArrayList<String>();
 
-		// TODO: seperate command from arguments
-
+		String[] parts = input.split(" ");
+        if (parts.length>0){
+            command = parts[0];
+        }
+        for (int i = 1; i < parts.length; i++) {
+            arguments.add(parts[i]);
+        }
 
 		// Run command
 		dialog += gameEngine.inputCommand(command, arguments);
