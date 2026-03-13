@@ -64,7 +64,7 @@ public class GameEngine {
 
 		Boolean successfulMove = this.playerController.move(direction);
 		if (!successfulMove) {
-			return "Move failed, either player, or player.getRoom() does not exist";
+			return "Move failed, either player, or player.getRoom() does not exist\n";
 		}
 
 		return this.player.getRoom().getDescription() + "\n";
@@ -81,7 +81,7 @@ public class GameEngine {
 
 	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
 		if (arguments.size() != command.getArguments().size()) {
-			return "Invalid " + command.getCommand() + "\nMust be in the format:\n" + command.getFormat() + "\n";
+			return "Invalid " + command.getCommand() + " command. Must be in the format:\n" + command.getFormat() + "\n";
 		}
 
 		return null;
