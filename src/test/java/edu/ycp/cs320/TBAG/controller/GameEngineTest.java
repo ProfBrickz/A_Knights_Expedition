@@ -7,16 +7,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GameEngineTest {
 	private Player player;
-	private ArrayList<Room> rooms;
+	private HashMap<String, Room> rooms;
 	private GameEngine gameEngine;
 
 	@BeforeEach
 	public void setUp() {
 		player = new Player();
-		rooms = new ArrayList<Room>();
+		rooms = new HashMap<String, Room>();
 		gameEngine = new GameEngine(player, rooms);
 	}
 }
