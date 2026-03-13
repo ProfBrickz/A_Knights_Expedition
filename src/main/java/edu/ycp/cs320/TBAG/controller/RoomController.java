@@ -41,10 +41,10 @@ public class RoomController {
 
 	//makeshift database for the set of rooms for the demo
 	public void loadDemo() {
-		Room start = new Room("0", "Shore", "You find yourself washed ashore after a shipwreck");
-		Room center = new Room("1", "Center", "You walk inshore and find a crossroads");
+		Room start = new Room("0", "Shore", "You find yourself on a shore with a shipwreck");
+		Room center = new Room("1", "Center", "You walk a bit until you spot a crossroads");
 		Room left = new Room("2", "Cave entrance", "You find the entrance to a cave blocked by a boulder");
-		Room top = new Room("3", "Mountains", "You find yourself lookiing up at a towering mountain");
+		Room top = new Room("3", "Mountains", "You find yourself looking up at a towering mountain");
 		Room right = new Room("4", "Jungle", "You stumble into a densely packed grove of trees");
 
 		start.setConnection(center, "NORTH");
