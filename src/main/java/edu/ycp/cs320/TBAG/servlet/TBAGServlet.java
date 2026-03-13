@@ -31,14 +31,20 @@ public class TBAGServlet extends HttpServlet {
 
 		System.out.println("TBAG Servlet: doPost");
 
-		// create Player model
-		Player player = new Player();
-		// create room models
-		HashMap<String, Room> rooms = new HashMap<String, Room>();
+		// create GameEngine controller
+		
+		GameEngine gameEngine = (GameEngine) req.getSession().getAttribute("gameEngine");
 
-		// create GameEngine controller - controller does not persist between requests
-		// must recreate it each time a Post comes in
-		GameEngine gameEngine = new GameEngine(player, rooms);
+		if (gameEngine == null){
+			// create Player model
+			Player player = new Player();
+
+			// create room models
+			HashMap<String, Room> rooms = new HashMap<String, Room>();
+
+			gameEngine = new GameEngine(player, rooms);
+			req.getSession().setAttribute("gameEngine", gameEngine);
+		}
 
 		// Get running dialog text
 		String dialog = req.getParameter("dialog");
