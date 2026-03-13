@@ -51,8 +51,9 @@ public class GameEngine {
 	}
 
 	private String move(ArrayList<String> arguments) {
-		if (arguments.size() != Command.MOVE.getArguments().size()) {
-			return "Invalid move command\nMust be in the format:\n" + Command.MOVE.getFormat() + "\n";
+		String error = validateCommandFormat(Command.MOVE, arguments);
+		if (error != null) {
+			return error;
 		}
 
 		String direction = arguments.get(0).toLowerCase();
@@ -70,10 +71,19 @@ public class GameEngine {
 	}
 
 	private String look(ArrayList<String> arguments) {
-		if (arguments.size() != Command.LOOK.getArguments().size()) {
-			return "Invalid look command\nMust be in the format:\n" + Command.LOOK.getFormat() + "\n";
+		String error = validateCommandFormat(Command.LOOK, arguments);
+		if (error != null) {
+			return error;
 		}
 
 		return this.player.getRoom().getDescription() + "\n";
+	}
+
+	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
+		if (arguments.size() != command.getArguments().size()) {
+			return "Invalid look " + command.getCommand() + "\nMust be in the format:\n" + command.getFormat() + "\n";
+		}
+
+		return null;
 	}
 }

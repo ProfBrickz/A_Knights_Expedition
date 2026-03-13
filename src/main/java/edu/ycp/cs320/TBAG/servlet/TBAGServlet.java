@@ -32,10 +32,10 @@ public class TBAGServlet extends HttpServlet {
 		System.out.println("TBAG Servlet: doPost");
 
 		// create GameEngine controller
-		
+
 		GameEngine gameEngine = (GameEngine) req.getSession().getAttribute("gameEngine");
 
-		if (gameEngine == null){
+		if (gameEngine == null) {
 			// create Player model
 			Player player = new Player();
 
@@ -58,12 +58,12 @@ public class TBAGServlet extends HttpServlet {
 		ArrayList<String> arguments = new ArrayList<String>();
 
 		String[] parts = input.split(" ");
-        if (parts.length>0){
-            command = parts[0];
-        }
-        for (int i = 1; i < parts.length; i++) {
-            arguments.add(parts[i]);
-        }
+		if (parts.length > 0) {
+			command = parts[0];
+		}
+		for (int i = 1; i < parts.length; i++) {
+			arguments.add(parts[i]);
+		}
 
 		// Run command
 		dialog += gameEngine.inputCommand(command, arguments);
