@@ -81,7 +81,7 @@ public class GameEngine {
 
 	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
 		if (arguments.size() != command.getArguments().size()) {
-			return "Invalid look " + command.getCommand() + "\nMust be in the format:\n" + command.getFormat() + "\n";
+			return "Invalid " + command.getCommand() + "\nMust be in the format:\n" + command.getFormat() + "\n";
 		}
 
 		return null;
