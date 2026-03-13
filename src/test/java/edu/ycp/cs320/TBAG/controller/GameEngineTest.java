@@ -32,31 +32,35 @@ public class GameEngineTest {
 
 	@Test
 	public void testDirection() {
-		Assertions.assertLinesMatch(gameEngine.);
+		ArrayList<String> argue = new ArrayList<String>();
+		argue.add("north");
+		Assertions.assertEquals("north", gameEngine.inputCommand("north", argue));
 	}
 
 	@Test
 	public void testDirectionNull() {
-		Assertions.assertLinesMatch(gameEngine.);
+		ArrayList<String> argue = new ArrayList<String>();
+		argue.add("north");
+		Assertions.assertEquals(null, gameEngine.inputCommand("south", argue));
 	}
 
-	@Test
-	public void testPlayerInMatchingRoom() {
-		Assertions.assertLinesMatch();
-	}
-
-	@Test
-	public void testLook() {
-		Assertions.assertLinesMatch(gameEngine.);
-	}
-
-	@Test
-	public void testLookNull() {
-		Assertions.assertLinesMatch(gameEngine.);
-	}
-
-	@Test
-	public void testNullCommand() {
-		Assertions.assertLinesMatch(gameEngine.);
-	}
+//	@Test
+//	public void testPlayerInMatchingRoom() {
+//		Assertions.assertLinesMatch();
+//	}
+//
+//	@Test
+//	public void testLook() {
+//		Assertions.assertLinesMatch(gameEngine.);
+//	}
+//
+//	@Test
+//	public void testLookNull() {
+//		Assertions.assertLinesMatch(gameEngine.);
+//	}
+//
+//	@Test
+//	public void testNullCommand() {
+//		Assertions.assertLinesMatch(gameEngine.);
+//	}
 }
