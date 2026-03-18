@@ -1,15 +1,15 @@
 package edu.ycp.cs320.TBAG.model;
 
 public class Item {
-	private final Integer id;
+	private final String id;
 	private String name, description;
 	private Integer sellValue, amount;
 
-	public Item(Integer id, String name, String description, Integer sellValue, Integer amount) {
+	public Item(String id, String name, String description, Integer sellValue, Integer amount) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	public Item(Integer id, String name, String description, Integer sellValue) {
+	public Item(String id, String name, String description, Integer sellValue) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 

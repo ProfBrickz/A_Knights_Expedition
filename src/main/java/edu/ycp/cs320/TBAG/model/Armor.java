@@ -5,7 +5,7 @@ public class Armor extends Item {
 	private Boolean active;
 
 	public Armor(
-		Integer id,
+		String id,
 		String name,
 		String description,
 		Integer defense,
@@ -19,7 +19,7 @@ public class Armor extends Item {
 	}
 
 	public Armor(
-		Integer id,
+		String id,
 		String name,
 		String description,
 		Integer defense,
