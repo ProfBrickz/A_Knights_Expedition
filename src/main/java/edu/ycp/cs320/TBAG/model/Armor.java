@@ -1,8 +1,8 @@
 package edu.ycp.cs320.TBAG.model;
 
 public class Armor extends Item {
-	Integer defense;
-	Boolean active;
+	private Integer defense;
+	private Boolean active;
 
 	public Armor(
 		Integer id,

@@ -3,16 +3,23 @@ package edu.ycp.cs320.TBAG.model;
 import java.util.HashMap;
 
 public class Room {
-
 	private String id, roomDescription, roomName;
 	//Hashmap:: String : Direction, RoomConnection : Pointer to next room
-	private HashMap<String, RoomConnection> roomConnections = new HashMap<String, RoomConnection>();
+	private HashMap<String, RoomConnection> roomConnections = new HashMap<>();
+	private HashMap<String, Enemy> enemies = new HashMap<>();
 
-	public Room(String id, String name, String description, HashMap<String, RoomConnection> roomConnections) {
+	public Room(
+		String id,
+		String name,
+		String description,
+		HashMap<String, RoomConnection> roomConnections,
+		HashMap<String, Enemy> enemies
+	) {
 		this.id = id;
 		roomName = name;
 		roomDescription = description;
 		this.roomConnections = roomConnections;
+		this.enemies = enemies;
 	}
 
 	//creates a room with no connections
@@ -60,6 +67,18 @@ public class Room {
 	//same as other, but will accept a description if wanted
 	public void setConnection(Room room, String key, String description) {
 		roomConnections.put(key, new RoomConnection(room, description));
+	}
+
+	public HashMap<String, Enemy> getEnemies() {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	public Enemy addEnemy(Enemy enemy) {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	public void removeEnemy(Enemy enemy) {
+		throw new UnsupportedOperationException("TODO - implement");
 	}
 }
 
