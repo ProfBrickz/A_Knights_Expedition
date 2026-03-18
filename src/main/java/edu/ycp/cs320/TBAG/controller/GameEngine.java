@@ -14,11 +14,12 @@ public class GameEngine {
 	private final HashMap<String, Room> rooms;
 	private final PlayerController playerController;
 	private final RoomController roomController;
+	private final BattleEntityController battleEntityController = new BattleEntityController();
 
 	public GameEngine(Player player, HashMap<String, Room> rooms) {
 		this.player = player;
 		this.rooms = rooms;
-		this.playerController = new PlayerController(this.player);
+		this.playerController = new PlayerController(this.player, this.battleEntityController);
 		this.roomController = new RoomController(this.rooms);
 
 		if (this.rooms.isEmpty()) {

@@ -13,54 +13,81 @@ public class GameEngineTest {
 	private Player player;
 	private HashMap<String, Room> rooms;
 	private GameEngine gameEngine;
+	private ArrayList<String> arguments;
 
 	@BeforeEach
 	public void setUp() {
-		player = new Player();
+		player = new Player(100,100);
 		rooms = new HashMap<String, Room>();
-		Room start = new Room("0", "Shore", "You find yourself washed ashore after a shipwreck");
-		Room center = new Room("1", "Center", "You walk inshore and find a crossroads");
+		Room roomA = new Room("0", "a", "description a");
+		Room roomB = new Room("1", "b", "description b");
 
-		start.setConnection(center, "NORTH");
+		roomA.setConnection(roomB, "north");
+		roomB.setConnection(roomA, "SOUTH");
 
-		center.setConnection(start, "SOUTH");
-
-		rooms.put(start.getID(), start);
-		rooms.put(center.getID(), center);
+		rooms.put(roomA.getID(), roomA);
+		rooms.put(roomB.getID(), roomB);
 		gameEngine = new GameEngine(player, rooms);
+
+		this.arguments = new ArrayList<>();
 	}
 
 	@Test
-	public void testDirection() {
-		ArrayList<String> argue = new ArrayList<String>();
-		argue.add("north");
-		Assertions.assertEquals("north", gameEngine.inputCommand("north", argue));
+	public void testDefaultRoom() {
+		Assertions.assertEquals("0", player.getRoom().getID());
+		Assertions.assertEquals("a", player.getRoom().getName());
+		Assertions.assertEquals("description a", player.getRoom().getDescription());
 	}
 
 	@Test
-	public void testDirectionNull() {
-		ArrayList<String> argue = new ArrayList<String>();
-		argue.add("north");
-		Assertions.assertEquals(null, gameEngine.inputCommand("south", argue));
+	public void testMove() {
+		arguments.add("north");
+		Assertions.assertEquals("description b\n", gameEngine.inputCommand("move", arguments));
+		Assertions.assertEquals("1", player.getRoom().getID());
+		Assertions.assertEquals("b", player.getRoom().getName());
+		Assertions.assertEquals("description b", player.getRoom().getDescription());
+
+		arguments.clear();
+		arguments.add("south");
+		Assertions.assertEquals("description a\n", gameEngine.inputCommand("move", arguments));
+		Assertions.assertEquals("0", player.getRoom().getID());
+		Assertions.assertEquals("a", player.getRoom().getName());
+		Assertions.assertEquals("description a", player.getRoom().getDescription());
+
+		// Invalid direction
+		arguments.clear();
+		arguments.add("left");
+		Assertions.assertEquals("Invalid direction for this room\n", gameEngine.inputCommand("move", arguments));
+		Assertions.assertEquals("0", player.getRoom().getID());
+		Assertions.assertEquals("a", player.getRoom().getName());
+		Assertions.assertEquals("description a", player.getRoom().getDescription());
 	}
 
-//	@Test
-//	public void testPlayerInMatchingRoom() {
-//		Assertions.assertLinesMatch();
-//	}
-//
-//	@Test
-//	public void testLook() {
-//		Assertions.assertLinesMatch(gameEngine.);
-//	}
-//
-//	@Test
-//	public void testLookNull() {
-//		Assertions.assertLinesMatch(gameEngine.);
-//	}
-//
-//	@Test
-//	public void testNullCommand() {
-//		Assertions.assertLinesMatch(gameEngine.);
-//	}
+	@Test
+	public void testInvalidFormat() {
+		final String moveFormat = "Invalid move command. Must be in the format:\n\"move <direction>\"\n"
+
+		// Too many arguments
+		arguments.add("left");
+		arguments.add("up");
+		Assertions.assertEquals(moveFormat, gameEngine.inputCommand("move", arguments));
+		Assertions.assertEquals("0", player.getRoom().getID());
+		Assertions.assertEquals("a", player.getRoom().getName());
+		Assertions.assertEquals("description a", player.getRoom().getDescription());
+
+		// Too few arguments
+		arguments.clear();
+		Assertions.assertEquals(moveFormat, gameEngine.inputCommand("move", arguments));
+	}
+
+	@Test
+	public void testLook() {
+		Assertions.assertEquals("description a\n", gameEngine.inputCommand("look", arguments));
+
+		arguments.add("north");
+		gameEngine.inputCommand("move", arguments);
+
+		arguments.clear();
+		Assertions.assertEquals("description b\n", gameEngine.inputCommand("look",arguments));
+	}
 }
