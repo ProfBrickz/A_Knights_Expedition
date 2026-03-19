@@ -1,5 +1,6 @@
 package edu.ycp.cs320.TBAG.controller;
 
+import edu.ycp.cs320.TBAG.model.Inventory;
 import edu.ycp.cs320.TBAG.model.Item;
 import edu.ycp.cs320.TBAG.model.Player;
 import edu.ycp.cs320.TBAG.model.Room;
@@ -96,6 +97,8 @@ public class GameEngine {
 			return this.inventory(arguments);
 		} else if (command.equals(Command.INSPECT_ITEM.getCommand())) {
 			return this.inspectItem(arguments);
+		} else if (command.equals(Command.SEARCH.getCommand())) {
+			return this.search(arguments);
 		} else {
 			return "Sorry, command not recognized.\n";
 		}
@@ -142,23 +145,7 @@ public class GameEngine {
 		String error = validateCommandFormat(Command.INVENTORY, arguments);
 		if (error != null) return error;
 
-		StringBuilder inventory = new StringBuilder("Inventory:\n");
-
-		for (Item item : player.getInventory().getItems().values()) {
-			inventory.append("- ");
-
-			if (item.getAmount() > 1) {
-				inventory
-					.append(item.getAmount())
-					.append(" x ");
-			}
-
-			inventory
-				.append(item.getName())
-				.append("\n");
-		}
-
-		return inventory.toString();
+		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
 	}
 
 	/**
@@ -174,6 +161,48 @@ public class GameEngine {
 		if (item == null) return "You do not have" + itemName + " in your inventory.\n";
 
 		return playerController.inspectItem(item) + "\n";
+	}
+
+	/**
+	 * Handles the "search" command.
+	 * Checks if the room has any items and returns them.
+	 */
+	private String search(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.SEARCH, arguments);
+		if (error != null) return error;
+
+		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
+	}
+
+	/**
+	 * Makes a string list of items in an inventory.
+	 */
+	private String getInventoryString(Inventory inventory, String startingPhrase, String emptyPhrase) {
+		StringBuilder itemList = new StringBuilder(startingPhrase);
+		itemList.append(":\n");
+
+		if (inventory.getItems().isEmpty()) {
+			itemList
+				.append(emptyPhrase)
+				.append("\n");
+			return itemList.toString();
+		}
+
+		for (Item item : inventory.getItems().values()) {
+			itemList.append("- ");
+
+			if (item.getAmount() > 1) {
+				itemList
+					.append(item.getAmount())
+					.append(" x ");
+			}
+
+			itemList
+				.append(item.getName())
+				.append("\n");
+		}
+
+		return itemList.toString();
 	}
 
 	/**

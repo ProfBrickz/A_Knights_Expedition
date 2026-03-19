@@ -6,7 +6,8 @@ public enum Command {
 	MOVE("move", List.of("direction")),
 	LOOK("look", List.of()),
 	INVENTORY("inventory", List.of()),
-	INSPECT_ITEM("inspect-item", List.of("item"));
+	INSPECT_ITEM("inspect-item", List.of("item")),
+	SEARCH("search", List.of());
 
 	private final String command;
 	private final List<String> arguments;
