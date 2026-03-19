@@ -10,14 +10,14 @@ public class Inventory {
 	}
 
 	public HashMap<String, Item> getItems() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return items;
 	}
 
 	public HashMap<String, Item> addItem() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return items;
 	}
 
 	public HashMap<String, Item> removeItem() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return items;
 	}
 }

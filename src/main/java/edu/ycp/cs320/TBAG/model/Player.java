@@ -12,16 +12,16 @@ public class Player extends BattleEntity {
 		super(maxHealth, health);
 
 		this.room = null;
-
-		throw new UnsupportedOperationException("TODO - implement");
+		this.armor = new ArrayList<>();
+		this.playerState = PlayerState.EXPLORING;
 	}
 
 	public Player(Integer maxHealth, Integer health, PlayerState playerState, Room room) {
 		super(maxHealth, health);
 
 		this.room = room;
-
-		throw new UnsupportedOperationException("TODO - implement");
+		this.armor = new ArrayList<>();
+		this.playerState = playerState;
 	}
 
 	// --- Getters & Setters ---
@@ -38,10 +38,14 @@ public class Player extends BattleEntity {
 	}
 
 	public PlayerState getState() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return playerState;
 	}
 
 	public void setState() {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (playerState == null || playerState == PlayerState.BATTLE) {
+			playerState = PlayerState.EXPLORING;
+		} else {
+			playerState = PlayerState.BATTLE;
+		}
 	}
 }
