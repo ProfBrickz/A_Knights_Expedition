@@ -4,7 +4,8 @@ import java.util.List;
 
 public enum Command {
 	MOVE("move", List.of("direction")),
-	LOOK("look", List.of());
+	LOOK("look", List.of()),
+	INVENTORY("inventory", List.of());
 
 	private final String command;
 	private final List<String> arguments;

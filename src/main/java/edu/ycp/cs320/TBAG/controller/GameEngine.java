@@ -1,5 +1,6 @@
 package edu.ycp.cs320.TBAG.controller;
 
+import edu.ycp.cs320.TBAG.model.Item;
 import edu.ycp.cs320.TBAG.model.Player;
 import edu.ycp.cs320.TBAG.model.Room;
 
@@ -15,6 +16,7 @@ public class GameEngine {
 	private final PlayerController playerController;
 	private final RoomController roomController;
 	private final BattleEntityController battleEntityController = new BattleEntityController();
+	private final InventoryController inventoryController = new InventoryController();
 
 	public GameEngine(Player player, HashMap<String, Room> rooms) {
 		this.player = player;
@@ -46,6 +48,8 @@ public class GameEngine {
 			return this.move(arguments);
 		} else if (command.equals(Command.LOOK.getCommand())) {
 			return this.look(arguments);
+		} else if (command.equals(Command.INVENTORY.getCommand())) {
+			return this.inventory(arguments);
 		} else {
 			return "Sorry, command not recognized.\n";
 		}
@@ -53,9 +57,7 @@ public class GameEngine {
 
 	private String move(ArrayList<String> arguments) {
 		String error = validateCommandFormat(Command.MOVE, arguments);
-		if (error != null) {
-			return error;
-		}
+		if (error != null) return error;
 
 		String direction = arguments.get(0).toLowerCase();
 
@@ -73,11 +75,32 @@ public class GameEngine {
 
 	private String look(ArrayList<String> arguments) {
 		String error = validateCommandFormat(Command.LOOK, arguments);
-		if (error != null) {
-			return error;
-		}
+		if (error != null) return error;
 
 		return this.player.getRoom().getDescription() + "\n";
+	}
+
+	private String inventory(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.INVENTORY, arguments);
+		if (error != null) return error;
+
+		StringBuilder inventory = new StringBuilder("Inventory:\n");
+
+		for (Item item : player.getInventory().getItems().values()) {
+			inventory.append("- ");
+
+			if (item.getAmount() > 1) {
+				inventory
+					.append(item.getAmount())
+					.append(" x ");
+			}
+			
+			inventory
+				.append(item.getName())
+				.append("\n");
+		}
+
+		return inventory.toString();
 	}
 
 	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
