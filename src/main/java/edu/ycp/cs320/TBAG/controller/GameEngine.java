@@ -50,6 +50,8 @@ public class GameEngine {
 			return this.look(arguments);
 		} else if (command.equals(Command.INVENTORY.getCommand())) {
 			return this.inventory(arguments);
+		} else if (command.equals(Command.INSPECT_ITEM.getCommand())) {
+			return this.inspectItem(arguments);
 		} else {
 			return "Sorry, command not recognized.\n";
 		}
@@ -94,13 +96,24 @@ public class GameEngine {
 					.append(item.getAmount())
 					.append(" x ");
 			}
-			
+
 			inventory
 				.append(item.getName())
 				.append("\n");
 		}
 
 		return inventory.toString();
+	}
+
+	private String inspectItem(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.INSPECT_ITEM, arguments);
+		if (error != null) return error;
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		if (item == null) return "You do not have" + itemName + " in your inventory.\n";
+
+		return playerController.inspectItem(item) + "\n";
 	}
 
 	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
