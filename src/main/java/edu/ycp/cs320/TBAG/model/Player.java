@@ -6,6 +6,7 @@ public class Player extends BattleEntity {
 	private Room room;
 	private ArrayList<Armor> armor;
 	private PlayerState playerState;
+	private final Inventory inventory = new Inventory();
 
 	public Player(Integer maxHealth, Integer health) {
 		super(maxHealth, health);
@@ -32,8 +33,8 @@ public class Player extends BattleEntity {
 		this.room = room;
 	}
 
-	public ArrayList<Armor> getArmor() {
-		return armor;
+	public Inventory getInventory() {
+		throw new UnsupportedOperationException("TODO - implement");
 	}
 
 	public PlayerState getState() {

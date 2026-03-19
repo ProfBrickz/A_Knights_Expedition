@@ -17,6 +17,10 @@ public class InventoryController {
 		return inventory.getItems();
 	}
 
+	public Item getItemByName(Inventory inventory, String itemName) {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
 	// adds item to inventory if not in it, increments amount if in it
 	public void addItem(Inventory inventory, Item item) {
 		if (inventory == null || item == null) {
