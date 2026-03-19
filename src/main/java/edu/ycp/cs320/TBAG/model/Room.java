@@ -7,6 +7,7 @@ public class Room {
 	//Hashmap:: String : Direction, RoomConnection : Pointer to next room
 	private HashMap<String, RoomConnection> roomConnections = new HashMap<>();
 	private HashMap<String, Enemy> enemies = new HashMap<>();
+	private Inventory inventory = new Inventory();
 
 	public Room(
 		String id,
@@ -91,6 +92,10 @@ public class Room {
 
 	public void removeEnemy(Enemy enemy) {
 		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	public Inventory getInventory() {
+		return inventory;
 	}
 }
 
