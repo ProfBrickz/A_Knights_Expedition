@@ -13,6 +13,10 @@ public class InventoryController {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	public Item getItemByName(Inventory inventory) {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
 	// adds item to inventory if not in it, increments amount if in it
 	public void addItem(Inventory inventory, Item item) {
 		throw new UnsupportedOperationException("TODO - implement");
