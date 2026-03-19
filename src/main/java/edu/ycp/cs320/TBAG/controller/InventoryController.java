@@ -13,7 +13,7 @@ public class InventoryController {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	public Item getItemByName(Inventory inventory) {
+	public Item getItemByName(Inventory inventory, String itemName) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
