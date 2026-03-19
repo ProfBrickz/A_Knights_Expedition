@@ -22,6 +22,18 @@ public class Room {
 		this.enemies = enemies;
 	}
 
+	public Room(
+		String id,
+		String name,
+		String description,
+		HashMap<String, RoomConnection> roomConnections
+	) {
+		this.id = id;
+		roomName = name;
+		roomDescription = description;
+		this.roomConnections = roomConnections;
+	}
+
 	//creates a room with no connections
 	public Room(String id, String name, String description) {
 		this.id = id;

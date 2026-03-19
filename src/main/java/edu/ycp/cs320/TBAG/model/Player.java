@@ -33,6 +33,10 @@ public class Player extends BattleEntity {
 		this.room = room;
 	}
 
+	public ArrayList<Armor> getArmor() {
+		return armor;
+	}
+
 	public Inventory getInventory() {
 		throw new UnsupportedOperationException("TODO - implement");
 	}

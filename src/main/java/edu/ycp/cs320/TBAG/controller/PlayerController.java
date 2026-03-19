@@ -66,7 +66,6 @@ public class PlayerController {
 
 		// Placeholder: total defense can be calculated once Armor exposes defense accessors.
 	}
-	}
 
 	public void die(Integer startingMaxHealth, Integer startingHealth, Room startingRoom) {
 		if (player == null) {
