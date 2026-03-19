@@ -17,7 +17,7 @@ public class GameEngineTest {
 
 	@BeforeEach
 	public void setUp() {
-		player = new Player(100,100);
+		player = new Player(100, 100);
 		rooms = new HashMap<String, Room>();
 		Room roomA = new Room("0", "a", "description a");
 		Room roomB = new Room("1", "b", "description b");
@@ -65,7 +65,7 @@ public class GameEngineTest {
 
 	@Test
 	public void testInvalidFormat() {
-		final String moveFormat = "Invalid move command. Must be in the format:\n\"move <direction>\"\n"
+		final String moveFormat = "Invalid move command. Must be in the format:\n\"move <direction>\"\n";
 
 		// Too many arguments
 		arguments.add("left");
@@ -88,6 +88,6 @@ public class GameEngineTest {
 		gameEngine.inputCommand("move", arguments);
 
 		arguments.clear();
-		Assertions.assertEquals("description b\n", gameEngine.inputCommand("look",arguments));
+		Assertions.assertEquals("description b\n", gameEngine.inputCommand("look", arguments));
 	}
 }

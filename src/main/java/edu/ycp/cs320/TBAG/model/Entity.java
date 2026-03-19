@@ -4,7 +4,8 @@ public class Entity {
 	private Integer health, maxHealth;
 
 	public Entity(Integer maxHealth, Integer health) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.maxHealth = maxHealth;
+		this.health = health;
 	}
 
 	public Integer getMaxHealth() {

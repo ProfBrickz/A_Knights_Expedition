@@ -54,6 +54,34 @@ public class GameEngine {
 	}
 
 	/**
+	 * Returns the player controller, for testing.
+	 */
+	public PlayerController getPlayerController() {
+		return playerController;
+	}
+
+	/**
+	 * Returns the room controller, for testing.
+	 */
+	public RoomController getRoomController() {
+		return roomController;
+	}
+
+	/**
+	 * Returns the battle entity controller, for testing.
+	 */
+	public BattleEntityController getBattleEntityController() {
+		return battleEntityController;
+	}
+
+	/**
+	 * Returns the inventory controller, for testing.
+	 */
+	public InventoryController getInventoryController() {
+		return inventoryController;
+	}
+
+	/**
 	 * Processes user input commands.
 	 * Routes commands to the appropriate handler based on the Command enum.
 	 */
