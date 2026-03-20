@@ -18,10 +18,16 @@ public class InventoryController {
 	}
 
 	public Item getItemByName(Inventory inventory, String itemName) {
-		throw new UnsupportedOperationException("TODO - implement");
+		for (Item item : inventory.getItems().values()) {
+			if (item.getName().equals(itemName)) return item;
+		}
+
+		return null;
 	}
 
-	// adds item to inventory if not in it, increments amount if in it
+	/**
+	 * adds item to inventory if not in it, increments amount if in it
+	 */
 	public void addItem(Inventory inventory, Item item) {
 		if (inventory == null || item == null) {
 			return;
@@ -42,7 +48,9 @@ public class InventoryController {
 		}
 	}
 
-	// removes item in inventory if amount == 1, decrements amount if amount > 1
+	/**
+	 * removes item in inventory if amount == 1, decrements amount if amount > 1
+	 */
 	public void removeItem(Inventory inventory, Integer id, Integer amount) {
 		if (inventory == null || id == null) {
 			return;
@@ -68,6 +76,9 @@ public class InventoryController {
 		}
 	}
 
+	/**
+	 * removes one of an item from the inventory
+	 */
 	public void removeItem(Inventory inventory, Integer id) {
 		removeItem(inventory, id, 1);
 	}

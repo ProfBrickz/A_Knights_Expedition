@@ -13,11 +13,28 @@ public class Inventory {
 		return items;
 	}
 
-	public HashMap<String, Item> addItem() {
-		return items;
+	public void addItem(Item item) {
+		if (item == null) {
+			return;
+		}
+
+		String key = String.valueOf(item.getId());
+
+		items.put(key, item);
 	}
 
-	public HashMap<String, Item> removeItem() {
-		return items;
+	public void removeItem(Integer id) {
+		if (id == null) {
+			return;
+		}
+		
+		String key = String.valueOf(id);
+		Item existing = items.get(key);
+
+		if (existing == null) {
+			return;
+		}
+
+		items.remove(key);
 	}
 }
