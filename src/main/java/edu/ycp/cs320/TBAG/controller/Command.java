@@ -7,7 +7,8 @@ public enum Command {
 	LOOK("look", List.of()),
 	INVENTORY("inventory", List.of()),
 	INSPECT_ITEM("inspect-item", List.of("item")),
-	SEARCH("search", List.of());
+	SEARCH("search", List.of()),
+	PICKUP("pickup", List.of("item"));
 
 	private final String command;
 	private final List<String> arguments;

@@ -19,6 +19,9 @@ public class GameEngine {
 	private final BattleEntityController battleEntityController = new BattleEntityController();
 	private final InventoryController inventoryController = new InventoryController();
 
+
+	// Constructor
+
 	/**
 	 * Initializes the player, rooms, and associated controllers.
 	 * Loads a demo room if no rooms are provided.
@@ -39,6 +42,9 @@ public class GameEngine {
 			this.player.setRoom(rooms.get("0"));
 		}
 	}
+
+
+	// Getters
 
 	/**
 	 * Returns the player object.
@@ -82,6 +88,9 @@ public class GameEngine {
 		return inventoryController;
 	}
 
+
+	// Input command
+
 	/**
 	 * Processes user input commands.
 	 * Routes commands to the appropriate handler based on the Command enum.
@@ -89,20 +98,29 @@ public class GameEngine {
 	public String inputCommand(String command, ArrayList<String> arguments) {
 		command = command.trim().toLowerCase();
 
+		String output = "";
+
 		if (command.equals(Command.MOVE.getCommand())) {
-			return this.move(arguments);
+			output = this.move(arguments);
 		} else if (command.equals(Command.LOOK.getCommand())) {
-			return this.look(arguments);
+			output = this.look(arguments);
 		} else if (command.equals(Command.INVENTORY.getCommand())) {
-			return this.inventory(arguments);
+			output = this.inventory(arguments);
 		} else if (command.equals(Command.INSPECT_ITEM.getCommand())) {
-			return this.inspectItem(arguments);
+			output = this.inspectItem(arguments);
 		} else if (command.equals(Command.SEARCH.getCommand())) {
-			return this.search(arguments);
+			output = this.search(arguments);
+		} else if (command.equals(Command.PICKUP.getCommand())) {
+			output = this.pickupItem(arguments);
 		} else {
-			return "Sorry, command not recognized.\n";
+			output = "Sorry, command not recognized.\n";
 		}
+
+		return output + "\n";
 	}
+
+
+	// Commands
 
 	/**
 	 * Handles the "move" command.
@@ -174,6 +192,32 @@ public class GameEngine {
 		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
 	}
 
+	private String pickupItem(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.PICKUP, arguments);
+		if (error != null) return error;
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByName(player.getRoom().getInventory(), itemName);
+		if (item == null) return "This room does not have a " + itemName + ".\n";
+
+		player.getRoom().getInventory().removeItem(item.getId());
+		player.getInventory().addItem(item);
+
+		String output = "You picked up ";
+
+		if (item.getAmount() == 1) {
+			output += "a " + itemName;
+		} else {
+			output += item.getAmount() + " " + itemName + "s";
+		}
+		output += ".\n";
+
+		return output;
+	}
+
+
+	// Utility methods
+
 	/**
 	 * Makes a string list of items in an inventory.
 	 */
@@ -189,15 +233,9 @@ public class GameEngine {
 		}
 
 		for (Item item : inventory.getItems().values()) {
-			itemList.append("- ");
-
-			if (item.getAmount() > 1) {
-				itemList
-					.append(item.getAmount())
-					.append(" x ");
-			}
-
-			itemList
+			itemList.append("- ")
+				.append(item.getAmount())
+				.append(" x ")
 				.append(item.getName())
 				.append("\n");
 		}

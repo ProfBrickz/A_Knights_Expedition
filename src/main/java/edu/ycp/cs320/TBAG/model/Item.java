@@ -13,7 +13,7 @@ public class Item {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	public Integer getId() {
+	public String getId() {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
