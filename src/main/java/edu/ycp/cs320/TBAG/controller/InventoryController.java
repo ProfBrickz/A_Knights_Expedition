@@ -51,7 +51,7 @@ public class InventoryController {
 	/**
 	 * removes item in inventory if amount == 1, decrements amount if amount > 1
 	 */
-	public void removeItem(Inventory inventory, Integer id, Integer amount) {
+	public void removeItem(Inventory inventory, String id, Integer amount) {
 		if (inventory == null || id == null) {
 			return;
 		}
@@ -61,8 +61,7 @@ public class InventoryController {
 		}
 
 		HashMap<String, Item> items = inventory.getItems();
-		String key = String.valueOf(id);
-		Item existing = items.get(key);
+		Item existing = items.get(id);
 
 		if (existing == null) {
 			return;
@@ -70,7 +69,7 @@ public class InventoryController {
 
 		Integer currentAmount = existing.getAmount();
 		if (currentAmount == null || currentAmount <= amount) {
-			items.remove(key);
+			items.remove(id);
 		} else {
 			existing.setAmount(currentAmount - amount);
 		}
@@ -79,7 +78,7 @@ public class InventoryController {
 	/**
 	 * removes one of an item from the inventory
 	 */
-	public void removeItem(Inventory inventory, Integer id) {
+	public void removeItem(Inventory inventory, String id) {
 		removeItem(inventory, id, 1);
 	}
 

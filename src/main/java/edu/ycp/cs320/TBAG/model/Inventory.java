@@ -23,12 +23,12 @@ public class Inventory {
 		items.put(key, item);
 	}
 
-	public void removeItem(Integer id) {
+	public void removeItem(String id) {
 		if (id == null) {
 			return;
 		}
-		
-		String key = String.valueOf(id);
+
+		String key = id;
 		Item existing = items.get(key);
 
 		if (existing == null) {
