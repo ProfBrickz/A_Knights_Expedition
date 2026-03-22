@@ -83,7 +83,7 @@ public class PlayerController {
 		player.setRoom(startingRoom);
 
 		if (player.getState() != PlayerState.EXPLORING) {
-			player.setState();
+			player.setState(PlayerState.EXPLORING);
 		}
 	}
 
@@ -126,7 +126,7 @@ public class PlayerController {
 		}
 
 		if (player.getState() == PlayerState.BATTLE) {
-			player.setState();
+			player.setState(PlayerState.EXPLORING);
 			return true;
 		}
 

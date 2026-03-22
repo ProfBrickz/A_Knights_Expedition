@@ -38,18 +38,14 @@ public class Player extends BattleEntity {
 	}
 
 	public Inventory getInventory() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return inventory;
 	}
 
 	public PlayerState getState() {
 		return playerState;
 	}
 
-	public void setState() {
-		if (playerState == null || playerState == PlayerState.BATTLE) {
-			playerState = PlayerState.EXPLORING;
-		} else {
-			playerState = PlayerState.BATTLE;
-		}
+	public void setState(PlayerState newState) {
+		playerState = newState;
 	}
 }

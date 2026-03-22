@@ -40,7 +40,7 @@ public class TBAGServlet extends HttpServlet {
 			Player player = new Player(100, 100);
 
 			// create room models
-			HashMap<String, Room> rooms = new HashMap<String, Room>();
+			HashMap<String, Room> rooms = new HashMap<>();
 
 			gameEngine = new GameEngine(player, rooms);
 			req.getSession().setAttribute("gameEngine", gameEngine);

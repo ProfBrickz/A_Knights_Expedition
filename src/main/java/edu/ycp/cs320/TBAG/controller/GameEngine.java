@@ -1,9 +1,6 @@
 package edu.ycp.cs320.TBAG.controller;
 
-import edu.ycp.cs320.TBAG.model.Inventory;
-import edu.ycp.cs320.TBAG.model.Item;
-import edu.ycp.cs320.TBAG.model.Player;
-import edu.ycp.cs320.TBAG.model.Room;
+import edu.ycp.cs320.TBAG.model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +15,7 @@ public class GameEngine {
 	private final RoomController roomController;
 	private final BattleEntityController battleEntityController = new BattleEntityController();
 	private final InventoryController inventoryController = new InventoryController();
+	private final String defaultRoom = "0";
 
 
 	// Constructor
@@ -39,7 +37,7 @@ public class GameEngine {
 
 		// Set default room
 		if (this.player.getRoom() == null) {
-			this.player.setRoom(rooms.get("0"));
+			this.player.setRoom(rooms.get(defaultRoom));
 		}
 	}
 
@@ -112,6 +110,8 @@ public class GameEngine {
 			output = this.search(arguments);
 		} else if (command.equals(Command.PICKUP.getCommand())) {
 			output = this.pickupItem(arguments);
+		} else if (command.equals(Command.RESTART.getCommand())) {
+			output = this.restart(arguments);
 		} else {
 			output = "Sorry, command not recognized.\n";
 		}
@@ -215,6 +215,22 @@ public class GameEngine {
 		return output;
 	}
 
+	private String restart(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.RESTART, arguments);
+		if (error != null) return error;
+
+		rooms.clear();
+		roomController.loadDemo();
+
+		player.getInventory().getItems().clear();
+		player.getArmor().clear();
+		player.setState(PlayerState.EXPLORING);
+
+		// Set default room
+		player.setRoom(rooms.get(defaultRoom));
+
+		return "Restarted game.\n";
+	}
 
 	// Utility methods
 
