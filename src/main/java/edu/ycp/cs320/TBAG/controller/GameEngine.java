@@ -110,6 +110,8 @@ public class GameEngine {
 			output = this.search(arguments);
 		} else if (command.equals(Command.PICKUP.getCommand())) {
 			output = this.pickupItem(arguments);
+		} else if (command.equals(Command.DROP.getCommand())) {
+			output = this.dropItem(arguments);
 		} else if (command.equals(Command.RESTART.getCommand())) {
 			output = this.restart(arguments);
 		} else {
@@ -192,6 +194,10 @@ public class GameEngine {
 		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
 	}
 
+	/**
+	 * Handles the "pickup" command.
+	 * Checks if the item is in the room and adds it to the player's inventory.
+	 */
 	private String pickupItem(ArrayList<String> arguments) {
 		String error = validateCommandFormat(Command.PICKUP, arguments);
 		if (error != null) return error;
@@ -200,11 +206,37 @@ public class GameEngine {
 		Item item = inventoryController.getItemByName(player.getRoom().getInventory(), itemName);
 		if (item == null) return "This room does not have a " + itemName + ".\n";
 
-		player.getRoom().getInventory().removeItem(item.getId());
-		player.getInventory().addItem(item);
+		inventoryController.removeItem(player.getRoom().getInventory(), item.getId(), item.getAmount());
+		inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
 		String output = "You picked up ";
 
+		if (item.getAmount() == 1) {
+			output += "a " + itemName;
+		} else {
+			output += item.getAmount() + " " + itemName + "s";
+		}
+		output += ".\n";
+
+		return output;
+	}
+
+	/**
+	 * Handles the 'drop' command.
+	 * Checks if the player has the item and drops it in the current room.
+	 */
+	private String dropItem(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.PICKUP, arguments);
+		if (error != null) return error;
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		if (item == null) return "This room does not have a " + itemName + ".\n";
+
+		inventoryController.removeItem(player.getInventory(), item.getId(), item.getAmount());
+		inventoryController.addItem(player.getRoom().getInventory(), item, item.getAmount());
+
+		String output = "You dropped ";
 		if (item.getAmount() == 1) {
 			output += "a " + itemName;
 		} else {
