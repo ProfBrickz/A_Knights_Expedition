@@ -13,8 +13,6 @@ public class Weapon extends Item {
 		Integer amount
 	) {
 		super(id, name, description, sellValue, amount);
-
-		throw new UnsupportedOperationException("TODO - implement");
 	}
 
 	public Weapon(
@@ -24,19 +22,17 @@ public class Weapon extends Item {
 		Integer sellValue
 	) {
 		super(id, name, description, sellValue);
-
-		throw new UnsupportedOperationException("TODO - implement");
 	}
 
 	public HashMap<String, WeaponAbility> getAbilities() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return abilities;
 	}
 
 	public WeaponAbility addAbility(WeaponAbility ability) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return abilities.put(ability.getId(), ability);
 	}
 
-	public void removeAbility(String ability) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public WeaponAbility removeAbility(WeaponAbility ability) {
+		return abilities.remove(ability.getId());
 	}
 }

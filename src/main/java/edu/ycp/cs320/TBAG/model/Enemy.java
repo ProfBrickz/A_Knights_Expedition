@@ -1,24 +1,25 @@
 package edu.ycp.cs320.TBAG.model;
 
 public class Enemy extends BattleEntity {
-	private final Integer id;
+	private final String id;
 	private String name;
 
-	public Enemy(Integer id, String name, Integer maxHealth, Integer health) {
+	public Enemy(String id, String name, Integer maxHealth, Integer health) {
 		super(maxHealth, health);
 
-		throw new UnsupportedOperationException("TODO - implement");
+		this.id = id;
+		this.name = name;
 	}
 
-	public Integer getId() {
-		throw new UnsupportedOperationException("TODO - implement");
+	public String getId() {
+		return id;
 	}
 
 	public String getName() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return name;
 	}
 
 	public void setName(String name) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.name = name;
 	}
 }

@@ -9,13 +9,14 @@ public class Armor extends Item {
 		String name,
 		String description,
 		Integer defense,
-		Integer active,
+		Boolean active,
 		Integer sellValue,
 		Integer amount
 	) {
 		super(id, name, description, sellValue, amount);
 
-		throw new UnsupportedOperationException("TODO - implement");
+		this.defense = defense;
+		this.active = active;
 	}
 
 	public Armor(
@@ -23,11 +24,28 @@ public class Armor extends Item {
 		String name,
 		String description,
 		Integer defense,
-		Integer active,
+		Boolean active,
 		Integer sellValue
 	) {
 		super(id, name, description, sellValue);
 
-		throw new UnsupportedOperationException("TODO - implement");
+		this.defense = defense;
+		this.active = active;
+	}
+
+	public Integer getDefense() {
+		return defense;
+	}
+
+	public void setDefense(Integer defense) {
+		this.defense = defense;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
 	}
 }

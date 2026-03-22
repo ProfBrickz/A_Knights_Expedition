@@ -83,15 +83,15 @@ public class Room {
 	}
 
 	public HashMap<String, Enemy> getEnemies() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return enemies;
 	}
 
 	public Enemy addEnemy(Enemy enemy) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return enemies.put(enemy.getId(), enemy);
 	}
 
-	public void removeEnemy(Enemy enemy) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public Enemy removeEnemy(Enemy enemy) {
+		return enemies.remove(enemy.getId());
 	}
 
 	public Inventory getInventory() {

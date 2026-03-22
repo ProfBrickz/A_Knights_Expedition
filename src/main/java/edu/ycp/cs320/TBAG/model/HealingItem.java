@@ -13,7 +13,7 @@ public class HealingItem extends Item {
 	) {
 		super(id, name, description, sellValue, amount);
 
-		throw new UnsupportedOperationException("TODO - implement");
+		this.healAmount = healAmount;
 	}
 
 	public HealingItem(
@@ -25,14 +25,14 @@ public class HealingItem extends Item {
 	) {
 		super(id, name, description, sellValue);
 
-		throw new UnsupportedOperationException("TODO - implement");
+		this.healAmount = healAmount;
 	}
 
 	public Integer getHealAmount() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return healAmount;
 	}
 
 	public void setHealAmount(Integer healAmount) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.healAmount = healAmount;
 	}
 }

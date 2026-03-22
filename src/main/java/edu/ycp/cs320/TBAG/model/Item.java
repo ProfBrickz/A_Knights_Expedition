@@ -6,46 +6,54 @@ public class Item {
 	private Integer sellValue, amount;
 
 	public Item(String id, String name, String description, Integer sellValue, Integer amount) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.sellValue = sellValue;
+		this.amount = amount;
 	}
 
 	public Item(String id, String name, String description, Integer sellValue) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.sellValue = sellValue;
+		this.amount = 1;
 	}
 
 	public String getId() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return id;
 	}
 
 	public String getName() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return name;
 	}
 
 	public void setName(String name) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.name = name;
 	}
 
 	public String getDescription() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return description;
 	}
 
 	public void setDescription(String description) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.description = description;
 	}
 
 	public Integer getSellValue() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return sellValue;
 	}
 
 	public void setSellValue(Integer sellValue) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.sellValue = sellValue;
 	}
 
 	public Integer getAmount() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return amount;
 	}
 
 	public void setAmount(Integer amount) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.amount = amount;
 	}
 }

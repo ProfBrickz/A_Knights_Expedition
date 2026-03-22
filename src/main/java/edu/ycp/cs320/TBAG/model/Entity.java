@@ -9,18 +9,18 @@ public class Entity {
 	}
 
 	public Integer getMaxHealth() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return maxHealth;
 	}
 
 	public void setMaxHealth(Integer maxHealth) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.maxHealth = maxHealth;
 	}
 
 	public Integer getHealth() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return health;
 	}
 
 	public void setHealth(Integer health) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.health = health;
 	}
 }

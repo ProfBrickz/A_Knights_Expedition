@@ -8,22 +8,23 @@ public class NPC {
 	private final HashMap<String, NPCItem> items = new HashMap<>();
 
 	public NPC(Integer id, String name) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.id = id;
+		this.name = name;
 	}
 
 	public Integer getId() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return id;
 	}
 
 	public String getName() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return name;
 	}
 
 	public void setName(String name) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.name = name;
 	}
 
 	public HashMap<String, NPCItem> getItems() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return items;
 	}
 }

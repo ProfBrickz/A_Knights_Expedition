@@ -5,27 +5,29 @@ public class WeaponAbility {
 	private Integer damage;
 	private String attackDescription;
 
-	public WeaponAbility(Integer id, Integer damage, Integer attackDescription) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public WeaponAbility(String id, Integer damage, String attackDescription) {
+		this.id = id;
+		this.damage = damage;
+		this.attackDescription = attackDescription;
 	}
 
-	public Integer getId() {
-		throw new UnsupportedOperationException("TODO - implement");
+	public String getId() {
+		return id;
 	}
 
 	public Integer getDamage() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return damage;
 	}
 
 	public void setDamage(Integer damage) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.damage = damage;
 	}
 
 	public String getAttackDescription() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return attackDescription;
 	}
 
 	public void setAttackDescription(String attackDescription) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.attackDescription = attackDescription;
 	}
 }

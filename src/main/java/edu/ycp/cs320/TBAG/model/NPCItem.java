@@ -6,22 +6,24 @@ public class NPCItem {
 	private Integer price;
 
 	public NPCItem(String id, Item item, Integer price) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.id = id;
+		this.item = item;
+		this.price = price;
 	}
 
 	public String getId() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return id;
 	}
 
 	public Item getItem() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return item;
 	}
 
 	public Integer getPrice() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return price;
 	}
 
 	public void setPrice(Integer price) {
-		throw new UnsupportedOperationException("TODO - implement");
+		this.price = price;
 	}
 }
