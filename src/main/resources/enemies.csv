@@ -1,0 +1,2 @@
+id|room_id|name|max_health|health
+String|String|String|Integer|Integer
