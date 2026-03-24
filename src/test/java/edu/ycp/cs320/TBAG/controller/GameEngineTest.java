@@ -272,7 +272,7 @@ public class GameEngineTest {
 
 		// Verify restart worked
 		Assertions.assertEquals("0", player.getRoom().getID());
-		Assertions.assertEquals("Shore", player.getRoom().getName());
+		Assertions.assertEquals("a", player.getRoom().getName());
 		Assertions.assertEquals("description a", player.getRoom().getDescription());
 		Assertions.assertTrue(player.getInventory().getItems().isEmpty());
 		Assertions.assertTrue(player.getArmor().isEmpty());

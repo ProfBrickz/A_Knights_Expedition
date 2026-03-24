@@ -287,6 +287,7 @@ public class GameEngine {
 				.append(item.getAmount())
 				.append(" x ")
 				.append(item.getName());
+
 			if (item.getAmount() > 1) itemList.append("s");
 
 			itemList.append("\n");
