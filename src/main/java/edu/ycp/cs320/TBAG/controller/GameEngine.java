@@ -9,8 +9,9 @@ import java.util.HashMap;
  * Controller for the TBAG game.
  */
 public class GameEngine {
-	private final Player player;
-	private final HashMap<String, Room> rooms;
+	private Player player;
+	private HashMap<String, Room> rooms;
+
 	private final PlayerController playerController;
 	private final RoomController roomController;
 	private final BattleEntityController battleEntityController = new BattleEntityController();
@@ -178,7 +179,7 @@ public class GameEngine {
 
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
-		if (item == null) return "You do not have" + itemName + " in your inventory.\n";
+		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
 
 		return playerController.inspectItem(item) + "\n";
 	}
@@ -264,6 +265,7 @@ public class GameEngine {
 		return "Restarted game.\n";
 	}
 
+
 	// Utility methods
 
 	/**
@@ -284,8 +286,10 @@ public class GameEngine {
 			itemList.append("- ")
 				.append(item.getAmount())
 				.append(" x ")
-				.append(item.getName())
-				.append("\n");
+				.append(item.getName());
+			if (item.getAmount() > 1) itemList.append("s");
+
+			itemList.append("\n");
 		}
 
 		return itemList.toString();

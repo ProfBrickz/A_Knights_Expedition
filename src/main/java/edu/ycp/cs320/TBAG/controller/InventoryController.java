@@ -75,9 +75,11 @@ public class InventoryController {
 		if (existing == null) {
 			return;
 		}
+		
+		if (amount > existing.getAmount()) amount = existing.getAmount();
 
 		Integer currentAmount = existing.getAmount();
-		if (currentAmount == null || currentAmount <= amount) {
+		if (currentAmount == null || currentAmount.equals(amount)) {
 			items.remove(id);
 		} else {
 			existing.setAmount(currentAmount - amount);
