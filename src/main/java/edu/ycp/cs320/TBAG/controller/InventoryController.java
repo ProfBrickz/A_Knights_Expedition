@@ -28,24 +28,33 @@ public class InventoryController {
 	/**
 	 * adds item to inventory if not in it, increments amount if in it
 	 */
-	public void addItem(Inventory inventory, Item item) {
+	public void addItem(Inventory inventory, Item item, Integer amount) {
 		if (inventory == null || item == null) {
 			return;
 		}
+
+		if (amount > item.getAmount()) amount = item.getAmount();
 
 		HashMap<String, Item> items = inventory.getItems();
 		String key = String.valueOf(item.getId());
 
 		if (items.containsKey(key)) {
 			Item existing = items.get(key);
-			Integer amount = existing.getAmount();
-			if (amount == null) {
-				amount = 0;
+			Integer existingAmount = existing.getAmount();
+			if (existingAmount == null) {
+				existingAmount = 0;
 			}
-			existing.setAmount(amount + 1);
+			existing.setAmount(existingAmount + amount);
 		} else {
 			items.put(key, item);
 		}
+	}
+
+	/**
+	 * adds one of an item to the inventory
+	 */
+	public void addItem(Inventory inventory, Item item) {
+		addItem(inventory, item, 1);
 	}
 
 	/**
@@ -66,9 +75,11 @@ public class InventoryController {
 		if (existing == null) {
 			return;
 		}
+		
+		if (amount > existing.getAmount()) amount = existing.getAmount();
 
 		Integer currentAmount = existing.getAmount();
-		if (currentAmount == null || currentAmount <= amount) {
+		if (currentAmount == null || currentAmount.equals(amount)) {
 			items.remove(id);
 		} else {
 			existing.setAmount(currentAmount - amount);

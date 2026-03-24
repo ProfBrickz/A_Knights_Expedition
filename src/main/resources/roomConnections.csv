@@ -1,0 +1,2 @@
+source_id|destination_id|locked|locked_message|unlock_item_id
+String|String|Boolean (false or true)|String|Integer

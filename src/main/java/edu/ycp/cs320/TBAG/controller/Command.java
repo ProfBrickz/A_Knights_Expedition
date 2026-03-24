@@ -8,7 +8,8 @@ public enum Command {
 	INVENTORY("inventory", List.of()),
 	INSPECT_ITEM("inspect-item", List.of("item")),
 	SEARCH("search", List.of()),
-	PICKUP("pickup", List.of("item")),
+	PICKUP("pickup", List.of("item name")),
+	DROP("drop", List.of("item name")),
 	RESTART("restart", List.of());
 
 	private final String command;
