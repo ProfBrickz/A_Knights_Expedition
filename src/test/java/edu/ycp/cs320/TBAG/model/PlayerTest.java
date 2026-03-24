@@ -17,32 +17,45 @@ public class PlayerTest {
 		Assertions.assertNull(player.getRoom());
 	}
 
-//	@Test
-//	public void testDefaultGetCoin() {
-//		Assertions.assertEquals(0, player.getCoins());
-//	}
-//
-//	@Test
-//	public void testDefaultGetState() {
-//		Assertions.assertEquals("NORMAL", player.getState());
-//	}
+	@Test
+	public void testDefaultState() {
+		Assertions.assertEquals(PlayerState.EXPLORING, player.getState());
+	}
 
-//	@Test
-//	public void testGetRoomID() {
-//		player.setRoom(5);
-//		Assertions.assertEquals(5, player.getRoomID());
-//	}
+	@Test
+	public void testSetGetRoom() {
+		Room room = new Room("1", "Hall", "A long hall");
+		player.setRoom(room);
+		Assertions.assertSame(room, player.getRoom());
+	}
 
-//	@Test
-//	public void testGetCoin() {
-//		player.setCoins(1000);
-//		Assertions.assertEquals(1000, player.getCoins());
-//	}
-//
-//	@Test
-//	public void testGetState() {
-//		player.setState("BATTLE");
-//		Assertions.assertEquals("BATTLE", player.getState());
-//	}
+	@Test
+	public void testSetGetState() {
+		player.setState(PlayerState.BATTLE);
+		Assertions.assertEquals(PlayerState.BATTLE, player.getState());
+	}
+
+	@Test
+	public void testArmorListDefaultsToEmpty() {
+		Assertions.assertNotNull(player.getArmor());
+		Assertions.assertTrue(player.getArmor().isEmpty());
+	}
+
+	@Test
+	public void testInventoryDefaultsToEmptyAndStable() {
+		Assertions.assertNotNull(player.getInventory());
+		Assertions.assertTrue(player.getInventory().getItems().isEmpty());
+		Assertions.assertSame(player.getInventory(), player.getInventory());
+	}
+
+	@Test
+	public void testConstructorWithStateAndRoom() {
+		Room room = new Room("2", "Armory", "Lots of gear");
+		Player battlePlayer = new Player(50, 25, PlayerState.BATTLE, room);
+		Assertions.assertEquals(50, battlePlayer.getMaxHealth());
+		Assertions.assertEquals(25, battlePlayer.getHealth());
+		Assertions.assertSame(room, battlePlayer.getRoom());
+		Assertions.assertEquals(PlayerState.BATTLE, battlePlayer.getState());
+	}
 
 }
