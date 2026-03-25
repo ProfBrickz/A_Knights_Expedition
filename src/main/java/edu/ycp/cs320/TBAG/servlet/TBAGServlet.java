@@ -44,6 +44,7 @@ public class TBAGServlet extends HttpServlet {
 
 			gameEngine = new GameEngine(player, rooms);
 			req.getSession().setAttribute("gameEngine", gameEngine);
+			req.getSession().setAttribute("player", player);
 		}
 
 		// Get running dialog text

@@ -62,6 +62,12 @@
     .inventory {
       grid-column: 2;
       grid-row: 1 / 3;
+      overflow-y: auto;
+
+      ul {
+      	margin: 0;
+      	padding-left: 20px;
+      }
     }
 
     .input {
@@ -74,6 +80,12 @@
       grid-row: 3;
     }
   </style>
+  <script>
+  	window.addEventListener('load', () => {
+        const log = document.querySelector('.log');
+        log.scrollTop = log.scrollHeight;
+      });
+  </script>
 </head>
 
 <body>
@@ -103,9 +115,11 @@
 	</div>
 
     <div class="inventory">
-      <c:forEach var="item" items="${inventory}">
-        <p>${item}</p>
-      </c:forEach>
+    	<ul>
+    		<c:forEach var="item" items="${player.inventory.items.values()}">
+        		<li>${item.amount} x ${item.name}</li>
+     		</c:forEach>
+    	</ul>
     </div>
 
     <div class="input">
