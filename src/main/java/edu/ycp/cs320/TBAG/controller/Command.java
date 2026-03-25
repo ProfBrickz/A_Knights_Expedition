@@ -12,7 +12,8 @@ public enum Command {
 	PICKUP_ALL("pickup-all", List.of()),
 	DROP("drop", List.of("item name")),
 	DROP_ALL("drop-all", List.of()),
-	RESTART("restart", List.of());
+	RESTART("restart", List.of()),
+	HELP("help", List.of());
 
 	private final String command;
 	private final List<String> arguments;

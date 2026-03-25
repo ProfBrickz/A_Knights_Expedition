@@ -120,6 +120,8 @@ public class GameEngine {
 			output = this.dropAllItems(arguments);
 		} else if (command.equals(Command.RESTART.getCommand())) {
 			output = this.restart(arguments);
+		} else if (command.equals(Command.HELP.getCommand())) {
+			output = this.help(arguments);
 		} else {
 			output = "Sorry, command not recognized.\n";
 		}
@@ -335,6 +337,19 @@ public class GameEngine {
 		player.setRoom(rooms.get(defaultRoom));
 
 		return "Restarted game.\n";
+	}
+
+	private String help(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.HELP, arguments);
+		if (error != null) return error;
+
+		StringBuilder output = new StringBuilder("Available commands:\n");
+
+		for (Command cmd : Command.values()) {
+			output.append("- ").append(cmd.getFormat()).append("\n");
+		}
+
+		return output.toString();
 	}
 
 
