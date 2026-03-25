@@ -4,6 +4,7 @@ import edu.ycp.cs320.TBAG.model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Controller for the TBAG game.
@@ -111,8 +112,12 @@ public class GameEngine {
 			output = this.search(arguments);
 		} else if (command.equals(Command.PICKUP.getCommand())) {
 			output = this.pickupItem(arguments);
+		} else if (command.equals(Command.PICKUP_ALL.getCommand())) {
+			output = this.pickupAllItems(arguments);
 		} else if (command.equals(Command.DROP.getCommand())) {
 			output = this.dropItem(arguments);
+		} else if (command.equals(Command.DROP_ALL.getCommand())) {
+			output = this.dropAllItems(arguments);
 		} else if (command.equals(Command.RESTART.getCommand())) {
 			output = this.restart(arguments);
 		} else {
@@ -203,11 +208,13 @@ public class GameEngine {
 		String error = validateCommandFormat(Command.PICKUP, arguments);
 		if (error != null) return error;
 
+		Room playerRoom = player.getRoom();
+
 		String itemName = arguments.get(0);
-		Item item = inventoryController.getItemByName(player.getRoom().getInventory(), itemName);
+		Item item = inventoryController.getItemByName(playerRoom.getInventory(), itemName);
 		if (item == null) return "This room does not have a " + itemName + ".\n";
 
-		inventoryController.removeItem(player.getRoom().getInventory(), item.getId(), item.getAmount());
+		inventoryController.removeItem(playerRoom.getInventory(), item.getId(), item.getAmount());
 		inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
 		String output = "You picked up ";
@@ -222,12 +229,45 @@ public class GameEngine {
 		return output;
 	}
 
+	private String pickupAllItems(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.PICKUP_ALL, arguments);
+		if (error != null) return error;
+
+		Room playerRoom = player.getRoom();
+
+		if (playerRoom.getInventory().getItems().isEmpty()) {
+			return "You did not pick anything up from this room.";
+		}
+
+		StringBuilder output = new StringBuilder("You pickup up:\n");
+
+		Iterator<Item> itemIterator = playerRoom.getInventory().getItems().values().iterator();
+
+		while (itemIterator.hasNext()) {
+			Item item = itemIterator.next();
+
+			//inventoryController.removeItem(playerRoom.getInventory(), item.getId(), item.getAmount());
+			itemIterator.remove();
+			inventoryController.addItem(player.getInventory(), item, item.getAmount());
+
+			output
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append("\n");
+		}
+
+		output.append("\n");
+
+		return output.toString();
+	}
+
 	/**
 	 * Handles the 'drop' command.
 	 * Checks if the player has the item and drops it in the current room.
 	 */
 	private String dropItem(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.PICKUP, arguments);
+		String error = validateCommandFormat(Command.DROP, arguments);
 		if (error != null) return error;
 
 		String itemName = arguments.get(0);
@@ -246,6 +286,38 @@ public class GameEngine {
 		output += ".\n";
 
 		return output;
+	}
+
+	private String dropAllItems(ArrayList<String> arguments) {
+		String error = validateCommandFormat(Command.DROP_ALL, arguments);
+		if (error != null) return error;
+
+		if (player.getInventory().getItems().isEmpty()) {
+			return "You did not have anything to drop.\n";
+		}
+
+		Room playerRoom = player.getRoom();
+		StringBuilder output = new StringBuilder("You dropped:\n");
+
+		Iterator<Item> itemIterator = player.getInventory().getItems().values().iterator();
+
+		while (itemIterator.hasNext()) {
+			Item item = itemIterator.next();
+
+			//inventoryController.removeItem(playerRoom.getInventory(), item.getId(), item.getAmount());
+			itemIterator.remove();
+			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+
+			output
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append("\n");
+		}
+
+		output.append("\n");
+
+		return output.toString();
 	}
 
 	private String restart(ArrayList<String> arguments) {

@@ -9,7 +9,9 @@ public enum Command {
 	INSPECT_ITEM("inspect-item", List.of("item")),
 	SEARCH("search", List.of()),
 	PICKUP("pickup", List.of("item name")),
+	PICKUP_ALL("pickup-all", List.of()),
 	DROP("drop", List.of("item name")),
+	DROP_ALL("drop-all", List.of()),
 	RESTART("restart", List.of());
 
 	private final String command;
