@@ -1,14 +1,27 @@
 package edu.ycp.cs320.TBAG.model;
 
-public class Player {
-	private Room room;
+import java.util.ArrayList;
 
-	public Player() {
+public class Player extends BattleEntity {
+	private Room room;
+	private ArrayList<Armor> armor;
+	private PlayerState playerState;
+	private final Inventory inventory = new Inventory();
+
+	public Player(Integer maxHealth, Integer health) {
+		super(maxHealth, health);
+
 		this.room = null;
+		this.armor = new ArrayList<>();
+		this.playerState = PlayerState.EXPLORING;
 	}
 
-	public Player(Room room) {
+	public Player(Integer maxHealth, Integer health, PlayerState playerState, Room room) {
+		super(maxHealth, health);
+
 		this.room = room;
+		this.armor = new ArrayList<>();
+		this.playerState = playerState;
 	}
 
 	// --- Getters & Setters ---
@@ -18,5 +31,21 @@ public class Player {
 
 	public void setRoom(Room room) {
 		this.room = room;
+	}
+
+	public ArrayList<Armor> getArmor() {
+		return armor;
+	}
+
+	public Inventory getInventory() {
+		return inventory;
+	}
+
+	public PlayerState getState() {
+		return playerState;
+	}
+
+	public void setState(PlayerState newState) {
+		playerState = newState;
 	}
 }

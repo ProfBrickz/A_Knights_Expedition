@@ -1,0 +1,2 @@
+id|room_id|name|locked|locked_message
+String|String|String|Boolean (false or true)|String
