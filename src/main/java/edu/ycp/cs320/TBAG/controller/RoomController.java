@@ -1,6 +1,7 @@
 package edu.ycp.cs320.TBAG.controller;
 
 
+import edu.ycp.cs320.TBAG.model.ItemCatalog;
 import edu.ycp.cs320.TBAG.model.Room;
 import edu.ycp.cs320.TBAG.model.RoomConnection;
 
@@ -74,7 +75,6 @@ public class RoomController {
 		}
 	}
 }
-
 
 
 
