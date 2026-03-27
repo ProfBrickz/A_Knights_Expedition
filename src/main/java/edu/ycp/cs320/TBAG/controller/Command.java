@@ -6,7 +6,7 @@ public enum Command {
 	MOVE("move", List.of("direction")),
 	LOOK("look", List.of()),
 	INVENTORY("inventory", List.of()),
-	INSPECT_ITEM("inspect-item", List.of("item name")),
+	INSPECT_ITEM("inspect", List.of("item name")),
 	SEARCH("search", List.of()),
 	PICKUP("pickup", List.of("item name")),
 	PICKUP_ALL("pickup-all", List.of()),
