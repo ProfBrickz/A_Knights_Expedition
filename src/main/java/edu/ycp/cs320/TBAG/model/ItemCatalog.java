@@ -4,6 +4,28 @@ public final class ItemCatalog {
 	private ItemCatalog() {
 	}
 
+	public static void addBaseItemsToInventory(Inventory inventory) {
+		if (inventory == null) {
+			return;
+		}
+
+		inventory.addItem(new Weapon(
+			"w_wooden_cudgel",
+			"Wooden Cudgel",
+			"A wooden pole mainly used for practice. Good for beating people to death",
+			1
+		));
+
+		inventory.addItem(new Armor(
+			"a_favorite_shirt",
+			"Favorite Shirt",
+			"Provides a placebo effect in DEF",
+			1,
+			false,
+			1
+		));
+	}
+
 	public static void addAllItemsToInventory(Inventory inventory) {
 		if (inventory == null) {
 			return;
