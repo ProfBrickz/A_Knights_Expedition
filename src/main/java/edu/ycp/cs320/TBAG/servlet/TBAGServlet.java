@@ -1,6 +1,7 @@
 package edu.ycp.cs320.TBAG.servlet;
 
 import edu.ycp.cs320.TBAG.controller.GameEngine;
+import edu.ycp.cs320.TBAG.model.ItemCatalog;
 import edu.ycp.cs320.TBAG.model.Player;
 import edu.ycp.cs320.TBAG.model.Room;
 
@@ -21,6 +22,21 @@ public class TBAGServlet extends HttpServlet {
 
 		System.out.println("TBAG Servlet: doGet");
 
+		GameEngine gameEngine = (GameEngine) req.getSession().getAttribute("gameEngine");
+		if (gameEngine == null) {
+			// create Player model
+			Player player = new Player(100, 100);
+			ItemCatalog.addBaseItemsToInventory(player.getInventory());
+
+			// create room models
+			HashMap<String, Room> rooms = new HashMap<>();
+
+			gameEngine = new GameEngine(player, rooms);
+			req.getSession().setAttribute("gameEngine", gameEngine);
+			req.getSession().setAttribute("player", player);
+			req.setAttribute("dialog", "");
+		}
+
 		// call JSP to generate empty form
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);
 	}
@@ -38,6 +54,7 @@ public class TBAGServlet extends HttpServlet {
 		if (gameEngine == null) {
 			// create Player model
 			Player player = new Player(100, 100);
+			ItemCatalog.addBaseItemsToInventory(player.getInventory());
 
 			// create room models
 			HashMap<String, Room> rooms = new HashMap<>();
