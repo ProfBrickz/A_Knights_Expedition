@@ -219,16 +219,11 @@ public class GameEngine {
 		inventoryController.removeItem(playerRoom.getInventory(), item.getId(), item.getAmount());
 		inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
-		String output = "You picked up ";
-
-		if (item.getAmount() == 1) {
-			output += "a " + itemName;
-		} else {
-			output += item.getAmount() + " " + itemName + "s";
-		}
-		output += ".\n";
-
-		return output;
+		return "You picked up "
+			+ item.getAmount()
+			+ " "
+			+ itemName
+			+ "s.\n";
 	}
 
 	private String pickupAllItems(ArrayList<String> arguments) {
@@ -279,15 +274,11 @@ public class GameEngine {
 		inventoryController.removeItem(player.getInventory(), item.getId(), item.getAmount());
 		inventoryController.addItem(player.getRoom().getInventory(), item, item.getAmount());
 
-		String output = "You dropped ";
-		if (item.getAmount() == 1) {
-			output += "a " + itemName;
-		} else {
-			output += item.getAmount() + " " + itemName + "s";
-		}
-		output += ".\n";
-
-		return output;
+		return "You dropped "
+			+ item.getAmount()
+			+ " "
+			+ itemName
+			+ "s.\n";
 	}
 
 	private String dropAllItems(ArrayList<String> arguments) {
