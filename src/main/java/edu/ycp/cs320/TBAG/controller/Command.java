@@ -91,7 +91,7 @@ public enum Command {
 		format.append("\"");
 
 		if (!this.examples.isEmpty()) {
-			format.append("\n  Examples: ");
+			format.append("\n  Examples:");
 
 			for (String example : examples) {
 				format

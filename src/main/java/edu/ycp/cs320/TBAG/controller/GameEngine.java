@@ -231,10 +231,10 @@ public class GameEngine {
 		Room playerRoom = player.getRoom();
 
 		if (playerRoom.getInventory().getItems().isEmpty()) {
-			return "You did not pick anything up from this room.";
+			return "You did not pick anything up from this room.\n";
 		}
 
-		StringBuilder output = new StringBuilder("You pickup up:\n");
+		StringBuilder output = new StringBuilder("You picked up:\n");
 
 		Iterator<Item> itemIterator = playerRoom.getInventory().getItems().values().iterator();
 
@@ -251,8 +251,6 @@ public class GameEngine {
 				.append(item.getName())
 				.append("\n");
 		}
-
-		output.append("\n");
 
 		return output.toString();
 	}
@@ -282,7 +280,7 @@ public class GameEngine {
 		if (error != null) return error;
 
 		if (player.getInventory().getItems().isEmpty()) {
-			return "You did not have anything to drop.\n";
+			return "You do not have anything to drop.\n";
 		}
 
 		Room playerRoom = player.getRoom();
@@ -292,8 +290,7 @@ public class GameEngine {
 
 		while (itemIterator.hasNext()) {
 			Item item = itemIterator.next();
-
-			//inventoryController.removeItem(playerRoom.getInventory(), item.getId(), item.getAmount());
+			
 			itemIterator.remove();
 			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
 
@@ -303,8 +300,6 @@ public class GameEngine {
 				.append(item.getName())
 				.append("\n");
 		}
-
-		output.append("\n");
 
 		return output.toString();
 	}
