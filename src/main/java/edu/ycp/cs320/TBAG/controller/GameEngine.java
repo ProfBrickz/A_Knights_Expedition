@@ -220,10 +220,8 @@ public class GameEngine {
 		inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
 		return "You picked up "
-			+ item.getAmount()
-			+ " "
-			+ itemName
-			+ "s.\n";
+			+ getItemFormat(item)
+			+ ".\n";
 	}
 
 	private String pickupAllItems(ArrayList<String> arguments) {
@@ -275,10 +273,8 @@ public class GameEngine {
 		inventoryController.addItem(player.getRoom().getInventory(), item, item.getAmount());
 
 		return "You dropped "
-			+ item.getAmount()
-			+ " "
-			+ itemName
-			+ "s.\n";
+			+ getItemFormat(item)
+			+ ".\n";
 	}
 
 	private String dropAllItems(ArrayList<String> arguments) {
@@ -346,6 +342,18 @@ public class GameEngine {
 
 
 	// Utility methods
+
+	private String getItemFormat(Item item) {
+		String output = "";
+
+		output += item.getAmount()
+			+ " "
+			+ item.getName();
+
+		if (item.getAmount() > 1) output += "s";
+
+		return output;
+	}
 
 	/**
 	 * Makes a string list of items in an inventory.
