@@ -11,14 +11,14 @@ public final class ItemCatalog {
 
 		inventory.addItem(new Weapon(
 			"w_wooden_cudgel",
-			"Wooden Cudgel",
+			"Wooden-Cudgel",
 			"A wooden pole mainly used for practice. Good for beating people to death",
 			1
 		));
 
 		inventory.addItem(new Armor(
 			"a_favorite_shirt",
-			"Favorite Shirt",
+			"Favorite-Shirt",
 			"Provides a placebo effect in DEF",
 			1,
 			false,
