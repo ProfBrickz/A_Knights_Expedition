@@ -7,6 +7,7 @@ public class Player extends BattleEntity {
 	private ArrayList<Armor> armor;
 	private PlayerState playerState;
 	private final Inventory inventory = new Inventory();
+	private Integer coins;
 
 	public Player(Integer maxHealth, Integer health) {
 		super(maxHealth, health);
@@ -14,6 +15,7 @@ public class Player extends BattleEntity {
 		this.room = null;
 		this.armor = new ArrayList<>();
 		this.playerState = PlayerState.EXPLORING;
+		this.coins = 0;
 	}
 
 	public Player(Integer maxHealth, Integer health, PlayerState playerState, Room room) {
@@ -22,6 +24,7 @@ public class Player extends BattleEntity {
 		this.room = room;
 		this.armor = new ArrayList<>();
 		this.playerState = playerState;
+		this.coins = 0;
 	}
 
 	// --- Getters & Setters ---
@@ -47,5 +50,13 @@ public class Player extends BattleEntity {
 
 	public void setState(PlayerState newState) {
 		playerState = newState;
+	}
+
+	public Integer getCoins(){
+		return coins;
+	}
+	
+	public void setCoins(Integer newCoins){
+		coins = newCoins;
 	}
 }

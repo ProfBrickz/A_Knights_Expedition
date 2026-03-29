@@ -14,6 +14,13 @@ public class NPCController {
 	}
 
 	public Integer sell(NPC npc, Player player, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		Item playerItem = player.getInventory().getItems().get(item.getId());
+    	if (playerItem == null) {
+        	return 0;
+		}
+		player.getInventory().removeItem(item.getId());
+    	player.setCoins(player.getCoins() + item.getValue());
+
+    	return item.getValue();
 	}
 }

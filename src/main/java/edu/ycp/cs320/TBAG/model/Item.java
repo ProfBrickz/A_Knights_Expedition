@@ -3,21 +3,21 @@ package edu.ycp.cs320.TBAG.model;
 public class Item {
 	private final String id;
 	private String name, description;
-	private Integer sellValue, amount;
+	private Integer value, amount;
 
-	public Item(String id, String name, String description, Integer sellValue, Integer amount) {
+	public Item(String id, String name, String description, Integer value, Integer amount) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.sellValue = sellValue;
+		this.value = value;
 		this.amount = amount;
 	}
 
-	public Item(String id, String name, String description, Integer sellValue) {
+	public Item(String id, String name, String description, Integer value) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.sellValue = sellValue;
+		this.value = value;
 		this.amount = 1;
 	}
 
@@ -41,12 +41,12 @@ public class Item {
 		this.description = description;
 	}
 
-	public Integer getSellValue() {
-		return sellValue;
+	public Integer getValue() {
+		return value;
 	}
 
-	public void setSellValue(Integer sellValue) {
-		this.sellValue = sellValue;
+	public void setSellValue(Integer value) {
+		this.value = value;
 	}
 
 	public Integer getAmount() {
