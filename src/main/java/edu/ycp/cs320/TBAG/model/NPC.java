@@ -1,18 +1,29 @@
 package edu.ycp.cs320.TBAG.model;
 
-import java.util.HashMap;
-
 public class NPC {
-	private final Integer id;
+	private final String id;
 	private String name;
-	private final HashMap<String, NPCItem> items = new HashMap<>();
+	private final Inventory inventory = new Inventory();
+	private String greeting;
+	private String goodbye;
 
-	public NPC(Integer id, String name) {
+	public NPC(String id, String name, String greeting, String goodbye) {
 		this.id = id;
 		this.name = name;
+		this.greeting = greeting;
+		this.goodbye = goodbye;
 	}
 
-	public Integer getId() {
+	public NPC(String id, String name) {
+		this(
+			id,
+			name,
+			"Hello adventurer, I am " + name + ".",
+			"Goodbye adventurer."
+		);
+	}
+
+	public String getId() {
 		return id;
 	}
 
@@ -24,7 +35,23 @@ public class NPC {
 		this.name = name;
 	}
 
-	public HashMap<String, NPCItem> getItems() {
-		return items;
+	public Inventory getInventory() {
+		return inventory;
+	}
+
+	public String getGreeting() {
+		return greeting;
+	}
+
+	public void setGreeting(String greeting) {
+		this.greeting = greeting;
+	}
+
+	public String getGoodbye() {
+		return goodbye;
+	}
+
+	public void setGoodbye(String goodbye) {
+		this.goodbye = goodbye;
 	}
 }

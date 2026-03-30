@@ -73,14 +73,39 @@ public class TBAGServlet extends HttpServlet {
 		dialog += input + "\n";
 
 		String command = "";
-		ArrayList<String> arguments = new ArrayList<String>();
+		ArrayList<String> arguments = new ArrayList<>();
 
 		String[] parts = input.split(" ");
 		if (parts.length > 0) {
 			command = parts[0];
 		}
+
+		StringBuilder part = new StringBuilder();
 		for (int i = 1; i < parts.length; i++) {
-			arguments.add(parts[i]);
+			part.append(parts[i]);
+			String currentPart = part.toString();
+
+			// Argument with no quotes
+			if (!currentPart.startsWith("\"")) {
+				arguments.add(currentPart);
+				part = new StringBuilder();
+				continue;
+			}
+
+			// Add to quoted argument
+			if (!currentPart.endsWith("\"")) {
+				part.append(" ");
+				continue;
+			}
+
+			// End multi-word argument
+			currentPart = currentPart.substring(1, currentPart.length() - 1);
+			arguments.add(currentPart);
+			part = new StringBuilder();
+		}
+
+		if (!part.isEmpty()) {
+			arguments.add(part.substring(1, part.length() - 1));
 		}
 
 		// Run command

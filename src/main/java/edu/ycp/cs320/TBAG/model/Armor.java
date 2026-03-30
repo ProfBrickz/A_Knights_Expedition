@@ -25,9 +25,9 @@ public class Armor extends Item {
 		String description,
 		Integer defense,
 		Boolean active,
-		Integer sellValue
+		Integer value
 	) {
-		super(id, name, description, sellValue);
+		super(id, name, description, value);
 
 		this.defense = defense;
 		this.active = active;

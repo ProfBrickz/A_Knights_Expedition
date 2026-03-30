@@ -5,15 +5,38 @@ import edu.ycp.cs320.TBAG.model.NPC;
 import edu.ycp.cs320.TBAG.model.Player;
 
 public class NPCController {
-	public NPCController() {
+	private InventoryController inventoryController;
 
+	public NPCController(InventoryController inventoryController) {
+		this.inventoryController = inventoryController;
 	}
 
-	public Item buy(NPC npc, Player player, Integer npcItemId) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public Item buy(NPC npc, Player player, String npcItemId, Integer amount) {
+		Item npcItem = npc.getInventory().getItems().get(npcItemId);
+		if (npcItem == null) {
+			return null;
+		}
+		if (player.getCoins() < npcItem.getPrice() * amount) {
+			return null;
+		}
+		player.setCoins(player.getCoins() - npcItem.getPrice());
+		inventoryController.addItem(player.getInventory(), npcItem, amount);
+
+		return npcItem;
 	}
 
-	public Integer sell(NPC npc, Player player, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public Integer sell(Player player, Item item, Integer amount) {
+		Item playerItem = player.getInventory().getItems().get(item.getId());
+		if (playerItem == null) {
+			return null;
+		}
+		if (playerItem.getAmount() < amount) {
+			return null;
+		}
+
+		player.getInventory().removeItem(item.getId());
+		player.setCoins(player.getCoins() + item.getValue() * amount);
+
+		return item.getValue();
 	}
 }
