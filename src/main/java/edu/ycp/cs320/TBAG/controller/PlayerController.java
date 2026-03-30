@@ -23,7 +23,7 @@ public class PlayerController {
 		Room currentRoom = player.getRoom();
 		RoomConnection connection = currentRoom.getRoomConnections().get(direction);
 
-		if (connection != null) {
+		if (connection != null && connection.getRoom() != null) {
 			Room nextRoom = connection.getRoom();
 			player.setRoom(nextRoom);
 			return true;

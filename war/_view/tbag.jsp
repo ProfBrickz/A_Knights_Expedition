@@ -151,9 +151,9 @@
           <c:when test="${player.room.name == 'NewBrambleton'}">
             <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/NewBrambleton.gif" alt="${player.room.name}" />
           </c:when>
-          <c:when test="${player.room.name == 'Backrooms'}">
+          <c:otherwise>
             <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif" alt="${player.room.name}" />
-          </c:when>
+          </c:otherwise>
         </c:choose>
       </div>
     </div>
