@@ -458,6 +458,7 @@ public class GameEngine {
 		player.getInventory().getItems().clear();
 		player.getArmor().clear();
 		player.setState(PlayerState.EXPLORING);
+		player.setCoins(0);
 		ItemCatalog.addBaseItemsToInventory(player.getInventory());
 
 		// Set default room
