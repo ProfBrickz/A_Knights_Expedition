@@ -67,8 +67,8 @@
     }
 
     .location-image {
-      width: 220px;
-      height: 120px;
+      width: 128px;
+      height: 128px;
       object-fit: cover;
       border: 3px solid black;
       background: #ccc;
