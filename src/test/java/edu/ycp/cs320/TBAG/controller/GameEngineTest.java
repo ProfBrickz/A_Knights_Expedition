@@ -25,6 +25,9 @@ public class GameEngineTest {
 		roomA.setConnection(roomB, "north");
 		roomB.setConnection(roomA, "south");
 
+		NPC npc = new NPC("0", "name");
+		roomA.addNPC(npc);
+
 		rooms.put(roomA.getID(), roomA);
 		rooms.put(roomB.getID(), roomB);
 		gameEngine = new GameEngine(player, rooms);
@@ -495,7 +498,7 @@ public class GameEngineTest {
 		public void notInInventory() {
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"This room does not have a sword.\n\n",
+				"You do not have a sword.\n\n",
 				gameEngine.inputCommand("drop", arguments)
 			);
 		}
@@ -629,6 +632,110 @@ public class GameEngineTest {
 				"You do not have anything to drop.\n\n",
 				gameEngine.inputCommand("drop-all", arguments)
 			);
+		}
+	}
+
+	@Test
+	public void testWallet() {
+		Assertions.assertEquals(
+			"You have 0 coins.\n\n",
+			gameEngine.inputCommand("wallet", arguments)
+		);
+
+		player.setCoins(1);
+		Assertions.assertEquals(
+			"You have 1 coin.\n\n",
+			gameEngine.inputCommand("wallet", arguments)
+		);
+
+		player.setCoins(10);
+		Assertions.assertEquals(
+			"You have 10 coins.\n\n",
+			gameEngine.inputCommand("wallet", arguments)
+		);
+	}
+
+	@Nested
+	class TalkToTests {
+		@Test
+		public void defaultGreeting() {
+			NPC npc = player.getRoom().getNpcs().get("0");
+
+			arguments.add("name");
+			Assertions.assertEquals(
+				"Hello adventurer, I am name.\n\n",
+				gameEngine.inputCommand("talk-to", arguments)
+			);
+
+			Assertions.assertEquals(
+				npc,
+				player.getCurrentNPC()
+			);
+		}
+
+		@Test
+		public void customGreeting() {
+			NPC npc = player.getRoom().getNpcs().get("0");
+			npc.setGreeting("Hi");
+
+			arguments.add("name");
+			Assertions.assertEquals(
+				"Hi\n\n",
+				gameEngine.inputCommand("talk-to", arguments)
+			);
+
+			Assertions.assertEquals(
+				npc,
+				player.getCurrentNPC()
+			);
+		}
+
+		@Test
+		public void noNPC() {
+			arguments.add("abc");
+			Assertions.assertEquals(
+				"abc is not in this room.\n\n",
+				gameEngine.inputCommand("talk-to", arguments)
+			);
+
+			Assertions.assertNull(player.getCurrentNPC());
+		}
+	}
+
+	@Nested
+	class LeaveTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get("0");
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void defaultBye() {
+			Assertions.assertEquals(
+				"Goodbye adventurer.\n\n",
+				gameEngine.inputCommand("leave", arguments)
+			);
+
+			Assertions.assertNull(player.getCurrentNPC());
+		}
+
+		@Test
+		public void customGreeting() {
+			npc.setGoodbye("Bye");
+
+			Assertions.assertEquals(
+				"Bye\n\n",
+				gameEngine.inputCommand("leave", arguments)
+			);
+
+			Assertions.assertNull(player.getCurrentNPC());
 		}
 	}
 
