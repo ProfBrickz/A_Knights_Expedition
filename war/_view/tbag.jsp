@@ -33,6 +33,8 @@
       grid-row: 1;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      gap: 12px;
     }
 
     .health {
@@ -53,6 +55,25 @@
       background: green;
     }
 
+    .location {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .location-name {
+      font-weight: bold;
+    }
+
+    .location-image {
+      width: 220px;
+      height: 120px;
+      object-fit: cover;
+      border: 3px solid black;
+      background: #ccc;
+    }
+
     .log {
       grid-column: 1;
       grid-row: 2;
@@ -66,8 +87,23 @@
 
       ul {
       	margin: 0;
-      	padding-left: 20px;
+      	padding-left: 0;
+        list-style: none;
       }
+    }
+    
+    .inventory-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .item-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      image-rendering: auto;
     }
 
     .input {
@@ -108,6 +144,18 @@
           <div class="fill" style="width: ${enemyHealth}%"></div>
         </div>
       </div>
+
+      <div class="location">
+        <div class="location-name">${player.room.name}</div>
+        <c:choose>
+          <c:when test="${player.room.name == 'NewBrambleton'}">
+            <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/NewBrambleton.gif" alt="${player.room.name}" />
+          </c:when>
+          <c:when test="${player.room.name == 'Backrooms'}">
+            <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif" alt="${player.room.name}" />
+          </c:when>
+        </c:choose>
+      </div>
     </div>
 
     <div class="log">
@@ -117,7 +165,17 @@
     <div class="inventory">
     	<ul>
     		<c:forEach var="item" items="${player.inventory.items.values()}">
-        		<li>${item.amount} x ${item.name}</li>
+        		<li class="inventory-item">
+              <c:choose>
+                <c:when test="${not empty item.assetName}">
+                  <img class="item-icon" src="${pageContext.request.contextPath}/assets/items/${item.assetName}" alt="${item.name}" />
+                </c:when>
+                <c:otherwise>
+                  <img class="item-icon" src="${pageContext.request.contextPath}/assets/items/fixIt.png" alt="${item.name}" />
+                </c:otherwise>
+              </c:choose>
+              <span>${item.amount} x ${item.name}</span>
+            </li>
      		</c:forEach>
     	</ul>
     </div>

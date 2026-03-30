@@ -1,7 +1,8 @@
 package edu.ycp.cs320.TBAG.controller;
 
 
-import edu.ycp.cs320.TBAG.model.ItemCatalog;
+import edu.ycp.cs320.TBAG.model.Item;
+import edu.ycp.cs320.TBAG.model.NPC;
 import edu.ycp.cs320.TBAG.model.Room;
 import edu.ycp.cs320.TBAG.model.RoomConnection;
 
@@ -33,6 +34,14 @@ public class RoomController {
 		return false;
 	}
 
+	public NPC getNPCByName(Room room, String npcName) {
+		for (NPC npc : room.getNpcs().values()) {
+			if (npc.getName().equals(npcName)) return npc;
+		}
+
+		return null;
+	}
+
 	//load room function: takes in database of rooms + ID of room to access it and build it locally
 	//will need to be redone with database once that is added
 	public void loadRoom(String id, HashMap<String, Room> loadList) {
@@ -42,40 +51,47 @@ public class RoomController {
 
 	//makeshift database for the set of rooms for the demo
 	public void loadDemo() {
-		Room start = new Room("0", "Shore", "You find yourself on a shore with a shipwreck");
+		Room start = new Room("0", "NewBrambleton", "You arrive in NewBrambleton, a bustling town that feels like the start of something big.");
+		start.setAssetName("NewBrambleton.gif");
 		Room center = new Room("1", "Center", "You walk a bit until you spot a crossroads");
 		Room left = new Room("2", "Cave entrance", "You find the entrance to a cave blocked by a boulder");
 		Room top = new Room("3", "Mountains", "You find yourself looking up at a towering mountain");
 		Room right = new Room("4", "Jungle", "You stumble into a densely packed grove of trees");
+		Room backrooms = new Room("5", "Backrooms", "Placeholder location: we will replace this once the other locations are ready.");
+		backrooms.setAssetName("Backrooms.gif");
 
 		start.setConnection(center, "NORTH");
+		start.setConnection(backrooms, "DOWN");
+		start.getInventory().addItem(new Item("0", "Sword", "a sword", 10));
+		start.getInventory().addItem(new Item("1", "Old book", "a book", 3));
 
 		center.setConnection(top, "NORTH");
 		center.setConnection(right, "EAST");
 		center.setConnection(start, "SOUTH");
 		center.setConnection(left, "WEST");
+		center.getInventory().addItem(new Item("1", "Old book", "a book", 3));
+		center.getInventory().addItem(new Item("2", "Stick", "a stick", 1));
+		NPC merchant = new NPC("0", "Merchant");
+		merchant.getInventory().addItem(new Item("3", "Potion", "potion", 2));
+		center.addNPC(merchant);
 
 		left.setConnection(center, "EAST");
 
 		top.setConnection(center, "SOUTH");
 
 		right.setConnection(center, "WEST");
+		backrooms.setConnection(start, "UP");
 
 		HashMap<String, Room> map = new HashMap<String, Room>();
 
-		map.put(start.getID(), start);
-		map.put(center.getID(), center);
-		map.put(left.getID(), left);
-		map.put(top.getID(), top);
-		map.put(right.getID(), right);
-
-		for (int i = 0; i < 5; i++) {
-			String key = "" + i;
-			loadRoom(key, map);
-		}
+		roomList.put(start.getID(), start);
+		roomList.put(center.getID(), center);
+		roomList.put(left.getID(), left);
+		roomList.put(top.getID(), top);
+		roomList.put(right.getID(), right);
+		roomList.put(backrooms.getID(), backrooms);
 	}
 }
-
 
 
 

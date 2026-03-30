@@ -9,21 +9,25 @@ public final class ItemCatalog {
 			return;
 		}
 
-		inventory.addItem(new Weapon(
+		Weapon woodenCudgel = new Weapon(
 			"w_wooden_cudgel",
-			"Wooden Cudgel",
+			"Wooden-Cudgel",
 			"A wooden pole mainly used for practice. Good for beating people to death",
 			1
-		));
+		);
+		woodenCudgel.setAssetName("Wooden_Cudgel.png");
+		inventory.addItem(woodenCudgel);
 
-		inventory.addItem(new Armor(
+		Armor favoriteShirt = new Armor(
 			"a_favorite_shirt",
-			"Favorite Shirt",
+			"Favorite-Shirt",
 			"Provides a placebo effect in DEF",
 			1,
 			false,
 			1
-		));
+		);
+		favoriteShirt.setAssetName("Favorite_Shirt.png");
+		inventory.addItem(favoriteShirt);
 	}
 
 	public static void addAllItemsToInventory(Inventory inventory) {
@@ -32,12 +36,14 @@ public final class ItemCatalog {
 		}
 
 		// Weapons
-		inventory.addItem(new Weapon(
+		Weapon woodenCudgel = new Weapon(
 			"w_wooden_cudgel",
 			"Wooden Cudgel",
 			"A wooden pole mainly used for practice. Good for beating people to death",
 			1
-		));
+		);
+		woodenCudgel.setAssetName("Wooden_Cudgel.png");
+		inventory.addItem(woodenCudgel);
 		inventory.addItem(new Weapon(
 			"w_iron_sword",
 			"Iron Sword",
@@ -64,14 +70,16 @@ public final class ItemCatalog {
 		));
 
 		// Armor
-		inventory.addItem(new Armor(
+		Armor favoriteShirt = new Armor(
 			"a_favorite_shirt",
 			"Favorite Shirt",
 			"Provides a placebo effect in DEF",
 			1,
 			false,
 			1
-		));
+		);
+		favoriteShirt.setAssetName("Favorite_Shirt.png");
+		inventory.addItem(favoriteShirt);
 		inventory.addItem(new Armor(
 			"a_wish_body_armor",
 			"Wish Body Armor",
@@ -106,13 +114,15 @@ public final class ItemCatalog {
 		));
 
 		// Consumables
-		inventory.addItem(new HealingItem(
+		HealingItem spam = new HealingItem(
 			"h_spam",
 			"Spam",
 			"Heals 15% HP",
 			15,
 			1
-		));
+		);
+		spam.setAssetName("SPAM.png");
+		inventory.addItem(spam);
 		inventory.addItem(new HealingItem(
 			"h_pola_soda",
 			"Pola Soda",

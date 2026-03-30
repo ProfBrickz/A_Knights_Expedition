@@ -4,6 +4,7 @@ public class Item {
 	private final String id;
 	private String name, description;
 	private Integer value, amount;
+	private String assetName;
 
 	public Item(String id, String name, String description, Integer value, Integer amount) {
 		this.id = id;
@@ -45,8 +46,8 @@ public class Item {
 		return value;
 	}
 
-	public void setSellValue(Integer value) {
-		this.value = value;
+	public Integer getPrice() {
+		return value * 4;
 	}
 
 	public Integer getAmount() {
@@ -55,5 +56,13 @@ public class Item {
 
 	public void setAmount(Integer amount) {
 		this.amount = amount;
+	}
+
+	public String getAssetName() {
+		return assetName;
+	}
+
+	public void setAssetName(String assetName) {
+		this.assetName = assetName;
 	}
 }
