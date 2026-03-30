@@ -46,7 +46,13 @@ public class InventoryController {
 			}
 			existing.setAmount(existingAmount + amount);
 		} else {
-			items.put(key, item);
+			items.put(key, new Item(
+				item.getId(),
+				item.getName(),
+				item.getDescription(),
+				item.getValue(),
+				item.getAmount()
+			));
 		}
 	}
 
@@ -75,7 +81,7 @@ public class InventoryController {
 		if (existing == null) {
 			return;
 		}
-		
+
 		if (amount > existing.getAmount()) amount = existing.getAmount();
 
 		Integer currentAmount = existing.getAmount();
