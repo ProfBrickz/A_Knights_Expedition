@@ -3,26 +3,36 @@ package edu.ycp.cs320.TBAG.controller;
 import edu.ycp.cs320.TBAG.model.Enemy;
 import edu.ycp.cs320.TBAG.model.Player;
 
+import edu.ycp.cs320.TBAG.model.*;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 public class EnemyController {
 	private final BattleEntityController battleEntityController;
+	private final Random random = new Random();
 
 	public EnemyController(BattleEntityController battleEntityController) {
 		this.battleEntityController = battleEntityController;
 	}
 
-	// Randomly chooses WeaponAbility
 	public void attack(Enemy enemy, Player player) {
-		throw new UnsupportedOperationException("TODO - implement");
+		WeaponAbility ability = new WeaponAbility("basic", 5, "Enemy attacks!");
+		battleEntityController.attack(enemy, player, ability);
 	}
 
-	// Randomly chooses Armor
-	// Throws IllegalArgumentException if armor is active
-	public void defend(Enemy enemy) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("TODO - implement");
+	public void defend(Enemy enemy) {
+		Armor armor = new Armor("enemy_armor", "Hide", "Basic armor", 3, false, 0);
+
+		if (armor.getActive()) {
+			throw new IllegalArgumentException("Armor already active");
+		}
+
+		battleEntityController.defend(enemy, armor);
 	}
 
-	// Randomly chooses HealingItem
 	public void heal(Enemy enemy) {
-		throw new UnsupportedOperationException("TODO - implement");
+		HealingItem heal = new HealingItem("enemy_heal", "Potion", "Heals", 10, 0);
+		battleEntityController.heal(enemy, heal);
 	}
 }
