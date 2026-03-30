@@ -51,13 +51,17 @@ public class RoomController {
 
 	//makeshift database for the set of rooms for the demo
 	public void loadDemo() {
-		Room start = new Room("0", "Shore", "You find yourself on a shore with a shipwreck");
+		Room start = new Room("0", "NewBrambleton", "You arrive in NewBrambleton, a bustling town that feels like the start of something big.");
+		start.setAssetName("NewBrambleton.gif");
 		Room center = new Room("1", "Center", "You walk a bit until you spot a crossroads");
 		Room left = new Room("2", "Cave entrance", "You find the entrance to a cave blocked by a boulder");
 		Room top = new Room("3", "Mountains", "You find yourself looking up at a towering mountain");
 		Room right = new Room("4", "Jungle", "You stumble into a densely packed grove of trees");
+		Room backrooms = new Room("5", "Backrooms", "Placeholder location: we will replace this once the other locations are ready.");
+		backrooms.setAssetName("Backrooms.gif");
 
 		start.setConnection(center, "NORTH");
+		start.setConnection(backrooms, "DOWN");
 		start.getInventory().addItem(new Item("0", "Sword", "a sword", 10));
 		start.getInventory().addItem(new Item("1", "Old book", "a book", 3));
 
@@ -76,6 +80,7 @@ public class RoomController {
 		top.setConnection(center, "SOUTH");
 
 		right.setConnection(center, "WEST");
+		backrooms.setConnection(start, "UP");
 
 		HashMap<String, Room> map = new HashMap<String, Room>();
 
@@ -84,9 +89,9 @@ public class RoomController {
 		roomList.put(left.getID(), left);
 		roomList.put(top.getID(), top);
 		roomList.put(right.getID(), right);
+		roomList.put(backrooms.getID(), backrooms);
 	}
 }
-
 
 
 

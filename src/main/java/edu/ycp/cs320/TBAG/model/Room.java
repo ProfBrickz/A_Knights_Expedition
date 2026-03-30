@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 public class Room {
 	private String id, roomDescription, roomName;
+	private String assetName;
 	//Hashmap:: String : Direction, RoomConnection : Pointer to next room
 	private HashMap<String, RoomConnection> roomConnections = new HashMap<>();
 	private HashMap<String, Enemy> enemies = new HashMap<>();
@@ -59,6 +60,10 @@ public class Room {
 		return roomName;
 	}
 
+	public String getAssetName() {
+		return assetName;
+	}
+
 	public String getDescription() {
 		return roomDescription;
 	}
@@ -73,6 +78,10 @@ public class Room {
 
 	public void setName(String name) {
 		roomName = name;
+	}
+
+	public void setAssetName(String assetName) {
+		this.assetName = assetName;
 	}
 
 	//links rooms together, room = destination, key = direction/keyword
@@ -113,6 +122,5 @@ public class Room {
 		return npcs.remove(npc.getId());
 	}
 }
-
 
 

@@ -280,7 +280,7 @@ public class GameEngine {
 
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
-		if (item == null) return "This room does not have a " + itemName + ".\n";
+		if (item == null) return "You do not have a " + itemName + ".\n";
 
 		inventoryController.removeItem(player.getInventory(), item.getId(), item.getAmount());
 		inventoryController.addItem(player.getRoom().getInventory(), item, item.getAmount());
