@@ -163,7 +163,7 @@ public class GameEngine {
 
 		Boolean successfulMove = this.playerController.move(direction);
 		if (!successfulMove) {
-			return "Move failed, either player, or player.getRoom() does not exist\n";
+			return "Move failed, either player, or the room does not exist\n";
 		}
 
 		return this.player.getRoom().getDescription() + "\n";
