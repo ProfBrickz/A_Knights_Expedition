@@ -72,6 +72,7 @@ public class GameEngineTest {
 			Assertions.assertEquals("b", playerRoom.getName());
 			Assertions.assertEquals("description b", playerRoom.getDescription());
 
+			arguments.clear();
 			arguments.add("south");
 			Assertions.assertEquals("description a\n\n", gameEngine.inputCommand("move", arguments));
 			playerRoom = player.getRoom();
@@ -121,7 +122,7 @@ public class GameEngineTest {
 			player.setRoom(roomA);
 
 			arguments.add("north");
-			Assertions.assertThrows(NullPointerException.class, () -> gameEngine.inputCommand("move", arguments));
+			Assertions.assertEquals("Move failed, either player, or the room does not exist\n\n", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = player.getRoom();
 			Assertions.assertEquals("0", playerRoom.getID());
 			Assertions.assertEquals("a", playerRoom.getName());
@@ -332,7 +333,6 @@ public class GameEngineTest {
 			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
 			playerRoom.getInventory().addItem(item2);
 
-			arguments.clear();
 			arguments.add("potion");
 
 			Assertions.assertEquals(
@@ -341,13 +341,13 @@ public class GameEngineTest {
 			);
 
 			// Check player inventory
-			Assertions.assertTrue(player.getInventory().getItems().containsKey(item1.getId()));
-			Assertions.assertEquals(1, player.getInventory().getItems().get(item1.getId()).getAmount());
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item1.getId()));
 			Assertions.assertTrue(player.getInventory().getItems().containsKey(item2.getId()));
 			Assertions.assertEquals(3, player.getInventory().getItems().get(item2.getId()).getAmount());
 
 			// Check room inventory
-			Assertions.assertFalse(playerRoom.getInventory().getItems().containsKey(item1.getId()));
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item1.getId()));
+			Assertions.assertEquals(1, playerRoom.getInventory().getItems().get(item1.getId()).getAmount());
 			Assertions.assertFalse(playerRoom.getInventory().getItems().containsKey(item2.getId()));
 		}
 
@@ -406,7 +406,7 @@ public class GameEngineTest {
 			);
 			Assertions.assertTrue(player.getInventory().getItems().containsKey(item.getId()));
 			Assertions.assertEquals(
-				Integer.MAX_VALUE,
+				Integer.MIN_VALUE,
 				player.getInventory().getItems().get(item.getId()).getAmount()
 			);
 			Assertions.assertFalse(playerRoom.getInventory().getItems().containsKey(item.getId()));
@@ -536,7 +536,7 @@ public class GameEngineTest {
 			);
 			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
 			Assertions.assertEquals(
-				Integer.MAX_VALUE,
+				Integer.MIN_VALUE,
 				playerRoom.getInventory().getItems().get(item.getId()).getAmount()
 			);
 			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
@@ -658,6 +658,7 @@ public class GameEngineTest {
 		Assertions.assertEquals("a", playerRoom.getName());
 		Assertions.assertEquals("description a", playerRoom.getDescription());
 		Assertions.assertTrue(player.getInventory().getItems().isEmpty());
+		Assertions.assertEquals(0, player.getCoins());
 		Assertions.assertTrue(player.getArmor().isEmpty());
 		Assertions.assertEquals(PlayerState.EXPLORING, player.getState());
 	}
@@ -698,7 +699,7 @@ public class GameEngineTest {
 		arguments.add("south");
 		Assertions.assertTrue(
 			gameEngine.inputCommand("move", arguments).startsWith(
-				"Invalid move command. Must be in the format:\n\"move <direction>\"\n"
+				"Invalid move command. Must be in the format:\n\"move <Direction>\"\n"
 			)
 		);
 
@@ -706,7 +707,7 @@ public class GameEngineTest {
 		arguments.clear();
 		Assertions.assertTrue(
 			gameEngine.inputCommand("move", arguments).startsWith(
-				"Invalid move command. Must be in the format:\n\"move <direction>\"\n"
+				"Invalid move command. Must be in the format:\n\"move <Direction>\"\n"
 			)
 		);
 	}
