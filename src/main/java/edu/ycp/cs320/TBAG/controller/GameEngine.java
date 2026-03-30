@@ -545,7 +545,7 @@ public class GameEngine {
 
 	private String validateCommandState(Command command, ArrayList<String> arguments) {
 		if (!command.getAllowedPlayerStates().contains(player.getState())) {
-			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".";
+			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".\n";
 		}
 
 		return null;
