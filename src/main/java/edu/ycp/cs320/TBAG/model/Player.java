@@ -8,6 +8,8 @@ public class Player extends BattleEntity {
 	private PlayerState playerState;
 	private final Inventory inventory = new Inventory();
 	private Integer coins;
+	// The current NPC the player is talking to (if any)
+	private NPC currentNPC = null;
 
 	public Player(Integer maxHealth, Integer health) {
 		super(maxHealth, health);
@@ -55,8 +57,16 @@ public class Player extends BattleEntity {
 	public Integer getCoins(){
 		return coins;
 	}
-	
+
 	public void setCoins(Integer newCoins){
 		coins = newCoins;
+	}
+
+	public NPC getCurrentNPC() {
+		return currentNPC;
+	}
+
+	public void setCurrentNPC(NPC currentNPC) {
+		this.currentNPC = currentNPC;
 	}
 }

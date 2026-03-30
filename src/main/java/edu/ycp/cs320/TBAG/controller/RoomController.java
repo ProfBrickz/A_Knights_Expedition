@@ -1,7 +1,8 @@
 package edu.ycp.cs320.TBAG.controller;
 
 
-import edu.ycp.cs320.TBAG.model.ItemCatalog;
+import edu.ycp.cs320.TBAG.model.Item;
+import edu.ycp.cs320.TBAG.model.NPC;
 import edu.ycp.cs320.TBAG.model.Room;
 import edu.ycp.cs320.TBAG.model.RoomConnection;
 
@@ -33,6 +34,14 @@ public class RoomController {
 		return false;
 	}
 
+	public NPC getNPCByName(Room room, String npcName) {
+		for (NPC npc : room.getNpcs().values()) {
+			if (npc.getName().equals(npcName)) return npc;
+		}
+
+		return null;
+	}
+
 	//load room function: takes in database of rooms + ID of room to access it and build it locally
 	//will need to be redone with database once that is added
 	public void loadRoom(String id, HashMap<String, Room> loadList) {
@@ -49,11 +58,18 @@ public class RoomController {
 		Room right = new Room("4", "Jungle", "You stumble into a densely packed grove of trees");
 
 		start.setConnection(center, "NORTH");
+		start.getInventory().addItem(new Item("0", "Sword", "a sword", 10));
+		start.getInventory().addItem(new Item("1", "Old book", "a book", 3));
 
 		center.setConnection(top, "NORTH");
 		center.setConnection(right, "EAST");
 		center.setConnection(start, "SOUTH");
 		center.setConnection(left, "WEST");
+		center.getInventory().addItem(new Item("1", "Old book", "a book", 3));
+		center.getInventory().addItem(new Item("2", "Stick", "a stick", 1));
+		NPC merchant = new NPC("0", "Merchant");
+		merchant.getInventory().addItem(new Item("3", "Potion", "potion", 2));
+		center.addNPC(merchant);
 
 		left.setConnection(center, "EAST");
 
@@ -63,16 +79,11 @@ public class RoomController {
 
 		HashMap<String, Room> map = new HashMap<String, Room>();
 
-		map.put(start.getID(), start);
-		map.put(center.getID(), center);
-		map.put(left.getID(), left);
-		map.put(top.getID(), top);
-		map.put(right.getID(), right);
-
-		for (int i = 0; i < 5; i++) {
-			String key = "" + i;
-			loadRoom(key, map);
-		}
+		roomList.put(start.getID(), start);
+		roomList.put(center.getID(), center);
+		roomList.put(left.getID(), left);
+		roomList.put(top.getID(), top);
+		roomList.put(right.getID(), right);
 	}
 }
 

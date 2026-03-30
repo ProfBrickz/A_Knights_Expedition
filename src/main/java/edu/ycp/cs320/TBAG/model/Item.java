@@ -45,8 +45,8 @@ public class Item {
 		return value;
 	}
 
-	public void setSellValue(Integer value) {
-		this.value = value;
+	public Integer getPrice() {
+		return value * 4;
 	}
 
 	public Integer getAmount() {

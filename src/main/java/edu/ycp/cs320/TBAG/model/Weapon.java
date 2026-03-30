@@ -9,19 +9,19 @@ public class Weapon extends Item {
 		String id,
 		String name,
 		String description,
-		Integer sellValue,
+		Integer value,
 		Integer amount
 	) {
-		super(id, name, description, sellValue, amount);
+		super(id, name, description, value, amount);
 	}
 
 	public Weapon(
 		String id,
 		String name,
 		String description,
-		Integer sellValue
+		Integer value
 	) {
-		super(id, name, description, sellValue);
+		super(id, name, description, value);
 	}
 
 	public HashMap<String, WeaponAbility> getAbilities() {

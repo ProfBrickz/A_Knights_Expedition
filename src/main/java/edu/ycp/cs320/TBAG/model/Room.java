@@ -8,19 +8,22 @@ public class Room {
 	private HashMap<String, RoomConnection> roomConnections = new HashMap<>();
 	private HashMap<String, Enemy> enemies = new HashMap<>();
 	private Inventory inventory = new Inventory();
+	private HashMap<String, NPC> npcs = new HashMap<>();
 
 	public Room(
 		String id,
 		String name,
 		String description,
 		HashMap<String, RoomConnection> roomConnections,
-		HashMap<String, Enemy> enemies
+		HashMap<String, Enemy> enemies,
+		HashMap<String, NPC> npcs
 	) {
 		this.id = id;
 		roomName = name;
 		roomDescription = description;
 		this.roomConnections = roomConnections;
 		this.enemies = enemies;
+		this.npcs = npcs;
 	}
 
 	public Room(
@@ -96,6 +99,18 @@ public class Room {
 
 	public Inventory getInventory() {
 		return inventory;
+	}
+
+	public HashMap<String, NPC> getNpcs() {
+		return npcs;
+	}
+
+	public NPC addNPC(NPC npc) {
+		return npcs.put(npc.getId(), npc);
+	}
+
+	public NPC removeNPC(NPC npc) {
+		return npcs.remove(npc.getId());
 	}
 }
 

@@ -17,6 +17,7 @@ public class GameEngine {
 	private final RoomController roomController;
 	private final BattleEntityController battleEntityController = new BattleEntityController();
 	private final InventoryController inventoryController = new InventoryController();
+	private final NPCController npcController = new NPCController(inventoryController);
 	private final String defaultRoom = "0";
 
 
@@ -100,28 +101,42 @@ public class GameEngine {
 
 		String output = "";
 
-		if (command.equals(Command.MOVE.getCommand())) {
-			output = this.move(arguments);
-		} else if (command.equals(Command.LOOK.getCommand())) {
-			output = this.look(arguments);
-		} else if (command.equals(Command.INVENTORY.getCommand())) {
-			output = this.inventory(arguments);
-		} else if (command.equals(Command.INSPECT_ITEM.getCommand())) {
-			output = this.inspectItem(arguments);
-		} else if (command.equals(Command.SEARCH.getCommand())) {
-			output = this.search(arguments);
-		} else if (command.equals(Command.PICKUP.getCommand())) {
-			output = this.pickupItem(arguments);
-		} else if (command.equals(Command.PICKUP_ALL.getCommand())) {
-			output = this.pickupAllItems(arguments);
-		} else if (command.equals(Command.DROP.getCommand())) {
-			output = this.dropItem(arguments);
-		} else if (command.equals(Command.DROP_ALL.getCommand())) {
-			output = this.dropAllItems(arguments);
-		} else if (command.equals(Command.RESTART.getCommand())) {
-			output = this.restart(arguments);
-		} else if (command.equals(Command.HELP.getCommand())) {
-			output = this.help(arguments);
+		if (command.equals(Command.MOVE.getName())) {
+			output = move(arguments);
+		} else if (command.equals(Command.LOOK.getName())) {
+			output = look(arguments);
+		} else if (command.equals(Command.INVENTORY.getName())) {
+			output = inventory(arguments);
+		} else if (command.equals(Command.INSPECT_ITEM.getName())) {
+			output = inspectItem(arguments);
+		} else if (command.equals(Command.SEARCH.getName())) {
+			output = search(arguments);
+		} else if (command.equals(Command.PICKUP.getName())) {
+			output = pickupItem(arguments);
+		} else if (command.equals(Command.PICKUP_ALL.getName())) {
+			output = pickupAllItems(arguments);
+		} else if (command.equals(Command.DROP.getName())) {
+			output = dropItem(arguments);
+		} else if (command.equals(Command.DROP_ALL.getName())) {
+			output = dropAllItems(arguments);
+		} else if (command.equals(Command.WALLET.getName())) {
+			output = wallet(arguments);
+		} else if (command.equals(Command.TALK_TO.getName())) {
+			output = talkToNPC(arguments);
+		} else if (command.equals(Command.LEAVE.getName())) {
+			output = leaveNPC(arguments);
+		} else if (command.equals(Command.SEARCH_SHOP.getName())) {
+			output = searchShop(arguments);
+		} else if (command.equals(Command.BUY.getName())) {
+			output = buyItem(arguments);
+		} else if (command.equals(Command.SELL.getName())) {
+			output = sellItem(arguments);
+		} else if (command.equals(Command.SELL_ALL.getName())) {
+			output = sellAllItem(arguments);
+		} else if (command.equals(Command.RESTART.getName())) {
+			output = restart(arguments);
+		} else if (command.equals(Command.HELP.getName())) {
+			output = help(arguments);
 		} else {
 			output = "Sorry, command not recognized.\n";
 		}
@@ -137,7 +152,7 @@ public class GameEngine {
 	 * Validates direction and updates player position.
 	 */
 	private String move(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.MOVE, arguments);
+		String error = validateCommand(Command.MOVE, arguments);
 		if (error != null) return error;
 
 		String direction = arguments.get(0).toLowerCase();
@@ -159,7 +174,7 @@ public class GameEngine {
 	 * Returns the description of the current room.
 	 */
 	private String look(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.LOOK, arguments);
+		String error = validateCommand(Command.LOOK, arguments);
 		if (error != null) return error;
 
 		return this.player.getRoom().getDescription() + "\n";
@@ -170,7 +185,7 @@ public class GameEngine {
 	 * Lists all items in the player's inventory with quantities.
 	 */
 	private String inventory(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.INVENTORY, arguments);
+		String error = validateCommand(Command.INVENTORY, arguments);
 		if (error != null) return error;
 
 		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
@@ -181,7 +196,7 @@ public class GameEngine {
 	 * Checks if the item exists in the inventory and returns inspection details.
 	 */
 	private String inspectItem(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.INSPECT_ITEM, arguments);
+		String error = validateCommand(Command.INSPECT_ITEM, arguments);
 		if (error != null) return error;
 
 		String itemName = arguments.get(0);
@@ -196,7 +211,7 @@ public class GameEngine {
 	 * Checks if the room has any items and returns them.
 	 */
 	private String search(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.SEARCH, arguments);
+		String error = validateCommand(Command.SEARCH, arguments);
 		if (error != null) return error;
 
 		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
@@ -207,7 +222,7 @@ public class GameEngine {
 	 * Checks if the item is in the room and adds it to the player's inventory.
 	 */
 	private String pickupItem(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.PICKUP, arguments);
+		String error = validateCommand(Command.PICKUP, arguments);
 		if (error != null) return error;
 
 		Room playerRoom = player.getRoom();
@@ -225,7 +240,7 @@ public class GameEngine {
 	}
 
 	private String pickupAllItems(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.PICKUP_ALL, arguments);
+		String error = validateCommand(Command.PICKUP_ALL, arguments);
 		if (error != null) return error;
 
 		Room playerRoom = player.getRoom();
@@ -260,7 +275,7 @@ public class GameEngine {
 	 * Checks if the player has the item and drops it in the current room.
 	 */
 	private String dropItem(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.DROP, arguments);
+		String error = validateCommand(Command.DROP, arguments);
 		if (error != null) return error;
 
 		String itemName = arguments.get(0);
@@ -276,7 +291,7 @@ public class GameEngine {
 	}
 
 	private String dropAllItems(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.DROP_ALL, arguments);
+		String error = validateCommand(Command.DROP_ALL, arguments);
 		if (error != null) return error;
 
 		if (player.getInventory().getItems().isEmpty()) {
@@ -290,7 +305,7 @@ public class GameEngine {
 
 		while (itemIterator.hasNext()) {
 			Item item = itemIterator.next();
-			
+
 			itemIterator.remove();
 			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
 
@@ -304,8 +319,137 @@ public class GameEngine {
 		return output.toString();
 	}
 
+	private String wallet(ArrayList<String> arguments) {
+		return "You have " + player.getCoins() + " coins.\n";
+	}
+
+	private String talkToNPC(ArrayList<String> arguments) {
+		String error = validateCommand(Command.TALK_TO, arguments);
+		if (error != null) return error;
+
+		Room playerRoom = player.getRoom();
+
+		String npcName = arguments.get(0);
+		NPC npc = roomController.getNPCByName(playerRoom, npcName);
+		if (npc == null) return npcName + " is not in this room.\n";
+
+		player.setCurrentNPC(npc);
+		player.setState(PlayerState.TALKING_TO_NPC);
+
+		return npc.getGreeting() + "\n";
+	}
+
+	private String leaveNPC(ArrayList<String> arguments) {
+		String error = validateCommand(Command.LEAVE, arguments);
+		if (error != null) return error;
+
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String goodbye = npc.getGoodbye() + "\n";
+
+		player.setCurrentNPC(null);
+		player.setState(PlayerState.EXPLORING);
+
+		return goodbye;
+	}
+
+	private String searchShop(ArrayList<String> arguments) {
+		String error = validateCommand(Command.SEARCH_SHOP, arguments);
+		if (error != null) return error;
+
+		NPC npc = player.getCurrentNPC();
+
+		if (npc.getInventory().getItems().isEmpty()) return "I am not selling anything.\n";
+
+		StringBuilder output = new StringBuilder("I am selling:\n");
+
+		for (Item item : npc.getInventory().getItems().values()) {
+			output
+				.append("- ")
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append(" for ")
+				.append(item.getPrice())
+				.append(" coins.\n");
+		}
+
+		return output.toString();
+	}
+
+	private String buyItem(ArrayList<String> arguments) {
+		String error = validateCommand(Command.BUY, arguments);
+		if (error != null) return error;
+
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByName(npc.getInventory(), itemName);
+		if (item == null) return npc.getName() + " is not selling any " + itemName + "s.\n";
+
+		Integer amount = null;
+		try {
+			amount = Integer.parseInt(arguments.get(1));
+		} catch (NumberFormatException _) {
+		}
+		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
+		if (player.getCoins() < item.getPrice() * amount) {
+			return "You are too poor to buy " + amount + " x " + item.getName() + ".";
+		}
+
+		npcController.buy(npc, player, item.getId(), amount);
+
+		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + "coins.\n";
+	}
+
+	private String sellItem(ArrayList<String> arguments) {
+		String error = validateCommand(Command.SELL, arguments);
+		if (error != null) return error;
+
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		if (item == null) return "You do not have any " + itemName + " to sell.\n";
+
+		Integer amount = null;
+		try {
+			amount = Integer.parseInt(arguments.get(1));
+		} catch (NumberFormatException _) {
+		}
+		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
+		if (item.getAmount() < amount) {
+			return "You do not have " + amount + " of " + item.getName() + ".";
+		}
+
+		npcController.sell(player, item, amount);
+
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + "coins.\n";
+	}
+
+	private String sellAllItem(ArrayList<String> arguments) {
+		String error = validateCommand(Command.SELL_ALL, arguments);
+		if (error != null) return error;
+
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		if (item == null) return "You do not have any " + itemName + " to sell.\n";
+
+		Integer amount = item.getAmount();
+
+		npcController.sell(player, item, amount);
+
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + "coins.\n";
+	}
+
 	private String restart(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.RESTART, arguments);
+		String error = validateCommand(Command.RESTART, arguments);
 		if (error != null) return error;
 
 		rooms.clear();
@@ -323,7 +467,7 @@ public class GameEngine {
 	}
 
 	private String help(ArrayList<String> arguments) {
-		String error = validateCommandFormat(Command.HELP, arguments);
+		String error = validateCommand(Command.HELP, arguments);
 		if (error != null) return error;
 
 		StringBuilder output = new StringBuilder("Available commands:\n");
@@ -378,13 +522,29 @@ public class GameEngine {
 		return itemList.toString();
 	}
 
+	private String validateCommand(Command command, ArrayList<String> arguments) {
+		String error = validateCommandState(command, arguments);
+		if (error != null) return error;
+
+		error = validateCommandFormat(command, arguments);
+		return error;
+	}
+
 	/**
 	 * Validates the command format by comparing argument count to expected format.
 	 * Returns an error message if the format is invalid.
 	 */
 	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
 		if (arguments.size() != command.getArguments().size()) {
-			return "Invalid " + command.getCommand() + " command. Must be in the format:\n" + command.getFormat() + "\n";
+			return "Invalid " + command.getName() + " command. Must be in the format:\n" + command.getFormat() + "\n";
+		}
+
+		return null;
+	}
+
+	private String validateCommandState(Command command, ArrayList<String> arguments) {
+		if (!command.getAllowedPlayerStates().contains(player.getState())) {
+			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".";
 		}
 
 		return null;

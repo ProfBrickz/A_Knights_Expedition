@@ -2,38 +2,41 @@ package edu.ycp.cs320.TBAG.controller;
 
 import edu.ycp.cs320.TBAG.model.Item;
 import edu.ycp.cs320.TBAG.model.NPC;
-import edu.ycp.cs320.TBAG.model.NPCItem;
 import edu.ycp.cs320.TBAG.model.Player;
 
 public class NPCController {
-	public NPCController() {
+	private InventoryController inventoryController;
 
+	public NPCController(InventoryController inventoryController) {
+		this.inventoryController = inventoryController;
 	}
 
-	public Item buy(NPC npc, Player player, Integer npcItemId) {
-		 NPCItem npcItem = npc.getItems().get(String.valueOf(npcItemId));
-    	if (npcItem == null) {
-        	return null;
+	public Item buy(NPC npc, Player player, String npcItemId, Integer amount) {
+		Item npcItem = npc.getInventory().getItems().get(npcItemId);
+		if (npcItem == null) {
+			return null;
 		}
-		int price = (int)(npcItem.getItem().getValue() * 1.25);
-    	if (player.getCoins() < price) {
-        	return null;
-    	}
-		player.setCoins(player.getCoins() - price);
-    	player.getInventory().addItem(npcItem.getItem());
+		if (player.getCoins() < npcItem.getPrice() * amount) {
+			return null;
+		}
+		player.setCoins(player.getCoins() - npcItem.getPrice());
+		inventoryController.addItem(player.getInventory(), npcItem, amount);
 
-    	return npcItem.getItem();
+		return npcItem;
 	}
-	
 
-	public Integer sell(NPC npc, Player player, Item item) {
+	public Integer sell(Player player, Item item, Integer amount) {
 		Item playerItem = player.getInventory().getItems().get(item.getId());
-    	if (playerItem == null) {
-        	return 0;
+		if (playerItem == null) {
+			return null;
 		}
-		player.getInventory().removeItem(item.getId());
-    	player.setCoins(player.getCoins() + item.getValue());
+		if (playerItem.getAmount() < amount) {
+			return null;
+		}
 
-    	return item.getValue();
+		player.getInventory().removeItem(item.getId());
+		player.setCoins(player.getCoins() + item.getValue() * amount);
+
+		return item.getValue();
 	}
 }
