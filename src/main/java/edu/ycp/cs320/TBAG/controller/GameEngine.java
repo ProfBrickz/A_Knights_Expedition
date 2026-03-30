@@ -320,7 +320,10 @@ public class GameEngine {
 	}
 
 	private String wallet(ArrayList<String> arguments) {
-		return "You have " + player.getCoins() + " coins.\n";
+		String output = "You have " + player.getCoins() + " coin";
+		if (player.getCoins() != 1) output += "s";
+
+		return output += ".\n";
 	}
 
 	private String talkToNPC(ArrayList<String> arguments) {
@@ -371,8 +374,8 @@ public class GameEngine {
 				.append(" x ")
 				.append(item.getName())
 				.append(" for ")
-				.append(item.getPrice())
-				.append(" coins.\n");
+				.append(item.getPrice() * item.getAmount())
+				.append(" coins\n");
 		}
 
 		return output.toString();
@@ -387,7 +390,7 @@ public class GameEngine {
 
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByName(npc.getInventory(), itemName);
-		if (item == null) return npc.getName() + " is not selling any " + itemName + "s.\n";
+		if (item == null) return "I am not selling any " + itemName + "s.\n";
 
 		Integer amount = null;
 		try {
@@ -396,12 +399,12 @@ public class GameEngine {
 		}
 		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
 		if (player.getCoins() < item.getPrice() * amount) {
-			return "You are too poor to buy " + amount + " x " + item.getName() + ".";
+			return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
 		}
 
 		npcController.buy(npc, player, item.getId(), amount);
 
-		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + "coins.\n";
+		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
 	}
 
 	private String sellItem(ArrayList<String> arguments) {
@@ -422,12 +425,12 @@ public class GameEngine {
 		}
 		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
 		if (item.getAmount() < amount) {
-			return "You do not have " + amount + " of " + item.getName() + ".";
+			return "You do not have " + amount + " of " + item.getName() + ".\n";
 		}
 
 		npcController.sell(player, item, amount);
 
-		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + "coins.\n";
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
 
 	private String sellAllItem(ArrayList<String> arguments) {
@@ -445,7 +448,7 @@ public class GameEngine {
 
 		npcController.sell(player, item, amount);
 
-		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + "coins.\n";
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
 
 	private String restart(ArrayList<String> arguments) {
