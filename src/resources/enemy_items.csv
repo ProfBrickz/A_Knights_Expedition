@@ -1,0 +1,3 @@
+sep=|
+enemy_id|item_id|amount
+String|item_id|amount

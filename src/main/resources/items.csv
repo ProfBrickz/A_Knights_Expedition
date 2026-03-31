@@ -1,2 +1,0 @@
-id|name|description|type|heal_amount|defense|active|sell_value
-String|String|String|healing or weapon or armor or unlock|Integer|defense|Boolean (false or true)|Integer

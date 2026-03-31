@@ -1,0 +1,3 @@
+sep=|
+container_id|item_id|amount
+String|String|Integer

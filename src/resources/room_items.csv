@@ -1,0 +1,3 @@
+sep=|
+room_id|item_id|amount
+String|String|Integer

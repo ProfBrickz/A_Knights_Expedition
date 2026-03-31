@@ -1,2 +1,3 @@
+sep=|
 id|damage|attack_description
 String|Integer|String

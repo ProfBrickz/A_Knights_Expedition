@@ -1,0 +1,3 @@
+sep=|
+id|name|description|value|type|heal_amount|defense|active_armor
+String|String|String|Integer|item or healing or weapon or armor or unlock|Integer|Integer|Boolean (false or true)
