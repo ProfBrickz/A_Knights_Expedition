@@ -657,10 +657,15 @@ public class GameEngineTest {
 
 	@Nested
 	class TalkToTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get("0");
+		}
+
 		@Test
 		public void defaultGreeting() {
-			NPC npc = player.getRoom().getNpcs().get("0");
-
 			arguments.add("name");
 			Assertions.assertEquals(
 				"Hello adventurer, I am name.\n\n",
@@ -675,7 +680,6 @@ public class GameEngineTest {
 
 		@Test
 		public void customGreeting() {
-			NPC npc = player.getRoom().getNpcs().get("0");
 			npc.setGreeting("Hi");
 
 			arguments.add("name");
@@ -738,6 +742,189 @@ public class GameEngineTest {
 			Assertions.assertNull(player.getCurrentNPC());
 		}
 	}
+
+	@Nested
+	class SearchShopTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get("0");
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void oneItem() {
+			npc.getInventory().addItem(new Item("0", "a", "", 1));
+
+			Assertions.assertEquals(
+				"I am selling:\n"
+					+ "- 1 x a for 4 coins\n\n",
+				gameEngine.inputCommand("search-shop", arguments)
+			);
+		}
+
+		@Test
+		public void multipleItems() {
+			npc.getInventory().addItem(new Item("0", "a", "", 1, 2));
+			npc.getInventory().addItem(new Item("1", "b", "", 7));
+
+			Assertions.assertEquals(
+				"I am selling:\n"
+					+ "- 2 x a for 8 coins\n"
+					+ "- 1 x b for 28 coins\n\n",
+				gameEngine.inputCommand("search-shop", arguments)
+			);
+		}
+
+		@Test
+		public void empty() {
+			Assertions.assertEquals(
+				"I am not selling anything.\n\n",
+				gameEngine.inputCommand("search-shop", arguments)
+			);
+		}
+	}
+
+	@Nested
+	class buyItemTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get("0");
+			npc.getInventory().addItem(new Item("0", "a", "", 3));
+			npc.getInventory().addItem(new Item("1", "b", "", 2, 2));
+			player.setCoins(100);
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void oneItem() {
+			arguments.add("a");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"You bought 1 x a, -12 coins.\n\n",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 12,
+				player.getCoins()
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				1,
+				player.getInventory().getItems().get("0").getAmount()
+			);
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				1,
+				npc.getInventory().getItems().get("0").getAmount()
+			);
+		}
+
+		@Test
+		public void oneItemMultipleTimes() {
+			arguments.add("a");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"You bought 1 x a, -12 coins.\n\n",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 12,
+				player.getCoins()
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				1,
+				player.getInventory().getItems().get("0").getAmount()
+			);
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				1,
+				npc.getInventory().getItems().get("0").getAmount()
+			);
+
+			Assertions.assertEquals(
+				"You bought 1 x a, -12 coins.\n\n",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 24,
+				player.getCoins()
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				2,
+				player.getInventory().getItems().get("0").getAmount()
+			);
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				1,
+				npc.getInventory().getItems().get("0").getAmount()
+			);
+		}
+
+		@Test
+		public void multipleItems() {
+			arguments.add("b");
+			arguments.add("2");
+
+			Assertions.assertEquals(
+				"You bought 2 x b, -16 coins.\n\n",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 16,
+				player.getCoins()
+			);
+		}
+
+		@Test
+		public void notEnoughCoins() {
+			player.setCoins(100);
+
+			arguments.add("a");
+			arguments.add("10");
+
+			Assertions.assertEquals(
+				"You are too poor to buy 10 x a.\n\n",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100,
+				player.getCoins()
+			);
+		}
+
+		@Test
+		public void notSelling() {
+			arguments.add("abc");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"I am not selling any abcs.\n\n",
+				gameEngine.inputCommand("buy", arguments)
+			);
+		}
+	}
+
 
 	// Unsure how to make restart able to work with any starting data.
 	@Test

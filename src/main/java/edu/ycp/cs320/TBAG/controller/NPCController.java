@@ -16,10 +16,11 @@ public class NPCController {
 		if (npcItem == null) {
 			return null;
 		}
-		if (player.getCoins() < npcItem.getPrice() * amount) {
+		Integer totalCost = npcItem.getPrice() * amount;
+		if (player.getCoins() < totalCost) {
 			return null;
 		}
-		player.setCoins(player.getCoins() - npcItem.getPrice());
+		player.setCoins(player.getCoins() - totalCost);
 		inventoryController.addItem(player.getInventory(), npcItem, amount);
 
 		return npcItem;
