@@ -45,51 +45,6 @@ public class GameEngine {
 	}
 
 
-	// Getters
-
-	/**
-	 * Returns the player object.
-	 */
-	public Player getPlayer() {
-		return player;
-	}
-
-	/**
-	 * Returns the map of rooms.
-	 */
-	public HashMap<String, Room> getRooms() {
-		return rooms;
-	}
-
-	/**
-	 * Returns the player controller, for testing.
-	 */
-	public PlayerController getPlayerController() {
-		return playerController;
-	}
-
-	/**
-	 * Returns the room controller, for testing.
-	 */
-	public RoomController getRoomController() {
-		return roomController;
-	}
-
-	/**
-	 * Returns the battle entity controller, for testing.
-	 */
-	public BattleEntityController getBattleEntityController() {
-		return battleEntityController;
-	}
-
-	/**
-	 * Returns the inventory controller, for testing.
-	 */
-	public InventoryController getInventoryController() {
-		return inventoryController;
-	}
-
-
 	// Input command
 
 	/**
