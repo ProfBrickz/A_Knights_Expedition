@@ -925,6 +925,176 @@ public class GameEngineTest {
 		}
 	}
 
+	@Nested
+	class SellItemTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get("0");
+			player.setCoins(100);
+			player.getInventory().addItem(new Item("0", "a", "", 3));
+			player.getInventory().addItem(new Item("1", "b", "", 2, 2));
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void oneItem() {
+			arguments.add("a");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"You sold 1 x a, +3 coins.\n\n",
+				gameEngine.inputCommand("sell", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 + 3,
+				player.getCoins()
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey("0"));
+		}
+
+		@Test
+		public void oneItemMultipleTimes() {
+			player.getInventory().getItems().get("0").setAmount(2);
+
+			arguments.add("a");
+			arguments.add("1");
+
+			// Sell 1
+			Assertions.assertEquals(
+				"You sold 1 x a, +3 coins.\n\n",
+				gameEngine.inputCommand("sell", arguments)
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				1,
+				player.getInventory().getItems().get("0").getAmount()
+			);
+
+			// Sell 2
+			Assertions.assertEquals(
+				"You sold 1 x a, +3 coins.\n\n",
+				gameEngine.inputCommand("sell", arguments)
+			);
+			Assertions.assertEquals(
+				100 + 6,
+				player.getCoins()
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey("0"));
+		}
+
+		@Test
+		public void multipleItems() {
+			arguments.add("b");
+			arguments.add("2");
+
+			Assertions.assertEquals(
+				"You sold 2 x b, +4 coins.\n\n",
+				gameEngine.inputCommand("sell", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 + 4,
+				player.getCoins()
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey("1"));
+		}
+
+		@Test
+		public void notEnoughItems() {
+			arguments.add("a");
+			arguments.add("5");
+
+			Assertions.assertEquals(
+				"You do not have 5 of a.\n\n",
+				gameEngine.inputCommand("sell", arguments)
+			);
+
+			Assertions.assertEquals(
+				100,
+				player.getCoins()
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertEquals(
+				1,
+				player.getInventory().getItems().get("0").getAmount()
+			);
+		}
+
+		@Test
+		public void notHaveItem() {
+			arguments.add("abc");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"You do not have any abc to sell.\n\n",
+				gameEngine.inputCommand("sell", arguments)
+			);
+		}
+	}
+
+	@Nested
+	class SellAllItemTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get("0");
+			player.setCoins(100);
+			player.getInventory().addItem(new Item("0", "a", "", 3));
+			player.getInventory().addItem(new Item("1", "b", "", 2, 2));
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void valid() {
+			arguments.add("a");
+			Assertions.assertEquals(
+				"You sold 1 x a, +3 coins.\n\n",
+				gameEngine.inputCommand("sell-all", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 + 3,
+				player.getCoins()
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey("0"));
+
+
+			arguments.clear();
+			arguments.add("b");
+			Assertions.assertEquals(
+				"You sold 2 x b, +4 coins.\n\n",
+				gameEngine.inputCommand("sell-all", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 + 3 + 4,
+				player.getCoins()
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey("1"));
+		}
+
+		@Test
+		public void notHaveItem() {
+			arguments.add("abc");
+
+			Assertions.assertEquals(
+				"You do not have any abc to sell.\n\n",
+				gameEngine.inputCommand("sell-all", arguments)
+			);
+		}
+	}
 
 	// Unsure how to make restart able to work with any starting data.
 	@Test
@@ -1003,6 +1173,20 @@ public class GameEngineTest {
 			gameEngine.inputCommand("move", arguments).startsWith(
 				"Invalid move command. Must be in the format:\n\"move <Direction>\"\n"
 			)
+		);
+	}
+
+	@Test
+	public void testDisallowedPlayerState() {
+		Assertions.assertEquals(
+			"You are not allowed to use sell while " + player.getState().getName() + ".\n\n",
+			gameEngine.inputCommand("sell", arguments)
+		);
+
+		player.setState(PlayerState.TALKING_TO_NPC);
+		Assertions.assertEquals(
+			"You are not allowed to use move while " + player.getState().getName() + ".\n\n",
+			gameEngine.inputCommand("move", arguments)
 		);
 	}
 

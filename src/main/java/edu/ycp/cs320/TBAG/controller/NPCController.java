@@ -35,8 +35,8 @@ public class NPCController {
 			return null;
 		}
 
-		player.getInventory().removeItem(item.getId());
 		player.setCoins(player.getCoins() + item.getValue() * amount);
+		inventoryController.removeItem(player.getInventory(), playerItem.getId(), amount);
 
 		return item.getValue();
 	}
