@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 
 public interface Database {
+	public void loadInitialData();
+
 	// Player-related methods
 	public Player getPlayer();
 
@@ -27,8 +29,12 @@ public interface Database {
 
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room);
 
+	public void addItemToRoom(Room room, Item item);
 
-	// Item-related methods
+	public void removeItemFromRoom(Room room, Item item);
+
+
+	// Item-related methods, all will use getItemsFromResultSet after the query
 	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet);
 
 	public HashMap<Integer, Item> getItemsForPlayer();
@@ -47,17 +53,11 @@ public interface Database {
 	// Enemy-related methods
 	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room);
 
-
-	// WeaponAbility-related methods
-	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon);
-
-
-	// Item management in rooms and enemies
-	public void addItemToRoom(Room room, Item item);
-
-	public void removeItemFromRoom(Room room, Item item);
-
 	public void addItemToEnemy(Enemy enemy, Item item);
 
 	public void removeItemFromEnemy(Enemy enemy, Item item);
+
+	
+	// WeaponAbility-related methods
+	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon);
 }
