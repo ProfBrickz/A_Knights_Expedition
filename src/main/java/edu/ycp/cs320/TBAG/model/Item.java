@@ -6,20 +6,25 @@ public class Item {
 	private Integer value, amount;
 	private String assetName;
 
-	public Item(Integer id, String name, String description, Integer value, Integer amount) {
-		this.id = id;
+	public Item(Integer id, String name, String description, Integer value, Integer amount, String assetName) {
+		this.id=id;
 		this.name = name;
 		this.description = description;
 		this.value = value;
 		this.amount = amount;
+
+		this.assetName=assetName;
+		if (this.assetName.isEmpty()) {
+			this.assetName = "fixIt.png";
+		}
+	}
+
+	public Item(Integer id, String name, String description, Integer value, Integer amount) {
+		this(id, name,description,value,amount,null);
 	}
 
 	public Item(Integer id, String name, String description, Integer value) {
-		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.value = value;
-		this.amount = 1;
+		this(id,name,description,value,1);
 	}
 
 	public Integer getId() {

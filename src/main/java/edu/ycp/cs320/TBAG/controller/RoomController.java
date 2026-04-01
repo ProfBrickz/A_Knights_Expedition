@@ -57,11 +57,6 @@ public class RoomController {
 		Room top = new Room(3, "Mountains", "You find yourself looking up at a towering mountain");
 		Room right = new Room(4, "Jungle", "You stumble into a densely packed grove of trees");
 		Room backrooms = new Room(5, "Backrooms", "Placeholder location: we will replace this once the other locations are ready.");
-		backrooms.setAssetName("Backrooms.gif");
-		center.setAssetName("Backrooms.gif");
-		left.setAssetName("Backrooms.gif");
-		top.setAssetName("Backrooms.gif");
-		right.setAssetName("Backrooms.gif");
 
 		start.setConnection(center, "NORTH");
 		start.setConnection(backrooms, "DOWN");
