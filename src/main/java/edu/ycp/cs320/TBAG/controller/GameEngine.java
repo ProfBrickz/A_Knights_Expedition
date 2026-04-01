@@ -1,10 +1,17 @@
 package edu.ycp.cs320.TBAG.controller;
 
-import edu.ycp.cs320.TBAG.model.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import edu.ycp.cs320.TBAG.model.Inventory;
+import edu.ycp.cs320.TBAG.model.Item;
+import edu.ycp.cs320.TBAG.model.ItemCatalog;
+import edu.ycp.cs320.TBAG.model.NPC;
+import edu.ycp.cs320.TBAG.model.Player;
+import edu.ycp.cs320.TBAG.model.PlayerState;
+import edu.ycp.cs320.TBAG.model.Room;
+
 
 /**
  * Controller for the TBAG game.
@@ -353,7 +360,7 @@ public class GameEngine {
 		Integer amount = null;
 		try {
 			amount = Integer.parseInt(arguments.get(1));
-		} catch (NumberFormatException _) {
+		} catch (NumberFormatException exception) {
 		}
 		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
 		if (player.getCoins() < item.getPrice() * amount) {
@@ -379,7 +386,7 @@ public class GameEngine {
 		Integer amount = null;
 		try {
 			amount = Integer.parseInt(arguments.get(1));
-		} catch (NumberFormatException _) {
+		} catch (NumberFormatException exception) {
 		}
 		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
 		if (item.getAmount() < amount) {
