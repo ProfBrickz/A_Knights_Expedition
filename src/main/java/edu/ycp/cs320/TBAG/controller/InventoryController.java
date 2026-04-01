@@ -66,10 +66,11 @@ public class InventoryController {
 	/**
 	 * removes item in inventory if amount == 1, decrements amount if amount > 1
 	 */
-	public void removeItem(Inventory inventory, Integer id, Integer amount) {
-		if (inventory == null || id == null) {
+	public void removeItem(Inventory inventory, Item item, Integer amount) {
+		if (inventory == null || item == null) {
 			return;
 		}
+		Integer id = item.getId();
 
 		if (amount == null || amount <= 0) {
 			return;
@@ -95,8 +96,8 @@ public class InventoryController {
 	/**
 	 * removes one of an item from the inventory
 	 */
-	public void removeItem(Inventory inventory, Integer id) {
-		removeItem(inventory, id, 1);
+	public void removeItem(Inventory inventory, Item item) {
+		removeItem(inventory, item, 1);
 	}
 
 	public HashMap<Integer, HealingItem> getHealingItems(Inventory inventory) {

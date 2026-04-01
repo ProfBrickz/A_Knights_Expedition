@@ -54,7 +54,7 @@ public class GameEngine {
 	public String inputCommand(String command, ArrayList<String> arguments) {
 		command = command.trim().toLowerCase();
 
-		String output = "";
+		String output;
 
 		if (command.equals(Command.MOVE.getName())) {
 			output = move(arguments);
@@ -186,7 +186,7 @@ public class GameEngine {
 		Item item = inventoryController.getItemByName(playerRoom.getInventory(), itemName);
 		if (item == null) return "This room does not have a " + itemName + ".\n";
 
-		inventoryController.removeItem(playerRoom.getInventory(), item.getId(), item.getAmount());
+		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
 		inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
 		return "You picked up "
@@ -237,7 +237,7 @@ public class GameEngine {
 		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
 		if (item == null) return "You do not have a " + itemName + ".\n";
 
-		inventoryController.removeItem(player.getInventory(), item.getId(), item.getAmount());
+		inventoryController.removeItem(player.getInventory(), item, item.getAmount());
 		inventoryController.addItem(player.getRoom().getInventory(), item, item.getAmount());
 
 		return "You dropped "
@@ -275,10 +275,13 @@ public class GameEngine {
 	}
 
 	private String wallet(ArrayList<String> arguments) {
+		String error = validateCommand(Command.TALK_TO, arguments);
+		if (error != null) return error;
+
 		String output = "You have " + player.getCoins() + " coin";
 		if (player.getCoins() != 1) output += "s";
 
-		return output += ".\n";
+		return output + ".\n";
 	}
 
 	private String talkToNPC(ArrayList<String> arguments) {
@@ -357,7 +360,7 @@ public class GameEngine {
 			return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
 		}
 
-		npcController.buy(npc, player, item.getId(), amount);
+		npcController.buy(npc, player, item, amount);
 
 		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
 	}
@@ -482,7 +485,7 @@ public class GameEngine {
 	}
 
 	private String validateCommand(Command command, ArrayList<String> arguments) {
-		String error = validateCommandState(command, arguments);
+		String error = validateCommandState(command);
 		if (error != null) return error;
 
 		error = validateCommandFormat(command, arguments);
@@ -501,7 +504,7 @@ public class GameEngine {
 		return null;
 	}
 
-	private String validateCommandState(Command command, ArrayList<String> arguments) {
+	private String validateCommandState(Command command) {
 		if (!command.getAllowedPlayerStates().contains(player.getState())) {
 			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".\n";
 		}

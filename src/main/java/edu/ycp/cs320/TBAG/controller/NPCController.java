@@ -11,8 +11,8 @@ public class NPCController {
 		this.inventoryController = inventoryController;
 	}
 
-	public Item buy(NPC npc, Player player, Integer npcItemId, Integer amount) {
-		Item npcItem = npc.getInventory().getItems().get(npcItemId);
+	public Item buy(NPC npc, Player player, Item item, Integer amount) {
+		Item npcItem = npc.getInventory().getItems().get(item.getId());
 		if (npcItem == null) {
 			return null;
 		}
@@ -36,7 +36,7 @@ public class NPCController {
 		}
 
 		player.setCoins(player.getCoins() + item.getValue() * amount);
-		inventoryController.removeItem(player.getInventory(), playerItem.getId(), amount);
+		inventoryController.removeItem(player.getInventory(), playerItem, amount);
 
 		return item.getValue();
 	}

@@ -57,7 +57,7 @@ public class GameEngineTest {
 		@Test
 		public void noMatchingRoom() {
 			player = new Player(100, 100);
-			rooms = new HashMap<Integer, Room>();
+			rooms = new HashMap<>();
 			Room roomA = new Room(1, "a", "description a");
 			rooms.put(roomA.getID(), roomA);
 			Assertions.assertNull(player.getRoom());

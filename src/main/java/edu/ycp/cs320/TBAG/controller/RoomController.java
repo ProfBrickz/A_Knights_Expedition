@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 public class RoomController {
 	//HashMap :: room ID : Room
-	private HashMap<Integer, Room> roomList = new HashMap<>();
+	private final HashMap<Integer, Room> roomList;
 
 
 	public RoomController(HashMap<Integer, Room> roomList) {
@@ -84,8 +84,6 @@ public class RoomController {
 
 		right.setConnection(center, "WEST");
 		backrooms.setConnection(start, "UP");
-
-		HashMap<Integer, Room> map = new HashMap<>();
 
 		roomList.put(start.getID(), start);
 		roomList.put(center.getID(), center);

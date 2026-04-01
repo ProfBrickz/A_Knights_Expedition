@@ -145,7 +145,7 @@ public enum Command {
 	private final List<PlayerState> allowedPlayerStates;
 	private final List<String> examples;
 
-	private Command(String name, String description, List<String> arguments, List<PlayerState> allowedPlayerStates, List<String> examples) {
+	Command(String name, String description, List<String> arguments, List<PlayerState> allowedPlayerStates, List<String> examples) {
 		this.name = name;
 		this.description = description;
 		this.arguments = arguments;

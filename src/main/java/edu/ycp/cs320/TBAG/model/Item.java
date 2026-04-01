@@ -46,6 +46,10 @@ public class Item {
 		return value;
 	}
 
+	public void setValue(Integer value) {
+		this.value = value;
+	}
+
 	public Integer getPrice() {
 		return value * 4;
 	}

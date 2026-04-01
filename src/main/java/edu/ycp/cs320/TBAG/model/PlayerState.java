@@ -7,7 +7,7 @@ public enum PlayerState {
 
 	private final String name;
 
-	private PlayerState(String name) {
+	PlayerState(String name) {
 		this.name = name;
 	}
 

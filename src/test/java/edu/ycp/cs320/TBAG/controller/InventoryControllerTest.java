@@ -53,10 +53,10 @@ public class InventoryControllerTest {
 		Item potion = new Item(0, "Potion", "Heals 10 HP", 5, 3);
 		controller.addItem(inventory, potion, 3);
 
-		controller.removeItem(inventory, 0, 1);
+		controller.removeItem(inventory, potion, 1);
 		Assertions.assertEquals(2, inventory.getItems().get(0).getAmount());
 
-		controller.removeItem(inventory, 0, 2);
+		controller.removeItem(inventory, potion, 2);
 		Assertions.assertFalse(inventory.getItems().containsKey(0));
 	}
 
@@ -66,8 +66,8 @@ public class InventoryControllerTest {
 		controller.addItem(inventory, potion, 1);
 
 		controller.removeItem(inventory, null, 1);
-		controller.removeItem(inventory, 0, 0);
-		controller.removeItem(inventory, 1, 1);
+		controller.removeItem(inventory, potion, 0);
+		controller.removeItem(inventory, potion, 1);
 
 		Assertions.assertEquals(1, inventory.getItems().size());
 	}
