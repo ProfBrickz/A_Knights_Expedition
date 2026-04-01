@@ -4,15 +4,11 @@ import edu.ycp.cs320.TBAG.model.*;
 
 public class PlayerController {
 	private final BattleEntityController battleEntityController;
-	private Player player;
+	private final Player player;
 
 	public PlayerController(Player player, BattleEntityController battleEntityController) {
 		this.player = player;
-		if (battleEntityController == null) {
-			this.battleEntityController = new BattleEntityController();
-		} else {
-			this.battleEntityController = battleEntityController;
-		}
+		this.battleEntityController = battleEntityController;
 	}
 
 	public Boolean move(String direction) {

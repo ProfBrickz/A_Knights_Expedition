@@ -3,10 +3,10 @@ package edu.ycp.cs320.TBAG.model;
 import java.util.HashMap;
 
 public class Weapon extends Item {
-	private final HashMap<String, WeaponAbility> abilities = new HashMap<>();
+	private final HashMap<Integer, WeaponAbility> abilities = new HashMap<>();
 
 	public Weapon(
-		String id,
+		Integer id,
 		String name,
 		String description,
 		Integer value,
@@ -16,7 +16,7 @@ public class Weapon extends Item {
 	}
 
 	public Weapon(
-		String id,
+		Integer id,
 		String name,
 		String description,
 		Integer value
@@ -24,7 +24,7 @@ public class Weapon extends Item {
 		super(id, name, description, value);
 	}
 
-	public HashMap<String, WeaponAbility> getAbilities() {
+	public HashMap<Integer, WeaponAbility> getAbilities() {
 		return abilities;
 	}
 

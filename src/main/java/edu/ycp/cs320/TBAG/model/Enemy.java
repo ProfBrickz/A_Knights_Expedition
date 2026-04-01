@@ -1,17 +1,17 @@
 package edu.ycp.cs320.TBAG.model;
 
 public class Enemy extends BattleEntity {
-	private final String id;
+	private final Integer id;
 	private String name;
 
-	public Enemy(String id, String name, Integer maxHealth, Integer health) {
+	public Enemy(Integer id, String name, Integer maxHealth, Integer health) {
 		super(maxHealth, health);
 
 		this.id = id;
 		this.name = name;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 

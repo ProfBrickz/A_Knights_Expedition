@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Player extends BattleEntity {
 	private Room room;
-	private ArrayList<Armor> armor;
+	private final ArrayList<Armor> armor;
 	private PlayerState playerState;
 	private final Inventory inventory = new Inventory();
 	private Integer coins;
@@ -54,11 +54,11 @@ public class Player extends BattleEntity {
 		playerState = newState;
 	}
 
-	public Integer getCoins(){
+	public Integer getCoins() {
 		return coins;
 	}
 
-	public void setCoins(Integer newCoins){
+	public void setCoins(Integer newCoins) {
 		coins = newCoins;
 	}
 

@@ -1,10 +1,14 @@
 package edu.ycp.cs320.TBAG.controller;
 
-import edu.ycp.cs320.TBAG.model.*;
+import edu.ycp.cs320.TBAG.model.Armor;
+import edu.ycp.cs320.TBAG.model.BattleEntity;
+import edu.ycp.cs320.TBAG.model.HealingItem;
+import edu.ycp.cs320.TBAG.model.WeaponAbility;
 
 public class BattleEntityController {
 
-	public BattleEntityController() {}
+	public BattleEntityController() {
+	}
 
 	// ATTACK
 	public void attack(BattleEntity attacker, BattleEntity target, WeaponAbility ability) {
@@ -14,11 +18,7 @@ public class BattleEntityController {
 
 		int damage = ability.getDamage();
 
-		int defense = 0;
-		if (target instanceof BattleEntity) {
-			defense = ((BattleEntity) target).getTemporaryDefense()
-				+ ((BattleEntity) target).getDefense();
-		}
+		int defense = target.getTemporaryDefense() + target.getDefense();
 
 		int finalDamage = damage - defense;
 		if (finalDamage < 0) {

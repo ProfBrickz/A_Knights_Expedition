@@ -11,21 +11,21 @@ import java.util.HashMap;
 
 public class GameEngineTest {
 	private Player player;
-	private HashMap<String, Room> rooms;
+	private HashMap<Integer, Room> rooms;
 	private GameEngine gameEngine;
 	private ArrayList<String> arguments;
 
 	@BeforeEach
 	public void setUp() {
 		player = new Player(100, 100);
-		rooms = new HashMap<String, Room>();
-		Room roomA = new Room("0", "a", "description a");
-		Room roomB = new Room("1", "b", "description b");
+		rooms = new HashMap<>();
+		Room roomA = new Room(0, "a", "description a");
+		Room roomB = new Room(1, "b", "description b");
 
 		roomA.setConnection(roomB, "north");
 		roomB.setConnection(roomA, "south");
 
-		NPC npc = new NPC("0", "name");
+		NPC npc = new NPC(0, "name");
 		roomA.addNPC(npc);
 
 		rooms.put(roomA.getID(), roomA);
@@ -49,7 +49,7 @@ public class GameEngineTest {
 		public void valid() {
 			Room playerRoom = player.getRoom();
 
-			Assertions.assertEquals("0", playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getID());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -57,8 +57,8 @@ public class GameEngineTest {
 		@Test
 		public void noMatchingRoom() {
 			player = new Player(100, 100);
-			rooms = new HashMap<String, Room>();
-			Room roomA = new Room("1", "a", "description a");
+			rooms = new HashMap<Integer, Room>();
+			Room roomA = new Room(1, "a", "description a");
 			rooms.put(roomA.getID(), roomA);
 			Assertions.assertNull(player.getRoom());
 		}
@@ -71,7 +71,7 @@ public class GameEngineTest {
 			arguments.add("north");
 			Assertions.assertEquals("description b\n\n", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = player.getRoom();
-			Assertions.assertEquals("1", playerRoom.getID());
+			Assertions.assertEquals(1, playerRoom.getID());
 			Assertions.assertEquals("b", playerRoom.getName());
 			Assertions.assertEquals("description b", playerRoom.getDescription());
 
@@ -79,7 +79,7 @@ public class GameEngineTest {
 			arguments.add("south");
 			Assertions.assertEquals("description a\n\n", gameEngine.inputCommand("move", arguments));
 			playerRoom = player.getRoom();
-			Assertions.assertEquals("0", playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getID());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -89,7 +89,7 @@ public class GameEngineTest {
 			arguments.add("left");
 			Assertions.assertEquals("Invalid direction for this room\n\n", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = player.getRoom();
-			Assertions.assertEquals("0", playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getID());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -99,7 +99,7 @@ public class GameEngineTest {
 			arguments.add("");
 			Assertions.assertEquals("Invalid direction for this room\n\n", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = player.getRoom();
-			Assertions.assertEquals("0", playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getID());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -109,7 +109,7 @@ public class GameEngineTest {
 			arguments.add(" ");
 			Assertions.assertEquals("Invalid direction for this room\n\n", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = player.getRoom();
-			Assertions.assertEquals("0", playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getID());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -117,17 +117,17 @@ public class GameEngineTest {
 		@Test
 		public void nullRoomConnection() {
 			rooms.clear();
-			Room roomA = new Room("0", "a", "description a");
+			Room roomA = new Room(0, "a", "description a");
 			Room roomB = null;
 			roomA.getRoomConnections().put("north", new RoomConnection(roomB));
-			rooms.put("0", roomA);
-			rooms.put("1", roomB);
+			rooms.put(0, roomA);
+			rooms.put(1, roomB);
 			player.setRoom(roomA);
 
 			arguments.add("north");
 			Assertions.assertEquals("Move failed, either player, or the room does not exist\n\n", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = player.getRoom();
-			Assertions.assertEquals("0", playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getID());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -176,36 +176,45 @@ public class GameEngineTest {
 		@Test
 		public void empty() {
 			Assertions.assertEquals(
-				"Your Inventory:\n"
-					+ "Empty\n\n",
+				"""
+					Your Inventory:
+					Empty
+					
+					""",
 				gameEngine.inputCommand("inventory", arguments)
 			);
 		}
 
 		@Test
 		public void singleItem() {
-			Item item = new Item("0", "sword", "A sharp sword", 1, 1);
+			Item item = new Item(0, "sword", "A sharp sword", 1, 1);
 			player.getInventory().addItem(item);
 
 			Assertions.assertEquals(
-				"Your Inventory:\n"
-					+ "- 1 x sword\n\n",
+				"""
+					Your Inventory:
+					- 1 x sword
+					
+					""",
 				gameEngine.inputCommand("inventory", arguments)
 			);
 		}
 
 		@Test
 		public void multipleItems() {
-			Item item1 = new Item("0", "sword", "A sharp sword", 1, 1);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1, 1);
 			player.getInventory().addItem(item1);
 
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 			player.getInventory().addItem(item2);
 
 			Assertions.assertEquals(
-				"Your Inventory:\n"
-					+ "- 1 x sword\n"
-					+ "- 3 x potions\n\n",
+				"""
+					Your Inventory:
+					- 1 x sword
+					- 3 x potions
+					
+					""",
 				gameEngine.inputCommand("inventory", arguments)
 			);
 		}
@@ -215,7 +224,7 @@ public class GameEngineTest {
 	class InspectItemTests {
 		@Test
 		public void valid() {
-			Item item = new Item("0", "sword", "A sharp sword", 1);
+			Item item = new Item(0, "sword", "A sharp sword", 1);
 			player.getInventory().addItem(item);
 
 			arguments.add("sword");
@@ -236,7 +245,7 @@ public class GameEngineTest {
 
 		@Test
 		public void emptyName() {
-			Item item = new Item("0", "", "A sharp sword", 1);
+			Item item = new Item(0, "", "A sharp sword", 1);
 			player.getInventory().addItem(item);
 
 			arguments.add("");
@@ -248,7 +257,7 @@ public class GameEngineTest {
 
 		@Test
 		public void whiteSpaceInName() {
-			Item item = new Item("0", "sharp sword", "A sharp sword", 1);
+			Item item = new Item(0, "sharp sword", "A sharp sword", 1);
 			player.getInventory().addItem(item);
 
 			arguments.add("sharp sword");
@@ -264,36 +273,45 @@ public class GameEngineTest {
 		@Test
 		public void emptyRoom() {
 			Assertions.assertEquals(
-				"You found:\n"
-					+ "Nothing!\n\n",
+				"""
+					You found:
+					Nothing!
+					
+					""",
 				gameEngine.inputCommand("search", arguments)
 			);
 		}
 
 		@Test
 		public void oneItem() {
-			Item item = new Item("0", "sword", "A sharp sword", 1);
+			Item item = new Item(0, "sword", "A sharp sword", 1);
 			player.getRoom().getInventory().addItem(item);
 
 			Assertions.assertEquals(
-				"You found:\n"
-					+ "- 1 x sword\n\n",
+				"""
+					You found:
+					- 1 x sword
+					
+					""",
 				gameEngine.inputCommand("search", arguments)
 			);
 		}
 
 		@Test
 		public void multipleItems() {
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
 			player.getRoom().getInventory().addItem(item1);
 
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 			player.getRoom().getInventory().addItem(item2);
 
 			Assertions.assertEquals(
-				"You found:\n"
-					+ "- 1 x sword\n"
-					+ "- 3 x potions\n\n",
+				"""
+					You found:
+					- 1 x sword
+					- 3 x potions
+					
+					""",
 				gameEngine.inputCommand("search", arguments)
 			);
 		}
@@ -314,7 +332,7 @@ public class GameEngineTest {
 		public void valid() {
 			Room playerRoom = player.getRoom();
 
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
 			playerRoom.getInventory().addItem(item1);
 
 			arguments.add("sword");
@@ -330,10 +348,10 @@ public class GameEngineTest {
 		public void multipleItems() {
 			Room playerRoom = player.getRoom();
 
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
 			playerRoom.getInventory().addItem(item1);
 
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 			playerRoom.getInventory().addItem(item2);
 
 			arguments.add("potion");
@@ -358,8 +376,8 @@ public class GameEngineTest {
 		public void alreadyHasItem() {
 			Room playerRoom = player.getRoom();
 
-			Item item = new Item("0", "sword", "A sharp sword", 1);
-			playerRoom.getInventory().addItem(new Item("0", "sword", "A sharp sword", 1));
+			Item item = new Item(0, "sword", "A sharp sword", 1);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
 			player.getInventory().addItem(item);
 
 			arguments.add("sword");
@@ -379,8 +397,8 @@ public class GameEngineTest {
 		public void alreadyHasDifferentDescription() {
 			Room playerRoom = player.getRoom();
 
-			Item item = new Item("0", "sword", "A sword", 1);
-			playerRoom.getInventory().addItem(new Item("0", "sword", "A sword sword", 1));
+			Item item = new Item(0, "sword", "A sword", 1);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sword sword", 1));
 			player.getInventory().addItem(item);
 
 			arguments.add("sword");
@@ -390,7 +408,7 @@ public class GameEngineTest {
 			);
 			Assertions.assertEquals(
 				"A sword",
-				player.getInventory().getItems().get("0").getDescription()
+				player.getInventory().getItems().get(0).getDescription()
 			);
 		}
 
@@ -398,8 +416,8 @@ public class GameEngineTest {
 		public void alreadyHasIntegerLimit() {
 			Room playerRoom = player.getRoom();
 
-			Item item = new Item("0", "sword", "A sharp sword", 1, Integer.MAX_VALUE);
-			playerRoom.getInventory().addItem(new Item("0", "sword", "A sharp sword", 1));
+			Item item = new Item(0, "sword", "A sharp sword", 1, Integer.MAX_VALUE);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
 			player.getInventory().addItem(item);
 
 			arguments.add("sword");
@@ -422,8 +440,8 @@ public class GameEngineTest {
 		public void valid() {
 			Room playerRoom = player.getRoom();
 
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 
 			playerRoom.getInventory().addItem(item1);
 			playerRoom.getInventory().addItem(item2);
@@ -446,12 +464,12 @@ public class GameEngineTest {
 		public void haveItem() {
 			Room playerRoom = player.getRoom();
 
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 
 			playerRoom.getInventory().addItem(item1);
 			playerRoom.getInventory().addItem(item2);
-			player.getInventory().addItem(new Item("0", "sword", "A sharp sword", 1));
+			player.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
 
 			Assertions.assertEquals(
 				"You picked up:\n1 x sword\n3 x potion\n\n",
@@ -482,7 +500,7 @@ public class GameEngineTest {
 		public void valid() {
 			Room playerRoom = player.getRoom();
 
-			Item item = new Item("0", "sword", "A sharp sword", 1);
+			Item item = new Item(0, "sword", "A sharp sword", 1);
 			player.getInventory().addItem(item);
 
 			arguments.add("sword");
@@ -507,8 +525,8 @@ public class GameEngineTest {
 		public void alreadyHasItem() {
 			Room playerRoom = player.getRoom();
 
-			Item item = new Item("0", "sword", "A sharp sword", 1);
-			playerRoom.getInventory().addItem(new Item("0", "sword", "A sharp sword", 1));
+			Item item = new Item(0, "sword", "A sharp sword", 1);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
 			player.getInventory().addItem(item);
 
 			arguments.add("sword");
@@ -528,8 +546,8 @@ public class GameEngineTest {
 		public void alreadyHasItemIntegerLimit() {
 			Room playerRoom = player.getRoom();
 
-			Item item = new Item("0", "sword", "A sharp sword", 1);
-			playerRoom.getInventory().addItem(new Item("0", "sword", "A sharp sword", 1, Integer.MAX_VALUE));
+			Item item = new Item(0, "sword", "A sharp sword", 1);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1, Integer.MAX_VALUE));
 			player.getInventory().addItem(item);
 
 			arguments.add("sword");
@@ -549,10 +567,10 @@ public class GameEngineTest {
 		public void multipleItems() {
 			Room playerRoom = player.getRoom();
 
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
 			player.getInventory().addItem(item1);
 
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 			player.getInventory().addItem(item2);
 
 			arguments.clear();
@@ -581,8 +599,8 @@ public class GameEngineTest {
 		public void valid() {
 			Room playerRoom = player.getRoom();
 
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 
 			player.getInventory().addItem(item1);
 			player.getInventory().addItem(item2);
@@ -605,12 +623,12 @@ public class GameEngineTest {
 		public void haveOneItem() {
 			Room playerRoom = player.getRoom();
 
-			Item item1 = new Item("0", "sword", "A sharp sword", 1);
-			Item item2 = new Item("1", "potion", "A healing potion", 1, 3);
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
 
 			player.getInventory().addItem(item1);
 			player.getInventory().addItem(item2);
-			playerRoom.getInventory().addItem(new Item("0", "sword", "A sharp sword", 1));
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
 
 			Assertions.assertEquals(
 				"You dropped:\n1 x sword\n3 x potion\n\n",
@@ -661,7 +679,7 @@ public class GameEngineTest {
 
 		@BeforeEach
 		public void setup() {
-			npc = player.getRoom().getNpcs().get("0");
+			npc = player.getRoom().getNpcs().get(0);
 		}
 
 		@Test
@@ -712,7 +730,7 @@ public class GameEngineTest {
 
 		@BeforeEach
 		public void setup() {
-			npc = player.getRoom().getNpcs().get("0");
+			npc = player.getRoom().getNpcs().get(0);
 
 			arguments.add("name");
 			gameEngine.inputCommand("talk-to", arguments);
@@ -749,7 +767,7 @@ public class GameEngineTest {
 
 		@BeforeEach
 		public void setup() {
-			npc = player.getRoom().getNpcs().get("0");
+			npc = player.getRoom().getNpcs().get(0);
 
 			arguments.add("name");
 			gameEngine.inputCommand("talk-to", arguments);
@@ -759,24 +777,30 @@ public class GameEngineTest {
 
 		@Test
 		public void oneItem() {
-			npc.getInventory().addItem(new Item("0", "a", "", 1));
+			npc.getInventory().addItem(new Item(0, "a", "", 1));
 
 			Assertions.assertEquals(
-				"I am selling:\n"
-					+ "- 1 x a for 4 coins\n\n",
+				"""
+					I am selling:
+					- 1 x a for 4 coins
+					
+					""",
 				gameEngine.inputCommand("search-shop", arguments)
 			);
 		}
 
 		@Test
 		public void multipleItems() {
-			npc.getInventory().addItem(new Item("0", "a", "", 1, 2));
-			npc.getInventory().addItem(new Item("1", "b", "", 7));
+			npc.getInventory().addItem(new Item(0, "a", "", 1, 2));
+			npc.getInventory().addItem(new Item(1, "b", "", 7));
 
 			Assertions.assertEquals(
-				"I am selling:\n"
-					+ "- 2 x a for 8 coins\n"
-					+ "- 1 x b for 28 coins\n\n",
+				"""
+					I am selling:
+					- 2 x a for 8 coins
+					- 1 x b for 28 coins
+					
+					""",
 				gameEngine.inputCommand("search-shop", arguments)
 			);
 		}
@@ -796,9 +820,9 @@ public class GameEngineTest {
 
 		@BeforeEach
 		public void setup() {
-			npc = player.getRoom().getNpcs().get("0");
-			npc.getInventory().addItem(new Item("0", "a", "", 3));
-			npc.getInventory().addItem(new Item("1", "b", "", 2, 2));
+			npc = player.getRoom().getNpcs().get(0);
+			npc.getInventory().addItem(new Item(0, "a", "", 3));
+			npc.getInventory().addItem(new Item(1, "b", "", 2, 2));
 			player.setCoins(100);
 
 			arguments.add("name");
@@ -821,15 +845,15 @@ public class GameEngineTest {
 				100 - 12,
 				player.getCoins()
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				1,
-				player.getInventory().getItems().get("0").getAmount()
+				player.getInventory().getItems().get(0).getAmount()
 			);
-			Assertions.assertTrue(npc.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				1,
-				npc.getInventory().getItems().get("0").getAmount()
+				npc.getInventory().getItems().get(0).getAmount()
 			);
 		}
 
@@ -847,15 +871,15 @@ public class GameEngineTest {
 				100 - 12,
 				player.getCoins()
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				1,
-				player.getInventory().getItems().get("0").getAmount()
+				player.getInventory().getItems().get(0).getAmount()
 			);
-			Assertions.assertTrue(npc.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				1,
-				npc.getInventory().getItems().get("0").getAmount()
+				npc.getInventory().getItems().get(0).getAmount()
 			);
 
 			Assertions.assertEquals(
@@ -867,15 +891,15 @@ public class GameEngineTest {
 				100 - 24,
 				player.getCoins()
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				2,
-				player.getInventory().getItems().get("0").getAmount()
+				player.getInventory().getItems().get(0).getAmount()
 			);
-			Assertions.assertTrue(npc.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				1,
-				npc.getInventory().getItems().get("0").getAmount()
+				npc.getInventory().getItems().get(0).getAmount()
 			);
 		}
 
@@ -927,14 +951,12 @@ public class GameEngineTest {
 
 	@Nested
 	class SellItemTests {
-		private NPC npc;
 
 		@BeforeEach
 		public void setup() {
-			npc = player.getRoom().getNpcs().get("0");
 			player.setCoins(100);
-			player.getInventory().addItem(new Item("0", "a", "", 3));
-			player.getInventory().addItem(new Item("1", "b", "", 2, 2));
+			player.getInventory().addItem(new Item(0, "a", "", 3));
+			player.getInventory().addItem(new Item(1, "b", "", 2, 2));
 
 			arguments.add("name");
 			gameEngine.inputCommand("talk-to", arguments);
@@ -956,12 +978,12 @@ public class GameEngineTest {
 				100 + 3,
 				player.getCoins()
 			);
-			Assertions.assertFalse(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(0));
 		}
 
 		@Test
 		public void oneItemMultipleTimes() {
-			player.getInventory().getItems().get("0").setAmount(2);
+			player.getInventory().getItems().get(0).setAmount(2);
 
 			arguments.add("a");
 			arguments.add("1");
@@ -971,10 +993,10 @@ public class GameEngineTest {
 				"You sold 1 x a, +3 coins.\n\n",
 				gameEngine.inputCommand("sell", arguments)
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				1,
-				player.getInventory().getItems().get("0").getAmount()
+				player.getInventory().getItems().get(0).getAmount()
 			);
 
 			// Sell 2
@@ -986,7 +1008,7 @@ public class GameEngineTest {
 				100 + 6,
 				player.getCoins()
 			);
-			Assertions.assertFalse(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(0));
 		}
 
 		@Test
@@ -1003,7 +1025,7 @@ public class GameEngineTest {
 				100 + 4,
 				player.getCoins()
 			);
-			Assertions.assertFalse(player.getInventory().getItems().containsKey("1"));
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(1));
 		}
 
 		@Test
@@ -1020,10 +1042,10 @@ public class GameEngineTest {
 				100,
 				player.getCoins()
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
 			Assertions.assertEquals(
 				1,
-				player.getInventory().getItems().get("0").getAmount()
+				player.getInventory().getItems().get(0).getAmount()
 			);
 		}
 
@@ -1041,14 +1063,12 @@ public class GameEngineTest {
 
 	@Nested
 	class SellAllItemTests {
-		private NPC npc;
 
 		@BeforeEach
 		public void setup() {
-			npc = player.getRoom().getNpcs().get("0");
 			player.setCoins(100);
-			player.getInventory().addItem(new Item("0", "a", "", 3));
-			player.getInventory().addItem(new Item("1", "b", "", 2, 2));
+			player.getInventory().addItem(new Item(0, "a", "", 3));
+			player.getInventory().addItem(new Item(1, "b", "", 2, 2));
 
 			arguments.add("name");
 			gameEngine.inputCommand("talk-to", arguments);
@@ -1068,7 +1088,7 @@ public class GameEngineTest {
 				100 + 3,
 				player.getCoins()
 			);
-			Assertions.assertFalse(player.getInventory().getItems().containsKey("0"));
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(0));
 
 
 			arguments.clear();
@@ -1082,7 +1102,7 @@ public class GameEngineTest {
 				100 + 3 + 4,
 				player.getCoins()
 			);
-			Assertions.assertFalse(player.getInventory().getItems().containsKey("1"));
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(1));
 		}
 
 		@Test
@@ -1102,7 +1122,7 @@ public class GameEngineTest {
 		Room playerRoom = player.getRoom();
 
 		// Add items to inventory and room to test restart properly
-		Item item = new Item("0", "sword", "A sharp sword", 1);
+		Item item = new Item(0, "sword", "A sharp sword", 1);
 		player.getInventory().addItem(item);
 		playerRoom.getInventory().addItem(item);
 
@@ -1118,7 +1138,7 @@ public class GameEngineTest {
 		);
 
 		// Verify restart worked
-		Assertions.assertEquals("0", playerRoom.getID());
+		Assertions.assertEquals(0, playerRoom.getID());
 		Assertions.assertEquals("a", playerRoom.getName());
 		Assertions.assertEquals("description a", playerRoom.getDescription());
 		Assertions.assertTrue(player.getInventory().getItems().isEmpty());

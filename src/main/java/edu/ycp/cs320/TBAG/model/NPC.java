@@ -1,20 +1,20 @@
 package edu.ycp.cs320.TBAG.model;
 
 public class NPC {
-	private final String id;
+	private final Integer id;
 	private String name;
 	private final Inventory inventory = new Inventory();
 	private String greeting;
 	private String goodbye;
 
-	public NPC(String id, String name, String greeting, String goodbye) {
+	public NPC(Integer id, String name, String greeting, String goodbye) {
 		this.id = id;
 		this.name = name;
 		this.greeting = greeting;
 		this.goodbye = goodbye;
 	}
 
-	public NPC(String id, String name) {
+	public NPC(Integer id, String name) {
 		this(
 			id,
 			name,
@@ -23,7 +23,7 @@ public class NPC {
 		);
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 

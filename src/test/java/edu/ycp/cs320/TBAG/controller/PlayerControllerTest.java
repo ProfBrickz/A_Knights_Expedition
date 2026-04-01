@@ -36,8 +36,8 @@ public class PlayerControllerTest {
 	@BeforeEach
 	public void setUp() {
 		player = new Player(100, 100);
-		roomA = new Room("A", "Room A", "First room");
-		roomB = new Room("B", "Room B", "Second room");
+		roomA = new Room(0, "Room A", "First room");
+		roomB = new Room(1, "Room B", "Second room");
 		roomA.setConnection(roomB, "north");
 		roomB.setConnection(roomA, "south");
 		player.setRoom(roomA);
@@ -62,7 +62,7 @@ public class PlayerControllerTest {
 
 	@Test
 	public void testEquipAndUnequipArmor() {
-		Armor armor = new Armor("a1", "Leather", "Basic armor", 1, true, 5, 1);
+		Armor armor = new Armor(0, "Leather", "Basic armor", 1, true, 5, 1);
 
 		controller.equipArmor(armor);
 		Assertions.assertTrue(player.getArmor().contains(armor));
@@ -80,7 +80,7 @@ public class PlayerControllerTest {
 		player.setState(PlayerState.BATTLE);
 		player.setHealth(1);
 		player.setMaxHealth(10);
-		Room startingRoom = new Room("S", "Start", "Start room");
+		Room startingRoom = new Room(0, "Start", "Start room");
 
 		controller.die(50, 50, startingRoom);
 
@@ -92,10 +92,10 @@ public class PlayerControllerTest {
 
 	@Test
 	public void testAttackDefendHealDelegate() {
-		Enemy enemy = new Enemy("e1", "Goblin", 10, 10);
-		WeaponAbility ability = new WeaponAbility("w1", 3, "Slash");
-		HealingItem potion = new HealingItem("h1", "Potion", "Heals", 5, 2, 1);
-		Armor armor = new Armor("a1", "Leather", "Basic armor", 1, true, 5, 1);
+		Enemy enemy = new Enemy(0, "Goblin", 10, 10);
+		WeaponAbility ability = new WeaponAbility(0, 3, "Slash");
+		HealingItem potion = new HealingItem(1, "Potion", "Heals", 5, 2, 1);
+		Armor armor = new Armor(3, "Leather", "Basic armor", 1, true, 5, 1);
 
 		controller.attack(enemy, ability);
 		controller.defend(armor);
@@ -118,7 +118,7 @@ public class PlayerControllerTest {
 
 	@Test
 	public void testInspectItem() {
-		Item item = new Item("i1", "Key", "A small key", 1, 1);
+		Item item = new Item(0, "Key", "A small key", 1, 1);
 		Assertions.assertEquals("A small key", controller.inspectItem(item));
 		Assertions.assertNull(controller.inspectItem(null));
 	}

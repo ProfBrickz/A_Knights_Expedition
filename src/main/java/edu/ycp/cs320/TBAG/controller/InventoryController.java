@@ -9,7 +9,7 @@ public class InventoryController {
 
 	}
 
-	public HashMap<String, Item> getItems(Inventory inventory) {
+	public HashMap<Integer, Item> getItems(Inventory inventory) {
 		if (inventory == null) {
 			return new HashMap<>();
 		}
@@ -35,8 +35,8 @@ public class InventoryController {
 
 		if (amount > item.getAmount()) amount = item.getAmount();
 
-		HashMap<String, Item> items = inventory.getItems();
-		String key = String.valueOf(item.getId());
+		HashMap<Integer, Item> items = inventory.getItems();
+		Integer key = item.getId();
 
 		if (items.containsKey(key)) {
 			Item existing = items.get(key);
@@ -66,7 +66,7 @@ public class InventoryController {
 	/**
 	 * removes item in inventory if amount == 1, decrements amount if amount > 1
 	 */
-	public void removeItem(Inventory inventory, String id, Integer amount) {
+	public void removeItem(Inventory inventory, Integer id, Integer amount) {
 		if (inventory == null || id == null) {
 			return;
 		}
@@ -75,7 +75,7 @@ public class InventoryController {
 			return;
 		}
 
-		HashMap<String, Item> items = inventory.getItems();
+		HashMap<Integer, Item> items = inventory.getItems();
 		Item existing = items.get(id);
 
 		if (existing == null) {
@@ -95,17 +95,17 @@ public class InventoryController {
 	/**
 	 * removes one of an item from the inventory
 	 */
-	public void removeItem(Inventory inventory, String id) {
+	public void removeItem(Inventory inventory, Integer id) {
 		removeItem(inventory, id, 1);
 	}
 
-	public HashMap<String, HealingItem> getHealingItems(Inventory inventory) {
-		HashMap<String, HealingItem> healingItems = new HashMap<>();
+	public HashMap<Integer, HealingItem> getHealingItems(Inventory inventory) {
+		HashMap<Integer, HealingItem> healingItems = new HashMap<>();
 		if (inventory == null) {
 			return healingItems;
 		}
 
-		for (String key : inventory.getItems().keySet()) {
+		for (Integer key : inventory.getItems().keySet()) {
 			Item item = inventory.getItems().get(key);
 			if (item instanceof HealingItem) {
 				healingItems.put(key, (HealingItem) item);
@@ -115,13 +115,13 @@ public class InventoryController {
 		return healingItems;
 	}
 
-	public HashMap<String, Weapon> getWeapons(Inventory inventory) {
-		HashMap<String, Weapon> weapons = new HashMap<>();
+	public HashMap<Integer, Weapon> getWeapons(Inventory inventory) {
+		HashMap<Integer, Weapon> weapons = new HashMap<>();
 		if (inventory == null) {
 			return weapons;
 		}
 
-		for (String key : inventory.getItems().keySet()) {
+		for (Integer key : inventory.getItems().keySet()) {
 			Item item = inventory.getItems().get(key);
 			if (item instanceof Weapon) {
 				weapons.put(key, (Weapon) item);
@@ -131,13 +131,13 @@ public class InventoryController {
 		return weapons;
 	}
 
-	public HashMap<String, Armor> getArmor(Inventory inventory) {
-		HashMap<String, Armor> armorItems = new HashMap<>();
+	public HashMap<Integer, Armor> getArmor(Inventory inventory) {
+		HashMap<Integer, Armor> armorItems = new HashMap<>();
 		if (inventory == null) {
 			return armorItems;
 		}
 
-		for (String key : inventory.getItems().keySet()) {
+		for (Integer key : inventory.getItems().keySet()) {
 			Item item = inventory.getItems().get(key);
 			if (item instanceof Armor) {
 				armorItems.put(key, (Armor) item);

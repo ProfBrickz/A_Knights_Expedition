@@ -29,7 +29,7 @@ public class TBAGServlet extends HttpServlet {
 			ItemCatalog.addBaseItemsToInventory(player.getInventory());
 
 			// create room models
-			HashMap<String, Room> rooms = new HashMap<>();
+			HashMap<Integer, Room> rooms = new HashMap<>();
 
 			gameEngine = new GameEngine(player, rooms);
 			req.getSession().setAttribute("gameEngine", gameEngine);
@@ -57,7 +57,7 @@ public class TBAGServlet extends HttpServlet {
 			ItemCatalog.addBaseItemsToInventory(player.getInventory());
 
 			// create room models
-			HashMap<String, Room> rooms = new HashMap<>();
+			HashMap<Integer, Room> rooms = new HashMap<>();
 
 			gameEngine = new GameEngine(player, rooms);
 			req.getSession().setAttribute("gameEngine", gameEngine);

@@ -37,6 +37,9 @@ public class RoomConnection {
 		return traveled;
 	}
 
+	public void setTraveled(boolean traveled) {
+		this.traveled = traveled;
+	}
 
 	public void setRoom(Room room) {
 		this.room = room;

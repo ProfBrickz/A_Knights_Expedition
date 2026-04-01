@@ -3,21 +3,22 @@ package edu.ycp.cs320.TBAG.model;
 import java.util.HashMap;
 
 public class Room {
-	private String id, roomDescription, roomName;
+	private final Integer id;
+	private String roomDescription, roomName;
 	private String assetName;
 	//Hashmap:: String : Direction, RoomConnection : Pointer to next room
 	private HashMap<String, RoomConnection> roomConnections = new HashMap<>();
-	private HashMap<String, Enemy> enemies = new HashMap<>();
-	private Inventory inventory = new Inventory();
-	private HashMap<String, NPC> npcs = new HashMap<>();
+	private HashMap<Integer, Enemy> enemies = new HashMap<>();
+	private final Inventory inventory = new Inventory();
+	private HashMap<Integer, NPC> npcs = new HashMap<>();
 
 	public Room(
-		String id,
+		Integer id,
 		String name,
 		String description,
 		HashMap<String, RoomConnection> roomConnections,
-		HashMap<String, Enemy> enemies,
-		HashMap<String, NPC> npcs
+		HashMap<Integer, Enemy> enemies,
+		HashMap<Integer, NPC> npcs
 	) {
 		this.id = id;
 		roomName = name;
@@ -28,7 +29,7 @@ public class Room {
 	}
 
 	public Room(
-		String id,
+		Integer id,
 		String name,
 		String description,
 		HashMap<String, RoomConnection> roomConnections
@@ -40,19 +41,19 @@ public class Room {
 	}
 
 	//creates a room with no connections
-	public Room(String id, String name, String description) {
+	public Room(Integer id, String name, String description) {
 		this.id = id;
 		roomName = name;
 		roomDescription = description;
 	}
 
 	public Room() {
-		id = "NULL";
+		id = null;
 		roomName = "Null";
 		roomDescription = "NULL";
 	}
 
-	public String getID() {
+	public Integer getID() {
 		return id;
 	}
 
@@ -94,7 +95,7 @@ public class Room {
 		roomConnections.put(key, new RoomConnection(room, description));
 	}
 
-	public HashMap<String, Enemy> getEnemies() {
+	public HashMap<Integer, Enemy> getEnemies() {
 		return enemies;
 	}
 
@@ -110,7 +111,7 @@ public class Room {
 		return inventory;
 	}
 
-	public HashMap<String, NPC> getNpcs() {
+	public HashMap<Integer, NPC> getNpcs() {
 		return npcs;
 	}
 

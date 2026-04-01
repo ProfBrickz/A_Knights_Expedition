@@ -1,12 +1,12 @@
 package edu.ycp.cs320.TBAG.model;
 
 public class Item {
-	private final String id;
+	private final Integer id;
 	private String name, description;
 	private Integer value, amount;
 	private String assetName;
 
-	public Item(String id, String name, String description, Integer value, Integer amount) {
+	public Item(Integer id, String name, String description, Integer value, Integer amount) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -14,7 +14,7 @@ public class Item {
 		this.amount = amount;
 	}
 
-	public Item(String id, String name, String description, Integer value) {
+	public Item(Integer id, String name, String description, Integer value) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -22,7 +22,7 @@ public class Item {
 		this.amount = 1;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 

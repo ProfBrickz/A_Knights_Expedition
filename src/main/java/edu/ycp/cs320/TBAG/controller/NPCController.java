@@ -5,13 +5,13 @@ import edu.ycp.cs320.TBAG.model.NPC;
 import edu.ycp.cs320.TBAG.model.Player;
 
 public class NPCController {
-	private InventoryController inventoryController;
+	private final InventoryController inventoryController;
 
 	public NPCController(InventoryController inventoryController) {
 		this.inventoryController = inventoryController;
 	}
 
-	public Item buy(NPC npc, Player player, String npcItemId, Integer amount) {
+	public Item buy(NPC npc, Player player, Integer npcItemId, Integer amount) {
 		Item npcItem = npc.getInventory().getItems().get(npcItemId);
 		if (npcItem == null) {
 			return null;

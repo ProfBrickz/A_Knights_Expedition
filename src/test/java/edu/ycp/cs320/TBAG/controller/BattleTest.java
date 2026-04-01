@@ -1,11 +1,8 @@
 package edu.ycp.cs320.TBAG.controller;
 
-import org.junit.jupiter.api.Assertions.*;
+import edu.ycp.cs320.TBAG.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import edu.ycp.cs320.TBAG.controller.BattleEntityController;
-import edu.ycp.cs320.TBAG.model.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,12 +17,12 @@ public class BattleTest {
 	public void setup() {
 		controller = new BattleEntityController();
 		player = new Player(100, 100);
-		enemy = new Enemy("e1", "Goblin", 50, 50);
+		enemy = new Enemy(0, "Goblin", 50, 50);
 	}
 
 	@Test
 	public void testAttack() {
-		WeaponAbility ability = new WeaponAbility("slash", 10, "Slash attack");
+		WeaponAbility ability = new WeaponAbility(0, 10, "Slash attack");
 
 		controller.attack(player, enemy, ability);
 
@@ -34,11 +31,11 @@ public class BattleTest {
 
 	@Test
 	public void testDefendReducesDamage() {
-		Armor armor = new Armor("a1", "Shield", "Basic shield", 5, false, 0);
+		Armor armor = new Armor(0, "Shield", "Basic shield", 5, false, 0);
 
 		controller.defend(enemy, armor);
 
-		WeaponAbility ability = new WeaponAbility("hit", 10, "Hit");
+		WeaponAbility ability = new WeaponAbility(0, 10, "Hit");
 
 		controller.attack(player, enemy, ability);
 
@@ -50,7 +47,7 @@ public class BattleTest {
 	public void testHeal() {
 		enemy.setHealth(20);
 
-		HealingItem potion = new HealingItem("h1", "Potion", "Heal", 15, 0);
+		HealingItem potion = new HealingItem(0, "Potion", "Heal", 15, 0);
 
 		controller.heal(enemy, potion);
 
@@ -59,7 +56,7 @@ public class BattleTest {
 
 	@Test
 	public void testHealDoesNotExceedMax() {
-		HealingItem potion = new HealingItem("h1", "Potion", "Heal", 50, 0);
+		HealingItem potion = new HealingItem(0, "Potion", "Heal", 50, 0);
 
 		controller.heal(player, potion);
 
@@ -68,7 +65,7 @@ public class BattleTest {
 
 	@Test
 	public void testAttackCannotGoBelowZero() {
-		WeaponAbility ability = new WeaponAbility("mega", 1000, "Big attack");
+		WeaponAbility ability = new WeaponAbility(0, 1000, "Big attack");
 
 		controller.attack(player, enemy, ability);
 

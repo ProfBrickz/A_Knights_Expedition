@@ -4,7 +4,7 @@ public class HealingItem extends Item {
 	private Integer healAmount;
 
 	public HealingItem(
-		String id,
+		Integer id,
 		String name,
 		String description,
 		Integer healAmount,
@@ -17,7 +17,7 @@ public class HealingItem extends Item {
 	}
 
 	public HealingItem(
-		String id,
+		Integer id,
 		String name,
 		String description,
 		Integer healAmount,

@@ -10,15 +10,15 @@ import java.util.Iterator;
  * Controller for the TBAG game.
  */
 public class GameEngine {
-	private Player player;
-	private HashMap<String, Room> rooms;
+	private final Player player;
+	private final HashMap<Integer, Room> rooms;
 
 	private final PlayerController playerController;
 	private final RoomController roomController;
 	private final BattleEntityController battleEntityController = new BattleEntityController();
 	private final InventoryController inventoryController = new InventoryController();
 	private final NPCController npcController = new NPCController(inventoryController);
-	private final String defaultRoom = "0";
+	private final Integer defaultRoom = 0;
 
 
 	// Constructor
@@ -28,7 +28,7 @@ public class GameEngine {
 	 * Loads a demo room if no rooms are provided.
 	 * Sets the player's starting room to "0" if not already set.
 	 */
-	public GameEngine(Player player, HashMap<String, Room> rooms) {
+	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
 		this.player = player;
 		this.rooms = rooms;
 		this.playerController = new PlayerController(this.player, this.battleEntityController);

@@ -3,13 +3,13 @@ package edu.ycp.cs320.TBAG.model;
 import java.util.HashMap;
 
 public class Inventory {
-	private final HashMap<String, Item> items = new HashMap<String, Item>();
+	private final HashMap<Integer, Item> items = new HashMap<>();
 
 	public Inventory() {
 
 	}
 
-	public HashMap<String, Item> getItems() {
+	public HashMap<Integer, Item> getItems() {
 		return items;
 	}
 
@@ -18,23 +18,22 @@ public class Inventory {
 			return;
 		}
 
-		String key = String.valueOf(item.getId());
+		Integer key = item.getId();
 
 		items.put(key, item);
 	}
 
-	public void removeItem(String id) {
+	public void removeItem(Integer id) {
 		if (id == null) {
 			return;
 		}
 
-		String key = id;
-		Item existing = items.get(key);
+		Item existing = items.get(id);
 
 		if (existing == null) {
 			return;
 		}
 
-		items.remove(key);
+		items.remove(id);
 	}
 }
