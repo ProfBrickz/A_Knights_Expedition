@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 
 public interface Database {
+	// General purpose methods
 	public void loadInitialData();
+
 
 	// Player-related methods
 	public Player getPlayer();
@@ -57,7 +59,7 @@ public interface Database {
 
 	public void removeItemFromEnemy(Enemy enemy, Item item);
 
-	
+
 	// WeaponAbility-related methods
 	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon);
 }
