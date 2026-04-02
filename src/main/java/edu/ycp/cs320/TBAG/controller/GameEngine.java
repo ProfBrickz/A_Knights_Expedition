@@ -360,7 +360,7 @@ public class GameEngine {
 		Integer amount = null;
 		try {
 			amount = Integer.parseInt(arguments.get(1));
-		} catch (NumberFormatException exception) {
+		} catch (NumberFormatException ignored) {
 		}
 		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
 		if (player.getCoins() < item.getPrice() * amount) {
@@ -386,7 +386,7 @@ public class GameEngine {
 		Integer amount = null;
 		try {
 			amount = Integer.parseInt(arguments.get(1));
-		} catch (NumberFormatException exception) {
+		} catch (NumberFormatException ignored) {
 		}
 		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
 		if (item.getAmount() < amount) {

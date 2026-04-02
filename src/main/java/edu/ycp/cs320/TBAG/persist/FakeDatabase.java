@@ -6,6 +6,10 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 
 public class FakeDatabase implements Database {
+	private Player player;
+	private HashMap<Integer, Room> rooms;
+
+
 	@Override
 	public void loadInitialData() {
 		throw new UnsupportedOperationException("TODO - implement");
