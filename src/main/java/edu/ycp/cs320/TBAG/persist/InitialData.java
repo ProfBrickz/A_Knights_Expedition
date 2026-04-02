@@ -8,10 +8,10 @@ import java.util.HashMap;
 
 public class InitialData {
 	// Might not need maps for all of these, or might need maps for other things but this is what they would look like
-	private HashMap<String, Integer> roomIds = new HashMap<String, Integer>();
-	private HashMap<String, Integer> itemIds = new HashMap<String, Integer>();
-	private HashMap<String, Integer> npcIds = new HashMap<String, Integer>();
-	private HashMap<String, Integer> enemyIds = new HashMap<String, Integer>();
+	private static HashMap<String, Integer> roomIds = new HashMap<String, Integer>();
+	private static HashMap<String, Integer> itemIds = new HashMap<String, Integer>();
+	private static HashMap<String, Integer> npcIds = new HashMap<String, Integer>();
+	private static HashMap<String, Integer> enemyIds = new HashMap<String, Integer>();
 
 	/**
 	 * will throw IllegalStateException when there are multiple players
