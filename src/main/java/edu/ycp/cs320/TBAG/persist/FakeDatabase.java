@@ -2,24 +2,36 @@ package edu.ycp.cs320.TBAG.persist;
 
 import edu.ycp.cs320.TBAG.model.*;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 
 public class FakeDatabase implements Database {
 	private Player player;
-	private HashMap<Integer, Room> rooms;
+	private HashMap<Integer, Room> rooms = new HashMap<>();
 
 
+	// General purpose methods
 	@Override
 	public void loadInitialData() {
-		throw new UnsupportedOperationException("TODO - implement");
+		try {
+			player = InitialData.getPlayer();
+		} catch (IllegalStateException exception) {
+			throw new IllegalStateException("Initial data is incorrect", exception);
+		} catch (IOException exception) {
+			throw new IllegalStateException("Couldn't read initial data", exception);
+		}
 	}
 
 
 	// Player-related methods
 	@Override
 	public Player getPlayer() {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+
+		return player;
 	}
 
 	@Override

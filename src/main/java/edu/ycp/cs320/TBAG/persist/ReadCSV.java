@@ -9,12 +9,18 @@ import java.util.StringTokenizer;
 public class ReadCSV implements Closeable {
 	private BufferedReader reader;
 
+	/// Slightly modified from lab 7 to work with different file structure
 	public ReadCSV(String resourceName) throws IOException {
-		InputStream in = this.getClass().getClassLoader().getResourceAsStream(resourceName);
-		if (in == null) {
+		File file = new File("src/resources/" + resourceName);
+		if (!file.exists()) {
 			throw new IOException("Couldn't open " + resourceName);
 		}
-		this.reader = new BufferedReader(new InputStreamReader(in));
+		this.reader = new BufferedReader(new FileReader(file));
+
+		// Skip first 3 lines that make it easier to read
+		this.next();
+		this.next();
+		this.next();
 	}
 
 	public List<String> next() throws IOException {

@@ -1,4 +1,4 @@
 sep=|
 room_id|state|coins|health|max_health
 String|exploring or battle or talking|Integer|Integer|Integer
-|exploring|0|100|100
+start|exploring|0|100|100

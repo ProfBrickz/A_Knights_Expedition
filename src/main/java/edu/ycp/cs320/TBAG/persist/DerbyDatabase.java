@@ -2,10 +2,8 @@ package edu.ycp.cs320.TBAG.persist;
 
 import edu.ycp.cs320.TBAG.model.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.sql.*;
 import java.util.HashMap;
 
 public class DerbyDatabase implements Database {
@@ -30,18 +28,106 @@ public class DerbyDatabase implements Database {
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
-		throw new UnsupportedOperationException("TODO - implement");
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				Player player;
+
+				try {
+					player = InitialData.getPlayer();
+				} catch (IllegalStateException exception) {
+					throw new IllegalStateException("Initial data is incorrect", exception);
+				} catch (IOException exception) {
+					throw new IllegalStateException("Couldn't read initial data", exception);
+				}
+
+				PreparedStatement addPlayer = null;
+
+				try {
+					addPlayer = connection.prepareStatement("""
+							INSERT INTO players (room_id, state, coins, max_health, health)
+							VALUES (?, ?, ?, ?, ?)
+						""");
+					addPlayer.setInt(1, player.getRoom().getID());
+					addPlayer.setInt(2, player.getState().ordinal());
+					addPlayer.setInt(3, player.getCoins());
+					addPlayer.setInt(4, player.getMaxHealth());
+					addPlayer.setInt(5, player.getHealth());
+					addPlayer.executeUpdate();
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(addPlayer);
+				}
+			}
+		});
 	}
 
 	public void createTables() {
-		throw new UnsupportedOperationException("TODO - implement");
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement addPlayerTableStatement = null;
+
+				try {
+					addPlayerTableStatement = connection.prepareStatement("""
+							CREATE TABLE player (
+								room_id INTEGER NOT NULL
+								state INTEGER NOT NULL
+								coins INTEGER NOT NULL
+								max_health INTEGER NOT NULL
+								health INTEGER NOT NULL
+							);
+						""");
+					addPlayerTableStatement.executeUpdate();
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(addPlayerTableStatement);
+				}
+			}
+		});
 	}
 
 
 	// Player-related methods
 	@Override
 	public Player getPlayer() {
-		throw new UnsupportedOperationException("TODO - implement");
+		return executeTransaction(new Transaction<Player>() {
+			@Override
+			public Player execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT room_id, state, coins, max_health, health
+							FROM player
+							LIMIT 1
+						""");
+					resultSet = statement.executeQuery();
+
+					if (!resultSet.next()) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					Room room = getRoomById(resultSet.getInt(1));
+					Integer stateOrdinal = resultSet.getInt(2);
+					PlayerState state = PlayerState.values()[stateOrdinal];
+					Integer coins = resultSet.getInt(3);
+					Integer health = resultSet.getInt(4);
+					Integer maxHealth = resultSet.getInt(5);
+
+					Player player = new Player(maxHealth, health, state, room);
+					player.setCoins(coins);
+
+					return player;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override
