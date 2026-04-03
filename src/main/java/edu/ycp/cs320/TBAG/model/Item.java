@@ -7,24 +7,24 @@ public class Item {
 	private String assetName;
 
 	public Item(Integer id, String name, String description, Integer value, Integer amount, String assetName) {
-		this.id=id;
+		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.value = value;
 		this.amount = amount;
 
-		this.assetName=assetName;
-		if (this.assetName.isEmpty()) {
+		this.assetName = assetName;
+		if (this.assetName == null || this.assetName.isEmpty()) {
 			this.assetName = "fixIt.png";
 		}
 	}
 
 	public Item(Integer id, String name, String description, Integer value, Integer amount) {
-		this(id, name,description,value,amount,null);
+		this(id, name, description, value, amount, null);
 	}
 
 	public Item(Integer id, String name, String description, Integer value) {
-		this(id,name,description,value,1);
+		this(id, name, description, value, 1);
 	}
 
 	public Integer getId() {

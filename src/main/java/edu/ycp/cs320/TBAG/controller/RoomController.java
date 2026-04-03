@@ -60,17 +60,17 @@ public class RoomController {
 
 		start.setConnection(center, "NORTH");
 		start.setConnection(backrooms, "DOWN");
-		start.getInventory().addItem(new Item(0, "Sword", "a sword", 10));
-		start.getInventory().addItem(new Item(1, "Old book", "a book", 3));
+		start.getInventory().addItem(new Item(21, "Sword", "a sword", 10));
+		start.getInventory().addItem(new Item(22, "Old book", "a book", 3));
 
 		center.setConnection(top, "NORTH");
 		center.setConnection(right, "EAST");
 		center.setConnection(start, "SOUTH");
 		center.setConnection(left, "WEST");
-		center.getInventory().addItem(new Item(1, "Old book", "a book", 3));
-		center.getInventory().addItem(new Item(2, "Stick", "a stick", 1));
+		center.getInventory().addItem(new Item(22, "Old book", "a book", 3));
+		center.getInventory().addItem(new Item(23, "Stick", "a stick", 1));
 		NPC merchant = new NPC(0, "Merchant");
-		merchant.getInventory().addItem(new Item(3, "Potion", "potion", 2));
+		merchant.getInventory().addItem(new Item(24, "Potion", "potion", 2));
 		center.addNPC(merchant);
 
 		left.setConnection(center, "EAST");
