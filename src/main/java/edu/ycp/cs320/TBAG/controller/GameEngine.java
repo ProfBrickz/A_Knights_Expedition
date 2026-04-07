@@ -1,16 +1,10 @@
 package edu.ycp.cs320.TBAG.controller;
 
+import edu.ycp.cs320.TBAG.model.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import edu.ycp.cs320.TBAG.model.Inventory;
-import edu.ycp.cs320.TBAG.model.Item;
-import edu.ycp.cs320.TBAG.model.ItemCatalog;
-import edu.ycp.cs320.TBAG.model.NPC;
-import edu.ycp.cs320.TBAG.model.Player;
-import edu.ycp.cs320.TBAG.model.PlayerState;
-import edu.ycp.cs320.TBAG.model.Room;
 
 
 /**
@@ -58,51 +52,19 @@ public class GameEngine {
 	 * Processes user input commands.
 	 * Routes commands to the appropriate handler based on the Command enum.
 	 */
-	public String inputCommand(String command, ArrayList<String> arguments) {
-		command = command.trim().toLowerCase();
+	public String inputCommand(String commandName, ArrayList<String> arguments) {
+		commandName = commandName.trim().toLowerCase();
 
-		String output;
+		String output = "";
 
-		if (command.equals(Command.MOVE.getName())) {
-			output = move(arguments);
-		} else if (command.equals(Command.LOOK.getName())) {
-			output = look(arguments);
-		} else if (command.equals(Command.INVENTORY.getName())) {
-			output = inventory(arguments);
-		} else if (command.equals(Command.INSPECT_ITEM.getName())) {
-			output = inspectItem(arguments);
-		} else if (command.equals(Command.SEARCH.getName())) {
-			output = search(arguments);
-		} else if (command.equals(Command.PICKUP.getName())) {
-			output = pickupItem(arguments);
-		} else if (command.equals(Command.PICKUP_ALL.getName())) {
-			output = pickupAllItems(arguments);
-		} else if (command.equals(Command.DROP.getName())) {
-			output = dropItem(arguments);
-		} else if (command.equals(Command.DROP_ALL.getName())) {
-			output = dropAllItems(arguments);
-		} else if (command.equals(Command.WALLET.getName())) {
-			output = wallet(arguments);
-		} else if (command.equals(Command.TALK_TO.getName())) {
-			output = talkToNPC(arguments);
-		} else if (command.equals(Command.LEAVE.getName())) {
-			output = leaveNPC(arguments);
-		} else if (command.equals(Command.SEARCH_SHOP.getName())) {
-			output = searchShop(arguments);
-		} else if (command.equals(Command.BUY.getName())) {
-			output = buyItem(arguments);
-		} else if (command.equals(Command.SELL.getName())) {
-			output = sellItem(arguments);
-		} else if (command.equals(Command.SELL_ALL.getName())) {
-			output = sellAllItem(arguments);
-		} else if (command.equals(Command.RESTART.getName())) {
-			output = restart(arguments);
-		} else if (command.equals(Command.HELP.getName())) {
-			output = help(arguments);
-		} else {
-			output = "Sorry, command not recognized.\n";
+		for (Command command : Command.values()) {
+			if (command.getName().equals(commandName)) {
+				output = command.run(this, arguments);
+				break;
+			}
 		}
-
+		if (output.isEmpty()) output = "Sorry, command not recognized.\n";
+		
 		return output + "\n";
 	}
 
@@ -113,10 +75,7 @@ public class GameEngine {
 	 * Handles the "move" command.
 	 * Validates direction and updates player position.
 	 */
-	private String move(ArrayList<String> arguments) {
-		String error = validateCommand(Command.MOVE, arguments);
-		if (error != null) return error;
-
+	public String move(ArrayList<String> arguments) {
 		String direction = arguments.get(0).toLowerCase();
 
 		if (!this.roomController.isValidDirection(player.getRoom(), direction)) {
@@ -135,10 +94,7 @@ public class GameEngine {
 	 * Handles the "look" command.
 	 * Returns the description of the current room.
 	 */
-	private String look(ArrayList<String> arguments) {
-		String error = validateCommand(Command.LOOK, arguments);
-		if (error != null) return error;
-
+	public String look(ArrayList<String> arguments) {
 		return this.player.getRoom().getDescription() + "\n";
 	}
 
@@ -146,10 +102,7 @@ public class GameEngine {
 	 * Handles the "inventory" command.
 	 * Lists all items in the player's inventory with quantities.
 	 */
-	private String inventory(ArrayList<String> arguments) {
-		String error = validateCommand(Command.INVENTORY, arguments);
-		if (error != null) return error;
-
+	public String inventory(ArrayList<String> arguments) {
 		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
 	}
 
@@ -157,10 +110,7 @@ public class GameEngine {
 	 * Handles the "inspect-item" command.
 	 * Checks if the item exists in the inventory and returns inspection details.
 	 */
-	private String inspectItem(ArrayList<String> arguments) {
-		String error = validateCommand(Command.INSPECT_ITEM, arguments);
-		if (error != null) return error;
-
+	public String inspectItem(ArrayList<String> arguments) {
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
 		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
@@ -172,10 +122,7 @@ public class GameEngine {
 	 * Handles the "search" command.
 	 * Checks if the room has any items and returns them.
 	 */
-	private String search(ArrayList<String> arguments) {
-		String error = validateCommand(Command.SEARCH, arguments);
-		if (error != null) return error;
-
+	public String search(ArrayList<String> arguments) {
 		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
 	}
 
@@ -183,10 +130,7 @@ public class GameEngine {
 	 * Handles the "pickup" command.
 	 * Checks if the item is in the room and adds it to the player's inventory.
 	 */
-	private String pickupItem(ArrayList<String> arguments) {
-		String error = validateCommand(Command.PICKUP, arguments);
-		if (error != null) return error;
-
+	public String pickupItem(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
 
 		String itemName = arguments.get(0);
@@ -201,10 +145,7 @@ public class GameEngine {
 			+ ".\n";
 	}
 
-	private String pickupAllItems(ArrayList<String> arguments) {
-		String error = validateCommand(Command.PICKUP_ALL, arguments);
-		if (error != null) return error;
-
+	public String pickupAllItems(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
 
 		if (playerRoom.getInventory().getItems().isEmpty()) {
@@ -236,10 +177,7 @@ public class GameEngine {
 	 * Handles the 'drop' command.
 	 * Checks if the player has the item and drops it in the current room.
 	 */
-	private String dropItem(ArrayList<String> arguments) {
-		String error = validateCommand(Command.DROP, arguments);
-		if (error != null) return error;
-
+	public String dropItem(ArrayList<String> arguments) {
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
 		if (item == null) return "You do not have a " + itemName + ".\n";
@@ -252,10 +190,7 @@ public class GameEngine {
 			+ ".\n";
 	}
 
-	private String dropAllItems(ArrayList<String> arguments) {
-		String error = validateCommand(Command.DROP_ALL, arguments);
-		if (error != null) return error;
-
+	public String dropAllItems(ArrayList<String> arguments) {
 		if (player.getInventory().getItems().isEmpty()) {
 			return "You do not have anything to drop.\n";
 		}
@@ -281,20 +216,14 @@ public class GameEngine {
 		return output.toString();
 	}
 
-	private String wallet(ArrayList<String> arguments) {
-		String error = validateCommand(Command.TALK_TO, arguments);
-		if (error != null) return error;
-
+	public String wallet(ArrayList<String> arguments) {
 		String output = "You have " + player.getCoins() + " coin";
 		if (player.getCoins() != 1) output += "s";
 
 		return output + ".\n";
 	}
 
-	private String talkToNPC(ArrayList<String> arguments) {
-		String error = validateCommand(Command.TALK_TO, arguments);
-		if (error != null) return error;
-
+	public String talkToNPC(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
 
 		String npcName = arguments.get(0);
@@ -307,10 +236,7 @@ public class GameEngine {
 		return npc.getGreeting() + "\n";
 	}
 
-	private String leaveNPC(ArrayList<String> arguments) {
-		String error = validateCommand(Command.LEAVE, arguments);
-		if (error != null) return error;
-
+	public String leaveNPC(ArrayList<String> arguments) {
 		NPC npc = player.getCurrentNPC();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
@@ -322,10 +248,7 @@ public class GameEngine {
 		return goodbye;
 	}
 
-	private String searchShop(ArrayList<String> arguments) {
-		String error = validateCommand(Command.SEARCH_SHOP, arguments);
-		if (error != null) return error;
-
+	public String searchShop(ArrayList<String> arguments) {
 		NPC npc = player.getCurrentNPC();
 
 		if (npc.getInventory().getItems().isEmpty()) return "I am not selling anything.\n";
@@ -346,10 +269,7 @@ public class GameEngine {
 		return output.toString();
 	}
 
-	private String buyItem(ArrayList<String> arguments) {
-		String error = validateCommand(Command.BUY, arguments);
-		if (error != null) return error;
-
+	public String buyItem(ArrayList<String> arguments) {
 		NPC npc = player.getCurrentNPC();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
@@ -372,10 +292,7 @@ public class GameEngine {
 		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
 	}
 
-	private String sellItem(ArrayList<String> arguments) {
-		String error = validateCommand(Command.SELL, arguments);
-		if (error != null) return error;
-
+	public String sellItem(ArrayList<String> arguments) {
 		NPC npc = player.getCurrentNPC();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
@@ -398,10 +315,7 @@ public class GameEngine {
 		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
 
-	private String sellAllItem(ArrayList<String> arguments) {
-		String error = validateCommand(Command.SELL_ALL, arguments);
-		if (error != null) return error;
-
+	public String sellAllItem(ArrayList<String> arguments) {
 		NPC npc = player.getCurrentNPC();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
@@ -416,10 +330,7 @@ public class GameEngine {
 		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
 
-	private String restart(ArrayList<String> arguments) {
-		String error = validateCommand(Command.RESTART, arguments);
-		if (error != null) return error;
-
+	public String restart(ArrayList<String> arguments) {
 		rooms.clear();
 		roomController.loadDemo();
 
@@ -435,10 +346,7 @@ public class GameEngine {
 		return "Restarted game.\n";
 	}
 
-	private String help(ArrayList<String> arguments) {
-		String error = validateCommand(Command.HELP, arguments);
-		if (error != null) return error;
-
+	public String help(ArrayList<String> arguments) {
 		StringBuilder output = new StringBuilder("Available commands:\n");
 
 		for (Command cmd : Command.values()) {
@@ -491,7 +399,7 @@ public class GameEngine {
 		return itemList.toString();
 	}
 
-	private String validateCommand(Command command, ArrayList<String> arguments) {
+	public String validateCommand(Command command, ArrayList<String> arguments) {
 		String error = validateCommandState(command);
 		if (error != null) return error;
 
