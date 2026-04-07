@@ -77,7 +77,7 @@ public class InitialData {
 		}
 	}
 
-	public static ArrayList<Room> getRooms() throws IOException {
+	public static HashMap<Integer, Room> getRooms() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 

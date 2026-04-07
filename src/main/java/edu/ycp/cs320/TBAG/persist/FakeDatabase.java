@@ -15,6 +15,7 @@ public class FakeDatabase implements Database {
 	@Override
 	public void loadInitialData() {
 		try {
+			rooms = InitialData.getRooms();
 			player = InitialData.getPlayer();
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
