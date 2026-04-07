@@ -95,7 +95,20 @@ public class GameEngine {
 	 * Returns the description of the current room.
 	 */
 	public String look(ArrayList<String> arguments) {
-		return this.player.getRoom().getDescription() + "\n";
+		Room playerRoom = player.getRoom();
+		StringBuilder output = new StringBuilder(playerRoom.getDescription());
+
+		if (!playerRoom.getNpcs().isEmpty()) {
+			output.append("\nYou see:\n");
+		}
+		for (NPC npc : playerRoom.getNpcs().values()) {
+			output
+				.append("-  ")
+				.append(npc.getName())
+				.append("\n");
+		}
+
+		return output + "\n";
 	}
 
 	/**
