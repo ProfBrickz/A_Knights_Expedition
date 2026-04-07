@@ -122,17 +122,17 @@ public enum Command {
 		"buy",
 		GameEngine::buyItem,
 		"Purchase an item from the current NPC's shop",
-		List.of("Item name", "Amount"),
+		List.of("Amount", "Item name"),
 		List.of(PlayerState.TALKING_TO_NPC),
-		List.of("buy sword 1", "buy potion 3", "buy \"Diamond pickaxe\" 5")
+		List.of("buy 1 sword", "buy 3 potion", "buy 5 \"Diamond pickaxe\"")
 	),
 	SELL(
 		"sell",
 		GameEngine::sellItem,
 		"Sells an item from the player's inventory to the current NPC",
-		List.of("Item name", "Amount"),
+		List.of("Amount", "Item name"),
 		List.of(PlayerState.TALKING_TO_NPC),
-		List.of("sell sword 1", "sell potion 2", "sell \"Diamond pickaxe\" 5")
+		List.of("sell 1 sword", "sell 2 potion", "sell 5 \"Diamond pickaxe\"")
 	),
 	SELL_ALL(
 		"sell-all",

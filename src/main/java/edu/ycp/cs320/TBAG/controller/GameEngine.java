@@ -64,7 +64,7 @@ public class GameEngine {
 			}
 		}
 		if (output.isEmpty()) output = "Sorry, command not recognized.\n";
-		
+
 		return output + "\n";
 	}
 
@@ -112,7 +112,7 @@ public class GameEngine {
 	 */
 	public String inspectItem(ArrayList<String> arguments) {
 		String itemName = arguments.get(0);
-		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
 		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
 
 		return playerController.inspectItem(item) + "\n";
@@ -133,8 +133,8 @@ public class GameEngine {
 	public String pickupItem(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
 
-		String itemName = arguments.get(0);
-		Item item = inventoryController.getItemByName(playerRoom.getInventory(), itemName);
+		String itemName = arguments.get(0).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(playerRoom.getInventory(), itemName);
 		if (item == null) return "This room does not have a " + itemName + ".\n";
 
 		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
@@ -178,8 +178,8 @@ public class GameEngine {
 	 * Checks if the player has the item and drops it in the current room.
 	 */
 	public String dropItem(ArrayList<String> arguments) {
-		String itemName = arguments.get(0);
-		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		String itemName = arguments.get(0).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
 		if (item == null) return "You do not have a " + itemName + ".\n";
 
 		inventoryController.removeItem(player.getInventory(), item, item.getAmount());
@@ -227,7 +227,7 @@ public class GameEngine {
 		Room playerRoom = player.getRoom();
 
 		String npcName = arguments.get(0);
-		NPC npc = roomController.getNPCByName(playerRoom, npcName);
+		NPC npc = roomController.getNPCByNameCaseInsensitive(playerRoom, npcName);
 		if (npc == null) return npcName + " is not in this room.\n";
 
 		player.setCurrentNPC(npc);
@@ -273,16 +273,16 @@ public class GameEngine {
 		NPC npc = player.getCurrentNPC();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
-		String itemName = arguments.get(0);
-		Item item = inventoryController.getItemByName(npc.getInventory(), itemName);
+		String itemName = arguments.get(1).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(npc.getInventory(), itemName);
 		if (item == null) return "I am not selling any " + itemName + "s.\n";
 
 		Integer amount = null;
 		try {
-			amount = Integer.parseInt(arguments.get(1));
+			amount = Integer.parseInt(arguments.get(0));
 		} catch (NumberFormatException ignored) {
 		}
-		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
+		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
 		if (player.getCoins() < item.getPrice() * amount) {
 			return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
 		}
@@ -296,16 +296,16 @@ public class GameEngine {
 		NPC npc = player.getCurrentNPC();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
-		String itemName = arguments.get(0);
-		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		String itemName = arguments.get(1).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
 		if (item == null) return "You do not have any " + itemName + " to sell.\n";
 
 		Integer amount = null;
 		try {
-			amount = Integer.parseInt(arguments.get(1));
+			amount = Integer.parseInt(arguments.get(0));
 		} catch (NumberFormatException ignored) {
 		}
-		if (amount == null) return arguments.get(1) + " is not a valid amount.\n";
+		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
 		if (item.getAmount() < amount) {
 			return "You do not have " + amount + " of " + item.getName() + ".\n";
 		}
@@ -319,8 +319,8 @@ public class GameEngine {
 		NPC npc = player.getCurrentNPC();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
-		String itemName = arguments.get(0);
-		Item item = inventoryController.getItemByName(player.getInventory(), itemName);
+		String itemName = arguments.get(0).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
 		if (item == null) return "You do not have any " + itemName + " to sell.\n";
 
 		Integer amount = item.getAmount();

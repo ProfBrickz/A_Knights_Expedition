@@ -41,6 +41,16 @@ public class RoomController {
 		return null;
 	}
 
+	public NPC getNPCByNameCaseInsensitive(Room room, String npcName) {
+		npcName = npcName.toLowerCase();
+
+		for (NPC npc : room.getNpcs().values()) {
+			if (npc.getName().toLowerCase().equals(npcName)) return npc;
+		}
+
+		return null;
+	}
+
 	//load room function: takes in database of rooms + ID of room to access it and build it locally
 	//will need to be redone with database once that is added
 	public void loadRoom(Integer id, HashMap<Integer, Room> loadList) {
