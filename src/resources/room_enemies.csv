@@ -1,3 +1,4 @@
 sep=|
-enemy_id|item_id|amount
+room_id|enemy_id|amount
 String|String|Integer
+
