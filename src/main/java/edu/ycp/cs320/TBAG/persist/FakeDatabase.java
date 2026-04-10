@@ -7,16 +7,18 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 
 public class FakeDatabase implements Database {
+	private HashMap<Integer, String> dialog;
 	private Player player;
-	private HashMap<Integer, Room> rooms = new HashMap<>();
+	private HashMap<Integer, Room> rooms;
 	// A map between a room's id and (a map of its directions and connections)
-	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
+	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
 
 
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
 		try {
+			dialog = InitialData.getDialog();
 			rooms = InitialData.getRooms();
 			player = InitialData.getPlayer();
 			roomConnections = InitialData.getRoomConnections();
@@ -27,6 +29,11 @@ public class FakeDatabase implements Database {
 		}
 	}
 
+	
+	@Override
+	public HashMap<Integer, String> getDialog() {
+		return dialog;
+	}
 
 	// Player-related methods
 	@Override

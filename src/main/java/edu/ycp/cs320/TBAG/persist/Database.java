@@ -9,6 +9,7 @@ public interface Database {
 	// General purpose methods
 	public void loadInitialData();
 
+	public HashMap<Integer, String> getDialog();
 
 	// Player-related methods
 

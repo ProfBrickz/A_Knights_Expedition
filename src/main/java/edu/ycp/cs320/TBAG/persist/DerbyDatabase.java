@@ -32,11 +32,13 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
+				HashMap<Integer, String> dialog;
 				Player player;
 				HashMap<Integer, Room> rooms;
 				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
 
 				try {
+					dialog = InitialData.getDialog();
 					player = InitialData.getPlayer();
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
@@ -46,36 +48,48 @@ public class DerbyDatabase implements Database {
 					throw new IllegalStateException("Couldn't read initial data", exception);
 				}
 
-				PreparedStatement addPlayer = null;
-				PreparedStatement addRooms = null;
-				PreparedStatement addRoomConnections = null;
+				PreparedStatement addDialogStatement = null;
+				PreparedStatement addPlayerStatement = null;
+				PreparedStatement addRoomsStatement = null;
+				PreparedStatement addRoomConnectionsStatement = null;
 
 				try {
-					addPlayer = connection.prepareStatement("""
+					addDialogStatement = connection.prepareStatement("""
+							INSERT INTO dialog (id, text)
+							VALUES (?, ?)
+						""");
+					for (Map.Entry<Integer, String> entry : dialog.entrySet()) {
+						addDialogStatement.setInt(1, entry.getKey());
+						addDialogStatement.setString(2, entry.getValue());
+						addRoomsStatement.addBatch();
+					}
+					addDialogStatement.executeBatch();
+
+					addPlayerStatement = connection.prepareStatement("""
 							INSERT INTO players (room_id, state, coins, max_health, health)
 							VALUES (?, ?, ?, ?, ?);
 						""");
-					addPlayer.setInt(1, player.getRoom().getID());
-					addPlayer.setInt(2, player.getState().ordinal());
-					addPlayer.setInt(3, player.getCoins());
-					addPlayer.setInt(4, player.getMaxHealth());
-					addPlayer.setInt(5, player.getHealth());
-					addPlayer.executeUpdate();
+					addPlayerStatement.setInt(1, player.getRoom().getID());
+					addPlayerStatement.setInt(2, player.getState().ordinal());
+					addPlayerStatement.setInt(3, player.getCoins());
+					addPlayerStatement.setInt(4, player.getMaxHealth());
+					addPlayerStatement.setInt(5, player.getHealth());
+					addPlayerStatement.executeUpdate();
 
-					addRooms = connection.prepareStatement("""
+					addRoomsStatement = connection.prepareStatement("""
 							INSERT INTO rooms (id, name, description, asset_name)
 							VALUES (?, ?, ?, ?);
 						""");
 					for (Room room : rooms.values()) {
-						addRooms.setInt(1, room.getID());
-						addRooms.setString(2, room.getName());
-						addRooms.setString(3, room.getDescription());
-						addRooms.setString(4, room.getAssetName());
-						addRooms.addBatch();
+						addRoomsStatement.setInt(1, room.getID());
+						addRoomsStatement.setString(2, room.getName());
+						addRoomsStatement.setString(3, room.getDescription());
+						addRoomsStatement.setString(4, room.getAssetName());
+						addRoomsStatement.addBatch();
 					}
-					addRooms.executeBatch();
+					addRoomsStatement.executeBatch();
 
-					addRoomConnections = connection.prepareStatement("""
+					addRoomConnectionsStatement = connection.prepareStatement("""
 							INSERT INTO room_connections (
 								source_id,
 								destination_id,
@@ -91,20 +105,21 @@ public class DerbyDatabase implements Database {
 							String direction = entry1.getKey();
 							RoomConnection roomConnection = entry1.getValue();
 
-							addRoomConnections.setInt(1, roomId);
-							addRoomConnections.setInt(2, roomConnection.getRoom().getID());
-							addRoomConnections.setString(3, direction);
-							addRoomConnections.setString(4, roomConnection.getDescription());
-							addRoomConnections.addBatch();
+							addRoomConnectionsStatement.setInt(1, roomId);
+							addRoomConnectionsStatement.setInt(2, roomConnection.getRoom().getID());
+							addRoomConnectionsStatement.setString(3, direction);
+							addRoomConnectionsStatement.setString(4, roomConnection.getDescription());
+							addRoomConnectionsStatement.addBatch();
 						}
 					}
-					addRoomConnections.executeBatch();
+					addRoomConnectionsStatement.executeBatch();
 
 					return true;
 				} finally {
-					DBUtil.closeQuietly(addPlayer);
-					DBUtil.closeQuietly(addRooms);
-					DBUtil.closeQuietly(addRoomConnections);
+					DBUtil.closeQuietly(addDialogStatement);
+					DBUtil.closeQuietly(addPlayerStatement);
+					DBUtil.closeQuietly(addRoomsStatement);
+					DBUtil.closeQuietly(addRoomConnectionsStatement);
 				}
 			}
 		});
@@ -114,11 +129,20 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement createDialogTableStatement = null;
 				PreparedStatement createPlayerTableStatement = null;
 				PreparedStatement createRoomsTableStatement = null;
 				PreparedStatement createRoomConnectionsTableStatement = null;
 
 				try {
+					createDialogTableStatement = connection.prepareStatement("""
+							CREATE TABLE dialog (
+								id INTEGER PRIMARY KEY,
+								text VARCHAR NOT NULL
+							);
+						""");
+					createDialogTableStatement.executeUpdate();
+
 					createPlayerTableStatement = connection.prepareStatement("""
 							CREATE TABLE player (
 								room_id INTEGER NOT NULL,
@@ -163,6 +187,39 @@ public class DerbyDatabase implements Database {
 		});
 	}
 
+
+	@Override
+	public HashMap<Integer, String> getDialog() {
+		return executeTransaction(new Transaction<HashMap<Integer, String>>() {
+			@Override
+			public HashMap<Integer, String> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT id, text
+							FROM dialog;
+						""");
+					resultSet = statement.executeQuery();
+
+					HashMap<Integer, String> result = new HashMap<>();
+
+					while (resultSet.next()) {
+						Integer id = resultSet.getInt(1);
+						String text = resultSet.getString(2);
+
+						result.put(id, text);
+					}
+
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
+	}
 
 	// Player-related methods
 	@Override
