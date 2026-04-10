@@ -67,23 +67,35 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
-				PreparedStatement addPlayerTableStatement = null;
+				PreparedStatement createPlayerTableStatement = null;
+				PreparedStatement createRoomsTableStatement = null;
 
 				try {
-					addPlayerTableStatement = connection.prepareStatement("""
+					createPlayerTableStatement = connection.prepareStatement("""
 							CREATE TABLE player (
-								room_id INTEGER NOT NULL
-								state INTEGER NOT NULL
-								coins INTEGER NOT NULL
-								max_health INTEGER NOT NULL
+								room_id INTEGER NOT NULL,
+								state INTEGER NOT NULL,
+								coins INTEGER NOT NULL,
+								max_health INTEGER NOT NULL,
 								health INTEGER NOT NULL
 							);
 						""");
-					addPlayerTableStatement.executeUpdate();
+					createPlayerTableStatement.executeUpdate();
+
+					createRoomsTableStatement = connection.prepareStatement("""
+							CREATE TABLE rooms (
+								id INTEGER PRIMARY KEY,
+								name VARCHAR NOT NULL,
+								description VARCHAR NOT NULL,
+								asset_name VARCHAR NOT NULL
+							);
+						""");
+					createRoomsTableStatement.executeUpdate();
 
 					return true;
 				} finally {
-					DBUtil.closeQuietly(addPlayerTableStatement);
+					DBUtil.closeQuietly(createPlayerTableStatement);
+					DBUtil.closeQuietly(createRoomsTableStatement);
 				}
 			}
 		});
@@ -164,7 +176,37 @@ public class DerbyDatabase implements Database {
 	// Room-related methods
 	@Override
 	public Room getRoomById(Integer id) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return executeTransaction(new Transaction<Room>() {
+			@Override
+			public Room execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT id, name, description, asset_name
+							FROM rooms
+							WHERE id = ?
+						""");
+					statement.setInt(1, id);
+					resultSet = statement.executeQuery();
+
+					if (!resultSet.next()) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					Integer databaseId = resultSet.getInt(1);
+					String name = resultSet.getString(2);
+					String description = resultSet.getNString(3);
+					String assetName = resultSet.getNString(4);
+
+					return new Room(databaseId, name, description, assetName);
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override
