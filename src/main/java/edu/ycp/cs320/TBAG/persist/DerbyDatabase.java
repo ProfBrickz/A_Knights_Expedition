@@ -178,12 +178,127 @@ public class DerbyDatabase implements Database {
 
 	@Override
 	public void addItemToPlayer(Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (item == null) {
+			return;
+		}
+
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement selectStatement = null;
+				PreparedStatement insertStatement = null;
+				PreparedStatement updateStatement = null;
+				ResultSet resultSet = null;
+
+				try {
+					selectStatement = connection.prepareStatement("""
+							SELECT amount
+							FROM player_items
+							WHERE item_id = ?
+						""");
+					selectStatement.setInt(1, item.getId());
+					resultSet = selectStatement.executeQuery();
+
+					int delta = item.getAmount() == null ? 1 : item.getAmount();
+					if (delta <= 0) {
+						return true;
+					}
+
+					if (resultSet.next()) {
+						int currentAmount = resultSet.getInt(1);
+						int newAmount = currentAmount + delta;
+
+						updateStatement = connection.prepareStatement("""
+								UPDATE player_items
+								SET amount = ?
+								WHERE item_id = ?
+							""");
+						updateStatement.setInt(1, newAmount);
+						updateStatement.setInt(2, item.getId());
+						updateStatement.executeUpdate();
+					} else {
+						insertStatement = connection.prepareStatement("""
+								INSERT INTO player_items (item_id, amount)
+								VALUES (?, ?)
+							""");
+						insertStatement.setInt(1, item.getId());
+						insertStatement.setInt(2, delta);
+						insertStatement.executeUpdate();
+					}
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(resultSet);
+					DBUtil.closeQuietly(selectStatement);
+					DBUtil.closeQuietly(insertStatement);
+					DBUtil.closeQuietly(updateStatement);
+				}
+			}
+		});
 	}
 
 	@Override
 	public void removeItemFromPlayer(Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (item == null) {
+			return;
+		}
+
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement selectStatement = null;
+				PreparedStatement updateStatement = null;
+				PreparedStatement deleteStatement = null;
+				ResultSet resultSet = null;
+
+				try {
+					selectStatement = connection.prepareStatement("""
+							SELECT amount
+							FROM player_items
+							WHERE item_id = ?
+						""");
+					selectStatement.setInt(1, item.getId());
+					resultSet = selectStatement.executeQuery();
+
+					if (!resultSet.next()) {
+						return true;
+					}
+
+					int delta = item.getAmount() == null ? 1 : item.getAmount();
+					if (delta <= 0) {
+						return true;
+					}
+
+					int currentAmount = resultSet.getInt(1);
+					int newAmount = currentAmount - delta;
+
+					if (newAmount > 0) {
+						updateStatement = connection.prepareStatement("""
+								UPDATE player_items
+								SET amount = ?
+								WHERE item_id = ?
+							""");
+						updateStatement.setInt(1, newAmount);
+						updateStatement.setInt(2, item.getId());
+						updateStatement.executeUpdate();
+					} else {
+						deleteStatement = connection.prepareStatement("""
+								DELETE FROM player_items
+								WHERE item_id = ?
+							""");
+						deleteStatement.setInt(1, item.getId());
+						deleteStatement.executeUpdate();
+					}
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(resultSet);
+					DBUtil.closeQuietly(selectStatement);
+					DBUtil.closeQuietly(updateStatement);
+					DBUtil.closeQuietly(deleteStatement);
+				}
+			}
+		});
 	}
 
 
@@ -283,12 +398,80 @@ public class DerbyDatabase implements Database {
 	// Item-related methods
 	@Override
 	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet) {
-		throw new UnsupportedOperationException("TODO - implement");
+		HashMap<Integer, Item> items = new HashMap<>();
+
+		try {
+			while (resultSet.next()) {
+				Integer id = resultSet.getInt("id");
+				String name = resultSet.getString("name");
+				String description = resultSet.getString("description");
+				Integer value = resultSet.getInt("value");
+				String type = resultSet.getString("type");
+				Integer amount = resultSet.getInt("amount");
+
+				if (resultSet.wasNull()) {
+					amount = 1;
+				}
+
+				Item item;
+				if (type != null) {
+					type = type.trim().toLowerCase();
+				}
+
+				if ("weapon".equals(type)) {
+					item = new Weapon(id, name, description, value, amount);
+				} else if ("armor".equals(type)) {
+					Integer defense = resultSet.getInt("defense");
+					Boolean active = resultSet.getBoolean("active_armor");
+					item = new Armor(id, name, description, defense, active, value, amount);
+				} else if ("healing".equals(type)) {
+					Integer healAmount = resultSet.getInt("heal_amount");
+					item = new HealingItem(id, name, description, healAmount, value, amount);
+				} else {
+					item = new Item(id, name, description, value, amount);
+				}
+
+				items.put(id, item);
+			}
+		} catch (SQLException e) {
+			throw new PersistenceException("Could not load items", e);
+		}
+
+		return items;
 	}
 
 	@Override
 	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return executeTransaction(new Transaction<HashMap<Integer, Item>>() {
+			@Override
+			public HashMap<Integer, Item> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								items.id,
+								items.name,
+								items.description,
+								items.value,
+								items.type,
+								items.heal_amount,
+								items.defense,
+								items.active_armor,
+								player_items.amount
+							FROM player_items, items
+							WHERE items.id = player_items.item_id
+						""");
+					resultSet = statement.executeQuery();
+
+					return getItemsFromResultSet(resultSet);
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override

@@ -19,6 +19,95 @@ public class InitialData {
 	private static final HashMap<String, Integer> npcIds = new HashMap<>();
 	private static final HashMap<String, Integer> enemyIds = new HashMap<>();
 
+	private static void ensureItemsLoaded() throws IOException {
+		if (!items.isEmpty()) {
+			return;
+		}
+
+		ReadCSV itemsFile = new ReadCSV("items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = itemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String itemKey = iterator.next();
+				String name = iterator.next();
+				String description = iterator.next();
+				Integer value = Integer.parseInt(iterator.next());
+				String type = iterator.next();
+				String healAmountString = iterator.next();
+				String defenseString = iterator.next();
+				String activeArmorString = iterator.next();
+
+				if (itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"Duplicate item id \"" + itemKey + "\" in items CSV."
+					);
+				}
+
+				Integer id;
+				try {
+					id = Integer.parseInt(itemKey);
+				} catch (NumberFormatException exception) {
+					id = 0;
+					while (items.containsKey(id) || itemIds.containsValue(id)) {
+						id++;
+					}
+				}
+
+				Item item;
+				String normalizedType = type == null ? "" : type.trim().toLowerCase();
+
+				if ("weapon".equals(normalizedType)) {
+					item = new Weapon(id, name, description, value);
+				} else if ("armor".equals(normalizedType)) {
+					Integer defense = Integer.parseInt(defenseString);
+					Boolean active = Boolean.parseBoolean(activeArmorString);
+					item = new Armor(id, name, description, defense, active, value);
+				} else if ("healing".equals(normalizedType)) {
+					Integer healAmount = Integer.parseInt(healAmountString);
+					item = new HealingItem(id, name, description, healAmount, value);
+				} else {
+					item = new Item(id, name, description, value);
+				}
+
+				items.put(id, item);
+				itemIds.put(itemKey, id);
+			}
+		} finally {
+			itemsFile.close();
+		}
+	}
+
+	private static Item copyItemWithAmount(Item baseItem, Integer amount) {
+		if (baseItem == null) {
+			return null;
+		}
+
+		Integer id = baseItem.getId();
+		String name = baseItem.getName();
+		String description = baseItem.getDescription();
+		Integer value = baseItem.getValue();
+
+		Item copy;
+		if (baseItem instanceof Weapon) {
+			copy = new Weapon(id, name, description, value, amount);
+		} else if (baseItem instanceof Armor) {
+			Armor armor = (Armor) baseItem;
+			copy = new Armor(id, name, description, armor.getDefense(), armor.getActive(), value, amount);
+		} else if (baseItem instanceof HealingItem) {
+			HealingItem healingItem = (HealingItem) baseItem;
+			copy = new HealingItem(id, name, description, healingItem.getHealAmount(), value, amount);
+		} else {
+			copy = new Item(id, name, description, value, amount);
+		}
+
+		copy.setAssetName(baseItem.getAssetName());
+		return copy;
+	}
 
 	public static HashMap<Integer, String> getDialog() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
@@ -88,7 +177,44 @@ public class InitialData {
 	 * Returns a list of the players items
 	 */
 	public static ArrayList<Item> getPlayerItems() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureItemsLoaded();
+
+		ArrayList<Item> result = new ArrayList<>();
+		ReadCSV playerItemsFile = new ReadCSV("player_items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = playerItemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String itemKey = iterator.next();
+				Integer amount = Integer.parseInt(iterator.next());
+
+				if (!itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"Player item \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Integer itemId = itemIds.get(itemKey);
+				Item baseItem = items.get(itemId);
+				if (baseItem == null) {
+					throw new IllegalStateException(
+						"Player item \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Item item = copyItemWithAmount(baseItem, amount);
+				if (item != null) {
+					result.add(item);
+				}
+			}
+
+			return result;
+		} finally {
+			playerItemsFile.close();
+		}
 	}
 
 	/**
@@ -110,7 +236,59 @@ public class InitialData {
 	 * Returns a map between room ids and a list of items
 	 */
 	public static HashMap<Integer, ArrayList<Item>> getRoomItems() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureItemsLoaded();
+
+		HashMap<Integer, ArrayList<Item>> result = new HashMap<>();
+		ReadCSV roomItemsFile = new ReadCSV("room_items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = roomItemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String roomKey = iterator.next();
+				String itemKey = iterator.next();
+				Integer amount = Integer.parseInt(iterator.next());
+
+				if (!roomIds.containsKey(roomKey)) {
+					throw new IllegalStateException(
+						"The room with the id \"" + roomKey + "\" does not exist in the rooms CSV."
+					);
+				}
+
+				if (!itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Integer roomId = roomIds.get(roomKey);
+				Integer itemId = itemIds.get(itemKey);
+				Item baseItem = items.get(itemId);
+				if (baseItem == null) {
+					throw new IllegalStateException(
+						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				ArrayList<Item> roomItems = result.get(roomId);
+				if (roomItems == null) {
+					roomItems = new ArrayList<>();
+					result.put(roomId, roomItems);
+				}
+
+				Item item = copyItemWithAmount(baseItem, amount);
+				if (item != null) {
+					roomItems.add(item);
+				}
+			}
+
+			return result;
+		} finally {
+			roomItemsFile.close();
+		}
 	}
 
 	/**

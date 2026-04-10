@@ -4,6 +4,7 @@ import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public class FakeDatabase implements Database {
@@ -59,12 +60,56 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public void addItemToPlayer(Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (item == null || player == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = player.getInventory().getItems().get(itemId);
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+
+		if (delta <= 0) {
+			return;
+		}
+
+		if (existing == null) {
+			player.getInventory().addItem(item);
+		} else {
+			existing.setAmount(existing.getAmount() + delta);
+		}
 	}
 
 	@Override
 	public void removeItemFromPlayer(Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (item == null || player == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = player.getInventory().getItems().get(itemId);
+		if (existing == null) {
+			return;
+		}
+
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+		if (delta <= 0) {
+			return;
+		}
+
+		int newAmount = existing.getAmount() - delta;
+		if (newAmount > 0) {
+			existing.setAmount(newAmount);
+		} else {
+			player.getInventory().removeItem(existing);
+		}
 	}
 
 
@@ -93,12 +138,59 @@ public class FakeDatabase implements Database {
 	// Item-related methods
 	@Override
 	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet) {
-		throw new UnsupportedOperationException("TODO - implement");
+		HashMap<Integer, Item> items = new HashMap<>();
+
+		if (resultSet == null) {
+			return items;
+		}
+
+		try {
+			while (resultSet.next()) {
+				Integer id = resultSet.getInt("id");
+				String name = resultSet.getString("name");
+				String description = resultSet.getString("description");
+				Integer value = resultSet.getInt("value");
+				String type = resultSet.getString("type");
+				Integer amount = resultSet.getInt("amount");
+
+				if (resultSet.wasNull()) {
+					amount = 1;
+				}
+
+				Item item;
+				if (type != null) {
+					type = type.trim().toLowerCase();
+				}
+
+				if ("weapon".equals(type)) {
+					item = new Weapon(id, name, description, value, amount);
+				} else if ("armor".equals(type)) {
+					Integer defense = resultSet.getInt("defense");
+					Boolean active = resultSet.getBoolean("active_armor");
+					item = new Armor(id, name, description, defense, active, value, amount);
+				} else if ("healing".equals(type)) {
+					Integer healAmount = resultSet.getInt("heal_amount");
+					item = new HealingItem(id, name, description, healAmount, value, amount);
+				} else {
+					item = new Item(id, name, description, value, amount);
+				}
+
+				items.put(id, item);
+			}
+		} catch (SQLException e) {
+			throw new PersistenceException("Could not load items", e);
+		}
+
+		return items;
 	}
 
 	@Override
 	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (player == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(player.getInventory().getItems());
 	}
 
 	@Override
