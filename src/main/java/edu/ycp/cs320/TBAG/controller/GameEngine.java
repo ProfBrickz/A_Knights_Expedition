@@ -1,6 +1,9 @@
 package edu.ycp.cs320.TBAG.controller;
 
 import edu.ycp.cs320.TBAG.model.*;
+import edu.ycp.cs320.TBAG.persist.Database;
+import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
+import edu.ycp.cs320.TBAG.persist.FakeDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +16,7 @@ import java.util.Iterator;
 public class GameEngine {
 	private final Player player;
 	private final HashMap<Integer, Room> rooms;
-
+	private final Database database;
 	private final PlayerController playerController;
 	private final RoomController roomController;
 	private final BattleEntityController battleEntityController = new BattleEntityController();
@@ -43,6 +46,9 @@ public class GameEngine {
 		if (this.player.getRoom() == null) {
 			this.player.setRoom(rooms.get(defaultRoom));
 		}
+
+		DatabaseProvider.setInstance(new FakeDatabase());
+		database = DatabaseProvider.getInstance();
 	}
 
 
@@ -78,6 +84,8 @@ public class GameEngine {
 	public String move(ArrayList<String> arguments) {
 		String direction = arguments.get(0).toLowerCase();
 
+		Player player = database.getPlayer();
+
 		if (!this.roomController.isValidDirection(player.getRoom(), direction)) {
 			return "Invalid direction for this room\n";
 		}
@@ -86,6 +94,8 @@ public class GameEngine {
 		if (!successfulMove) {
 			return "Move failed, either player, or the room does not exist\n";
 		}
+
+		database.setPlayerRoom(player.getRoom().getID());
 
 		return this.player.getRoom().getDescription() + "\n";
 	}
