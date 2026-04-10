@@ -77,6 +77,9 @@ public class InitialData {
 		}
 	}
 
+	/**
+	 * Will also get the items for each room
+	 */
 	public static HashMap<Integer, Room> getRooms() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
@@ -85,6 +88,9 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	/**
+	 * Will also get the items for each NPC
+	 */
 	public static ArrayList<NPC> getNPCs() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
@@ -93,6 +99,9 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	/**
+	 * Will also get the items for each enemy
+	 */
 	public static ArrayList<Enemy> getEnemies() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}

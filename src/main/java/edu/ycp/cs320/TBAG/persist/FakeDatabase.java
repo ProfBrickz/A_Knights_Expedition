@@ -51,17 +51,17 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
+	public void setPlayerNPC(NPC npc) {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	@Override
 	public void addItemToPlayer(Item item) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
 	@Override
 	public void removeItemFromPlayer(Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
-
-	@Override
-	public void setPlayerNPC(NPC npc) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
@@ -95,7 +95,7 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForPlayer() {
+	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
