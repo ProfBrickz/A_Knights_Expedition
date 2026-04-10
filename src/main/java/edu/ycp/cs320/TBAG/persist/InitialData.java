@@ -100,9 +100,8 @@ public class InitialData {
 
 	/**
 	 * Returns a list of maps between room ids and a list of room connection
-	 * Each connection is a room connection (without a room) and a room id
 	 */
-	public static HashMap<Integer, ArrayList<Pair<RoomConnection, Integer>>> getRoomConnections() throws IOException {
+	public static HashMap<Integer, ArrayList<RoomConnection>> getRoomConnections() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
