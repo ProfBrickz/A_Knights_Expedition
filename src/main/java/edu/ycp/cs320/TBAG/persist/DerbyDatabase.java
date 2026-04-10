@@ -132,17 +132,86 @@ public class DerbyDatabase implements Database {
 
 	@Override
 	public void setPlayerRoom(Integer roomId) {
-		throw new UnsupportedOperationException("TODO - implement");
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET room_id = ?"
+					);
+
+					statement.setInt(1, roomId);
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
 	}
 
 	@Override
 	public void setPlayerCoins(Integer coins) {
-		throw new UnsupportedOperationException("TODO - implement");
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET coins = ?"
+					);
+
+					statement.setInt(1, coins);
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
 	}
 
 	@Override
 	public void setPlayerState(PlayerState playerState) {
-		throw new UnsupportedOperationException("TODO - implement");
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET state = ?"
+					);
+
+					statement.setString(1, String.valueOf(playerState));
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
 	}
 
 	@Override
