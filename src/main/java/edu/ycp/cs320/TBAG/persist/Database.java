@@ -33,6 +33,9 @@ public interface Database {
 	// Room-related methods
 	public Room getRoomById(Integer id);
 
+	/**
+	 * Returns a map between a room's directions and connections
+	 */
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room);
 
 	public void addItemToRoom(Room room, Item item);

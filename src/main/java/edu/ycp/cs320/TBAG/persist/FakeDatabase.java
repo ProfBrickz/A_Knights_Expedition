@@ -9,8 +9,8 @@ import java.util.HashMap;
 public class FakeDatabase implements Database {
 	private Player player;
 	private HashMap<Integer, Room> rooms = new HashMap<>();
-	//
-	private HashMap<Integer, RoomConnection> roomConnections = new HashMap<>();
+	// A map between a room's id and (a map of its directions and connections)
+	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
 
 
 	// General purpose methods
@@ -76,7 +76,7 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return roomConnections.get(room.getID());
 	}
 
 	@Override

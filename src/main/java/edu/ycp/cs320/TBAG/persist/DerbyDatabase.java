@@ -69,6 +69,7 @@ public class DerbyDatabase implements Database {
 			public Boolean execute(Connection connection) throws SQLException {
 				PreparedStatement createPlayerTableStatement = null;
 				PreparedStatement createRoomsTableStatement = null;
+				PreparedStatement createRoomConnectionsTableStatement = null;
 
 				try {
 					createPlayerTableStatement = connection.prepareStatement("""
@@ -92,10 +93,23 @@ public class DerbyDatabase implements Database {
 						""");
 					createRoomsTableStatement.executeUpdate();
 
+					createRoomConnectionsTableStatement = connection.prepareStatement("""
+							CREATE TABLE room_connections (
+								source_id INTEGER,
+								destination_id INTEGER,
+								description VARCHAR NOT NULL,
+								locked BOOLEAN,
+								locked_message VARCHAR,
+								PRIMARY KEY (source_id, destination_id)
+							);
+						""");
+					createRoomConnectionsTableStatement.execute();
+
 					return true;
 				} finally {
 					DBUtil.closeQuietly(createPlayerTableStatement);
 					DBUtil.closeQuietly(createRoomsTableStatement);
+					DBUtil.closeQuietly(createRoomConnectionsTableStatement);
 				}
 			}
 		});
@@ -192,7 +206,7 @@ public class DerbyDatabase implements Database {
 					resultSet = statement.executeQuery();
 
 					if (!resultSet.next()) {
-						throw new IllegalStateException("No player exists");
+						return null;
 					}
 
 					Integer databaseId = resultSet.getInt(1);
@@ -211,7 +225,48 @@ public class DerbyDatabase implements Database {
 
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return executeTransaction(new Transaction<HashMap<String, RoomConnection>>() {
+			@Override
+			public HashMap<String, RoomConnection> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								connection.description,
+								connection.direction,
+								room.id,
+								room.name,
+								room.description
+							FROM room_connections connection, rooms room
+							WHERE room.id = connection.destination_id AND connection.source_id = ?
+						""");
+					statement.setInt(1, room.getID());
+					resultSet = statement.executeQuery();
+
+					HashMap<String, RoomConnection> result = new HashMap<>();
+
+					while (resultSet.next()) {
+						String connectionDescription = resultSet.getString(1);
+						String direction = resultSet.getString(2);
+						Integer roomId = resultSet.getInt(3);
+						String roomName = resultSet.getString(4);
+						String roomDescription = resultSet.getString(5);
+
+						Room room = new Room(roomId, roomName, roomDescription);
+						RoomConnection roomConnection = new RoomConnection(room, connectionDescription);
+
+						result.put(direction, roomConnection);
+					}
+
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override

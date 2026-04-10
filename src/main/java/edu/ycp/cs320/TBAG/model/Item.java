@@ -13,10 +13,8 @@ public class Item {
 		this.value = value;
 		this.amount = amount;
 
-		this.assetName = assetName;
-		if (this.assetName == null || this.assetName.isEmpty()) {
-			this.assetName = "fixIt.png";
-		}
+		if (assetName == null || assetName.isEmpty()) this.assetName = "fixIt.png";
+		else this.assetName = assetName;
 	}
 
 	public Item(Integer id, String name, String description, Integer value, Integer amount) {
