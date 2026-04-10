@@ -1,5 +1,5 @@
-id,text
-Integer,String
-0,"If your reading this, we did something wrong ~L"
-1,"I'm Euroland, the blacksmith of New Brambleton. What do you want?"
-2,"Hello adventure, I'm Morshu and if you want anything come to me, if you have the coin."
+text
+String
+If your reading this, we did something wrong ~L
+I'm Euroland, the blacksmith of New Brambleton. What do you want?
+Hello adventure, I'm Morshu and if you want anything come to me, if you have the coin.

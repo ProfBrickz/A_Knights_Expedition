@@ -67,23 +67,49 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
-				PreparedStatement addPlayerTableStatement = null;
+				PreparedStatement createPlayerTableStatement = null;
+				PreparedStatement createRoomsTableStatement = null;
+				PreparedStatement createRoomConnectionsTableStatement = null;
 
 				try {
-					addPlayerTableStatement = connection.prepareStatement("""
+					createPlayerTableStatement = connection.prepareStatement("""
 							CREATE TABLE player (
-								room_id INTEGER NOT NULL
-								state INTEGER NOT NULL
-								coins INTEGER NOT NULL
-								max_health INTEGER NOT NULL
+								room_id INTEGER NOT NULL,
+								state INTEGER NOT NULL,
+								coins INTEGER NOT NULL,
+								max_health INTEGER NOT NULL,
 								health INTEGER NOT NULL
 							);
 						""");
-					addPlayerTableStatement.executeUpdate();
+					createPlayerTableStatement.executeUpdate();
+
+					createRoomsTableStatement = connection.prepareStatement("""
+							CREATE TABLE rooms (
+								id INTEGER PRIMARY KEY,
+								name VARCHAR NOT NULL,
+								description VARCHAR NOT NULL,
+								asset_name VARCHAR NOT NULL
+							);
+						""");
+					createRoomsTableStatement.executeUpdate();
+
+					createRoomConnectionsTableStatement = connection.prepareStatement("""
+							CREATE TABLE room_connections (
+								source_id INTEGER,
+								destination_id INTEGER,
+								description VARCHAR NOT NULL,
+								locked BOOLEAN,
+								locked_message VARCHAR,
+								PRIMARY KEY (source_id, destination_id)
+							);
+						""");
+					createRoomConnectionsTableStatement.execute();
 
 					return true;
 				} finally {
-					DBUtil.closeQuietly(addPlayerTableStatement);
+					DBUtil.closeQuietly(createPlayerTableStatement);
+					DBUtil.closeQuietly(createRoomsTableStatement);
+					DBUtil.closeQuietly(createRoomConnectionsTableStatement);
 				}
 			}
 		});
@@ -146,6 +172,11 @@ public class DerbyDatabase implements Database {
 	}
 
 	@Override
+	public void setPlayerNPC(NPC npc) {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	@Override
 	public void addItemToPlayer(Item item) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
@@ -155,21 +186,87 @@ public class DerbyDatabase implements Database {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	@Override
-	public void setPlayerNPC(NPC npc) {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
-
 
 	// Room-related methods
 	@Override
 	public Room getRoomById(Integer id) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return executeTransaction(new Transaction<Room>() {
+			@Override
+			public Room execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT id, name, description, asset_name
+							FROM rooms
+							WHERE id = ?
+						""");
+					statement.setInt(1, id);
+					resultSet = statement.executeQuery();
+
+					if (!resultSet.next()) {
+						return null;
+					}
+
+					Integer databaseId = resultSet.getInt(1);
+					String name = resultSet.getString(2);
+					String description = resultSet.getNString(3);
+					String assetName = resultSet.getNString(4);
+
+					return new Room(databaseId, name, description, assetName);
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return executeTransaction(new Transaction<HashMap<String, RoomConnection>>() {
+			@Override
+			public HashMap<String, RoomConnection> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								connection.description,
+								connection.direction,
+								room.id,
+								room.name,
+								room.description
+							FROM room_connections connection, rooms room
+							WHERE room.id = connection.destination_id AND connection.source_id = ?
+						""");
+					statement.setInt(1, room.getID());
+					resultSet = statement.executeQuery();
+
+					HashMap<String, RoomConnection> result = new HashMap<>();
+
+					while (resultSet.next()) {
+						String connectionDescription = resultSet.getString(1);
+						String direction = resultSet.getString(2);
+						Integer roomId = resultSet.getInt(3);
+						String roomName = resultSet.getString(4);
+						String roomDescription = resultSet.getString(5);
+
+						Room room = new Room(roomId, roomName, roomDescription);
+						RoomConnection roomConnection = new RoomConnection(room, connectionDescription);
+
+						result.put(direction, roomConnection);
+					}
+
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -190,7 +287,7 @@ public class DerbyDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForPlayer() {
+	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 

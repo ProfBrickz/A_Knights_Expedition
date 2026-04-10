@@ -10,12 +10,19 @@ import java.util.List;
 
 public class InitialData {
 	private static final HashMap<Integer, Room> rooms = new HashMap<>();
+	private static final HashMap<Integer, Item> items = new HashMap<>();
+	private static final HashMap<Integer, NPC> npcs = new HashMap<>();
+	private static final HashMap<Integer, Enemy> enemies = new HashMap<>();
 	// Might not need maps for all of these, or might need maps for other things but this is what they would look like
-	private static final HashMap<String, Integer> roomIds = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> itemIds = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> npcIds = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> enemyIds = new HashMap<String, Integer>();
+	private static final HashMap<String, Integer> roomIds = new HashMap<>();
+	private static final HashMap<String, Integer> itemIds = new HashMap<>();
+	private static final HashMap<String, Integer> npcIds = new HashMap<>();
+	private static final HashMap<String, Integer> enemyIds = new HashMap<>();
 
+
+	public static HashMap<Integer, String> getDialog() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
 
 	public static Player getPlayer() throws IOException, IllegalStateException {
 		ArrayList<Player> players = new ArrayList<>();
@@ -77,10 +84,44 @@ public class InitialData {
 		}
 	}
 
-	public static ArrayList<Room> getRooms() throws IOException {
+	/**
+	 * Returns a list of the players items
+	 */
+	public static ArrayList<Item> getPlayerItems() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	/**
+	 * Rooms do not have items, npcs, or enemies
+	 */
+	public static HashMap<Integer, Room> getRooms() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	/**
+	 * Returns a list of maps between room ids and a list of room connection
+	 */
+	public static HashMap<Integer, ArrayList<RoomConnection>> getRoomConnections() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	/**
+	 * Returns a map between room ids and a list of items
+	 */
+	public static HashMap<Integer, ArrayList<Item>> getRoomItems() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	/**
+	 * Returns a map between room ids and a list of enemies
+	 */
+	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	/**
+	 * Returns a list of all items without amounts
+	 */
 	public static ArrayList<Item> getItems() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
@@ -89,11 +130,28 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	/**
+	 * Returns a map between npc ids and a list of items
+	 */
+	public static HashMap<Integer, ArrayList<Item>> getNPCItems() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
 	public static ArrayList<WeaponAbility> getWeaponAbilities() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	/**
+	 * Returns a list of enemies without items
+	 */
 	public static ArrayList<Enemy> getEnemies() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	/**
+	 * Returns a map between enemy ids and a list of items
+	 */
+	public static HashMap<Integer, ArrayList<Item>> getEnemyItems() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 }

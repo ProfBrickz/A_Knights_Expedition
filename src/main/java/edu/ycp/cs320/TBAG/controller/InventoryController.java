@@ -25,6 +25,16 @@ public class InventoryController {
 		return null;
 	}
 
+	public Item getItemByNameCaseInsensitive(Inventory inventory, String itemName) {
+		itemName = itemName.toLowerCase();
+
+		for (Item item : inventory.getItems().values()) {
+			if (item.getName().toLowerCase().equals(itemName)) return item;
+		}
+
+		return null;
+	}
+
 	/**
 	 * adds item to inventory if not in it, increments amount if in it
 	 */

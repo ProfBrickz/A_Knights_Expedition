@@ -16,16 +16,17 @@ public class Room {
 		Integer id,
 		String name,
 		String description,
-		HashMap<String, RoomConnection> roomConnections,
-		HashMap<Integer, Enemy> enemies,
-		HashMap<Integer, NPC> npcs
+		String assetName,
+		HashMap<String, RoomConnection> roomConnections
 	) {
 		this.id = id;
-		roomName = name;
-		roomDescription = description;
-		this.roomConnections = roomConnections;
-		this.enemies = enemies;
-		this.npcs = npcs;
+		this.roomName = name;
+		this.roomDescription = description;
+
+		if (roomConnections != null) this.roomConnections = roomConnections;
+
+		if (assetName == null || assetName.isEmpty()) this.assetName = "fixIt.png";
+		else this.assetName = assetName;
 	}
 
 	public Room(
@@ -34,24 +35,18 @@ public class Room {
 		String description,
 		HashMap<String, RoomConnection> roomConnections
 	) {
-		this.id = id;
-		roomName = name;
-		roomDescription = description;
-		this.roomConnections = roomConnections;
+		this(id, name, description, null, roomConnections);
 	}
 
 	//creates a room with no connections
-	public Room(Integer id, String name, String description) {
-		this.id = id;
-		roomName = name;
-		roomDescription = description;
+	public Room(Integer id, String name, String description, String assetName) {
+		this(id, name, description, assetName, null);
 	}
 
-	public Room() {
-		id = null;
-		roomName = "Null";
-		roomDescription = "NULL";
+	public Room(Integer id, String name, String description) {
+		this(id, name, description, (String) null);
 	}
+
 
 	public Integer getID() {
 		return id;

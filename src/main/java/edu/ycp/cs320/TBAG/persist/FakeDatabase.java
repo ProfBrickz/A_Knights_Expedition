@@ -9,12 +9,15 @@ import java.util.HashMap;
 public class FakeDatabase implements Database {
 	private Player player;
 	private HashMap<Integer, Room> rooms = new HashMap<>();
+	// A map between a room's id and (a map of its directions and connections)
+	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
 
 
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
 		try {
+			rooms = InitialData.getRooms();
 			player = InitialData.getPlayer();
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
@@ -50,6 +53,11 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
+	public void setPlayerNPC(NPC npc) {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	@Override
 	public void addItemToPlayer(Item item) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
@@ -59,21 +67,16 @@ public class FakeDatabase implements Database {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	@Override
-	public void setPlayerNPC(NPC npc) {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
-
 
 	// Room-related methods
 	@Override
 	public Room getRoomById(Integer id) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return rooms.get(id);
 	}
 
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		return roomConnections.get(room.getID());
 	}
 
 	@Override
@@ -94,7 +97,7 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForPlayer() {
+	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 

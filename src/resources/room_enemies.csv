@@ -1,0 +1,4 @@
+sep=|
+room_id|enemy_id|amount
+String|String|Integer
+

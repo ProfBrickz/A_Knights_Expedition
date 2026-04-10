@@ -11,6 +11,10 @@ public interface Database {
 
 
 	// Player-related methods
+
+	/**
+	 * Returns the player, without items or a room
+	 */
 	public Player getPlayer();
 
 	public void setPlayerRoom(Integer roomId);
@@ -19,16 +23,19 @@ public interface Database {
 
 	public void setPlayerState(PlayerState playerState);
 
+	public void setPlayerNPC(NPC npc);
+
 	public void addItemToPlayer(Item item);
 
 	public void removeItemFromPlayer(Item item);
-
-	public void setPlayerNPC(NPC npc);
 
 
 	// Room-related methods
 	public Room getRoomById(Integer id);
 
+	/**
+	 * Returns a map between a room's directions and connections
+	 */
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room);
 
 	public void addItemToRoom(Room room, Item item);
@@ -39,7 +46,7 @@ public interface Database {
 	// Item-related methods, all will use getItemsFromResultSet after the query
 	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet);
 
-	public HashMap<Integer, Item> getItemsForPlayer();
+	public HashMap<Integer, Item> getItemsForPlayer(Player player);
 
 	public HashMap<Integer, Item> getItemsForRoom(Room room);
 
