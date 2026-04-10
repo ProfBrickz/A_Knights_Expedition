@@ -1,5 +1,8 @@
 package edu.ycp.cs320.TBAG.model;
 
+/**
+ * From lab 7
+ */
 public class Pair<LeftType, RightType> {
 	private LeftType left;
 	private RightType right;
