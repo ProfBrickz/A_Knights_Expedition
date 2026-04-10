@@ -1,3 +1,5 @@
-sep=|
-id|name|description|value|type|heal_amount|defense|active_armor
-String|String|String|Integer|item or healing or weapon or armor or unlock|Integer|Integer|Boolean (false or true)
+id,name,description,value,type,heal_amount,defense,active_armor
+String,String,String,Integer,item or healing or weapon or armor or unlock,Integer,Integer,Boolean (false or true)
+1,Wooden Cudgel,A wooden pole mainly used for practice. Good for beating people to death,10,Weapon,0,0,FALSE
+2,Iron Sword,"A good iron sword. On the side, it reads “Made in China”",25,Weapon,0,0,FALSE
+3,Skyforge Steel Sword,Forged far in the north. A unique blade from distant lands.,50,Weapon,0,0,FALSE

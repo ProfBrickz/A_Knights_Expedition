@@ -1,3 +1,5 @@
-sep=|
-id|room_id|name|max_health|health
-String|String|String|Integer|Integer
+id,room_id,name,max_health,health
+String,String,String,Integer,Integer
+1,Blacksmith_Store_NB,Euroland,999,999
+2,Shopkeeper_Store_NB,Morshu,200,200
+3,Arcadia_Cauldron_NB,Arcadia,100,90

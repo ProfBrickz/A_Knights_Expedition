@@ -1,3 +1,5 @@
-sep=|
-item_id|weapon_ability_id
-String|String
+item_id,weapon_ability_id
+String,String
+1,chance to temporarily stun an enemy for 2 turns
+2,"Small chance to insta-kill an enemy, breaks weapon as well"
+3,"Its power allows you to shout an enemy down, lowering there ATK and DEF by 20% for 3 turns"
