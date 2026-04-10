@@ -5,6 +5,7 @@ import edu.ycp.cs320.TBAG.model.*;
 import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public class DerbyDatabase implements Database {
 	// From lab 7
@@ -32,9 +33,13 @@ public class DerbyDatabase implements Database {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
 				Player player;
+				HashMap<Integer, Room> rooms;
+				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
 
 				try {
 					player = InitialData.getPlayer();
+					rooms = InitialData.getRooms();
+					roomConnections = InitialData.getRoomConnections();
 				} catch (IllegalStateException exception) {
 					throw new IllegalStateException("Initial data is incorrect", exception);
 				} catch (IOException exception) {
@@ -42,11 +47,13 @@ public class DerbyDatabase implements Database {
 				}
 
 				PreparedStatement addPlayer = null;
+				PreparedStatement addRooms = null;
+				PreparedStatement addRoomConnections = null;
 
 				try {
 					addPlayer = connection.prepareStatement("""
 							INSERT INTO players (room_id, state, coins, max_health, health)
-							VALUES (?, ?, ?, ?, ?)
+							VALUES (?, ?, ?, ?, ?);
 						""");
 					addPlayer.setInt(1, player.getRoom().getID());
 					addPlayer.setInt(2, player.getState().ordinal());
@@ -55,9 +62,49 @@ public class DerbyDatabase implements Database {
 					addPlayer.setInt(5, player.getHealth());
 					addPlayer.executeUpdate();
 
+					addRooms = connection.prepareStatement("""
+							INSERT INTO rooms (id, name, description, asset_name)
+							VALUES (?, ?, ?, ?);
+						""");
+					for (Room room : rooms.values()) {
+						addRooms.setInt(1, room.getID());
+						addRooms.setString(2, room.getName());
+						addRooms.setString(3, room.getDescription());
+						addRooms.setString(4, room.getAssetName());
+						addRooms.addBatch();
+					}
+					addRooms.executeBatch();
+
+					addRoomConnections = connection.prepareStatement("""
+							INSERT INTO room_connections (
+								source_id,
+								destination_id,
+								direction,
+								description
+							)
+							VALUES (?, ?, ?);
+						""");
+					for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
+						Integer roomId = entry.getKey();
+
+						for (Map.Entry<String, RoomConnection> entry1 : entry.getValue().entrySet()) {
+							String direction = entry1.getKey();
+							RoomConnection roomConnection = entry1.getValue();
+
+							addRoomConnections.setInt(1, roomId);
+							addRoomConnections.setInt(2, roomConnection.getRoom().getID());
+							addRoomConnections.setString(3, direction);
+							addRoomConnections.setString(4, roomConnection.getDescription());
+							addRoomConnections.addBatch();
+						}
+					}
+					addRoomConnections.executeBatch();
+
 					return true;
 				} finally {
 					DBUtil.closeQuietly(addPlayer);
+					DBUtil.closeQuietly(addRooms);
+					DBUtil.closeQuietly(addRoomConnections);
 				}
 			}
 		});
@@ -97,6 +144,7 @@ public class DerbyDatabase implements Database {
 							CREATE TABLE room_connections (
 								source_id INTEGER,
 								destination_id INTEGER,
+								direction VARCHAR NOT NULL,
 								description VARCHAR NOT NULL,
 								locked BOOLEAN,
 								locked_message VARCHAR,

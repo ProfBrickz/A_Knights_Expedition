@@ -19,6 +19,7 @@ public class FakeDatabase implements Database {
 		try {
 			rooms = InitialData.getRooms();
 			player = InitialData.getPlayer();
+			roomConnections = InitialData.getRoomConnections();
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
 		} catch (IOException exception) {
