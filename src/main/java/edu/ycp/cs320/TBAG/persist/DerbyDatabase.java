@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DerbyDatabase implements Database {
-	// From lab 7
+	/// From lab 7
 	static {
 		try {
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
@@ -24,6 +24,75 @@ public class DerbyDatabase implements Database {
 
 	/// From lab 7
 	private static final int MAX_ATTEMPTS = 10;
+
+	/// From lab 7
+	public <ResultType> ResultType executeTransaction(Transaction<ResultType> txn) {
+		try {
+			return doExecuteTransaction(txn);
+		} catch (SQLException e) {
+			throw new PersistenceException("Transaction failed", e);
+		}
+	}
+
+	/// From lab 7
+	public <ResultType> ResultType doExecuteTransaction(Transaction<ResultType> txn) throws SQLException {
+		Connection conn = connect();
+
+		try {
+			int numAttempts = 0;
+			boolean success = false;
+			ResultType result = null;
+
+			while (!success && numAttempts < MAX_ATTEMPTS) {
+				try {
+					result = txn.execute(conn);
+					conn.commit();
+					success = true;
+				} catch (SQLException e) {
+					if (e.getSQLState() != null && e.getSQLState().equals("41000")) {
+						// Deadlock: retry (unless max retry count has been reached)
+						numAttempts++;
+					} else {
+						// Some other kind of SQLException
+						throw e;
+					}
+				}
+			}
+
+			if (!success) {
+				throw new SQLException("Transaction failed (too many retries)");
+			}
+
+			// Success!
+			return result;
+		} finally {
+			DBUtil.closeQuietly(conn);
+		}
+	}
+
+	/// From lab 7
+	private Connection connect() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:derby:database.db;create=true");
+
+		// Set autocommit too false to allow execution of
+		// multiple queries/statements as part of the same transaction.
+		conn.setAutoCommit(false);
+
+		return conn;
+	}
+
+	/// From lab 7
+	// The main method creates the database tables and loads the initial data.
+	public static void main(String[] args) throws IOException {
+		System.out.println("Creating tables...");
+		DerbyDatabase db = new DerbyDatabase();
+		db.createTables();
+
+		System.out.println("Loading initial data...");
+		db.loadInitialData();
+
+		System.out.println("Library DB successfully initialized!");
+	}
 
 
 	// General purpose methods
@@ -67,7 +136,7 @@ public class DerbyDatabase implements Database {
 
 					addPlayerStatement = connection.prepareStatement("""
 							INSERT INTO players (room_id, state, coins, max_health, health)
-							VALUES (?, ?, ?, ?, ?);
+							VALUES (?, ?, ?, ?, ?)
 						""");
 					addPlayerStatement.setInt(1, player.getRoom().getID());
 					addPlayerStatement.setInt(2, player.getState().ordinal());
@@ -78,7 +147,7 @@ public class DerbyDatabase implements Database {
 
 					addRoomsStatement = connection.prepareStatement("""
 							INSERT INTO rooms (id, name, description, asset_name)
-							VALUES (?, ?, ?, ?);
+							VALUES (?, ?, ?, ?)
 						""");
 					for (Room room : rooms.values()) {
 						addRoomsStatement.setInt(1, room.getID());
@@ -96,7 +165,7 @@ public class DerbyDatabase implements Database {
 								direction,
 								description
 							)
-							VALUES (?, ?, ?);
+							VALUES (?, ?, ?)
 						""");
 					for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
 						Integer roomId = entry.getKey();
@@ -126,6 +195,11 @@ public class DerbyDatabase implements Database {
 	}
 
 	public void createTables() {
+		final Integer DIALOG_MAX_LENGTH = 128;
+		final Integer NAME_MAX_LENGTH = 128;
+		final Integer DESCRIPTION_MAX_LENGTH = 512;
+		final Integer DIRECTION_MAX_LENGTH = 64;
+
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
@@ -138,9 +212,9 @@ public class DerbyDatabase implements Database {
 					createDialogTableStatement = connection.prepareStatement("""
 							CREATE TABLE dialog (
 								id INTEGER PRIMARY KEY,
-								text VARCHAR NOT NULL
-							);
-						""");
+								text VARCHAR(%d) NOT NULL
+							)
+						""".formatted(DIALOG_MAX_LENGTH));
 					createDialogTableStatement.executeUpdate();
 
 					createPlayerTableStatement = connection.prepareStatement("""
@@ -150,35 +224,44 @@ public class DerbyDatabase implements Database {
 								coins INTEGER NOT NULL,
 								max_health INTEGER NOT NULL,
 								health INTEGER NOT NULL
-							);
+							)
 						""");
 					createPlayerTableStatement.executeUpdate();
 
 					createRoomsTableStatement = connection.prepareStatement("""
 							CREATE TABLE rooms (
 								id INTEGER PRIMARY KEY,
-								name VARCHAR NOT NULL,
-								description VARCHAR NOT NULL,
-								asset_name VARCHAR NOT NULL
-							);
-						""");
+								name VARCHAR(%d) NOT NULL,
+								description VARCHAR(%d) NOT NULL,
+								asset_name VARCHAR(%d) NOT NULL
+							)
+						""".formatted(
+						NAME_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH,
+						NAME_MAX_LENGTH
+					));
 					createRoomsTableStatement.executeUpdate();
 
 					createRoomConnectionsTableStatement = connection.prepareStatement("""
 							CREATE TABLE room_connections (
 								source_id INTEGER,
 								destination_id INTEGER,
-								direction VARCHAR NOT NULL,
-								description VARCHAR NOT NULL,
+								direction VARCHAR(%d) NOT NULL,
+								description VARCHAR(%d) NOT NULL,
 								locked BOOLEAN,
-								locked_message VARCHAR,
+								locked_message VARCHAR(%d),
 								PRIMARY KEY (source_id, destination_id)
-							);
-						""");
+							)
+						""".formatted(
+						DIRECTION_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH
+					));
 					createRoomConnectionsTableStatement.execute();
 
 					return true;
 				} finally {
+					DBUtil.closeQuietly(createDialogTableStatement);
 					DBUtil.closeQuietly(createPlayerTableStatement);
 					DBUtil.closeQuietly(createRoomsTableStatement);
 					DBUtil.closeQuietly(createRoomConnectionsTableStatement);
@@ -199,7 +282,7 @@ public class DerbyDatabase implements Database {
 				try {
 					statement = connection.prepareStatement("""
 							SELECT id, text
-							FROM dialog;
+							FROM dialog
 						""");
 					resultSet = statement.executeQuery();
 
@@ -440,62 +523,5 @@ public class DerbyDatabase implements Database {
 	@Override
 	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) {
 		throw new UnsupportedOperationException("TODO - implement");
-	}
-
-
-	/// From lab 7
-	public <ResultType> ResultType executeTransaction(Transaction<ResultType> txn) {
-		try {
-			return doExecuteTransaction(txn);
-		} catch (SQLException e) {
-			throw new PersistenceException("Transaction failed", e);
-		}
-	}
-
-	/// From lab 7
-	public <ResultType> ResultType doExecuteTransaction(Transaction<ResultType> txn) throws SQLException {
-		Connection conn = connect();
-
-		try {
-			int numAttempts = 0;
-			boolean success = false;
-			ResultType result = null;
-
-			while (!success && numAttempts < MAX_ATTEMPTS) {
-				try {
-					result = txn.execute(conn);
-					conn.commit();
-					success = true;
-				} catch (SQLException e) {
-					if (e.getSQLState() != null && e.getSQLState().equals("41000")) {
-						// Deadlock: retry (unless max retry count has been reached)
-						numAttempts++;
-					} else {
-						// Some other kind of SQLException
-						throw e;
-					}
-				}
-			}
-
-			if (!success) {
-				throw new SQLException("Transaction failed (too many retries)");
-			}
-
-			// Success!
-			return result;
-		} finally {
-			DBUtil.closeQuietly(conn);
-		}
-	}
-
-	/// From lab 7
-	private Connection connect() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:derby:test.db;create=true");
-
-		// Set autocommit to false to allow execution of
-		// multiple queries/statements as part of the same transaction.
-		conn.setAutoCommit(false);
-
-		return conn;
 	}
 }
