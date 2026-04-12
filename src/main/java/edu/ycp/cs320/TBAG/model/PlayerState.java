@@ -14,4 +14,12 @@ public enum PlayerState {
 	public String getName() {
 		return name;
 	}
+
+	public static PlayerState getByName(String name) {
+		for (PlayerState state : PlayerState.values()) {
+			if (state.getName().equals(name)) return state;
+		}
+
+		return null;
+	}
 }

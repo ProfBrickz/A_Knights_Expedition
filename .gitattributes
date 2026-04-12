@@ -1,2 +1,5 @@
 # Normalize all text files to LF
 * text=auto eol=lf
+
+# Ignore csv files
+*.csv -text

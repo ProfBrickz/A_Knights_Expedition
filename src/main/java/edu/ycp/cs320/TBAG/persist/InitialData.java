@@ -110,7 +110,25 @@ public class InitialData {
 	}
 
 	public static HashMap<Integer, String> getDialog() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		HashMap<Integer, String> dialog = new HashMap<>();
+		ReadCSV dialogFile = new ReadCSV("dialog.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = dialogFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String text = iterator.next();
+
+				dialog.put(dialog.size(), text);
+			}
+
+			return dialog;
+		} finally {
+			dialogFile.close();
+		}
 	}
 
 	public static Player getPlayer() throws IOException, IllegalStateException {
@@ -133,13 +151,6 @@ public class InitialData {
 					);
 				}
 				Integer roomIdA = roomIds.get(roomId);
-				if (roomIdA == null) {
-					throw new IllegalStateException(
-						"The room the player is in with the id \""
-							+ roomId
-							+ "\" does not exist in the initial CSV data."
-					);
-				}
 				Room playerRoom = rooms.get(roomIdA);
 				if (playerRoom == null) {
 					throw new IllegalStateException(
@@ -149,8 +160,14 @@ public class InitialData {
 					);
 				}
 
-				Integer stateOrdinal = Integer.parseInt(iterator.next());
-				PlayerState state = PlayerState.values()[stateOrdinal];
+				String stateString = iterator.next();
+				PlayerState state = PlayerState.getByName(stateString);
+				if (state == null) {
+					throw new IllegalStateException(
+						"Invalid player state: \"" + stateString + "\""
+					);
+				}
+
 				Integer coins = Integer.parseInt(iterator.next());
 				Integer health = Integer.parseInt(iterator.next());
 				Integer maxHealth = Integer.parseInt(iterator.next());
@@ -221,15 +238,78 @@ public class InitialData {
 	 * Rooms do not have items, npcs, or enemies
 	 */
 	public static HashMap<Integer, Room> getRooms() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ReadCSV roomsFile = new ReadCSV("rooms.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = roomsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> it = tuple.iterator();
+
+				String roomKey = it.next();   // CSV string ID
+				String name = it.next();
+				String description = it.next();
+				String assetName = it.next();
+
+				// Map CSV string ID → integer ID
+				Integer id = roomIds.size();
+				roomIds.put(roomKey, id);
+
+				Room room = new Room(id, name, description, assetName);
+				rooms.put(id, room);
+			}
+
+			return rooms;
+		} finally {
+			roomsFile.close();
+		}
 	}
 
 	/**
-	 * Returns a list of maps between room ids and a list of room connection
-	 * Each connection is a room connection (without a room) and a room id
+	 * Returns a list of maps between room ids and a hashmap of (directions and room connection)
 	 */
-	public static HashMap<Integer, ArrayList<Pair<RoomConnection, Integer>>> getRoomConnections() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+	public static HashMap<Integer, HashMap<String, RoomConnection>> getRoomConnections() throws IOException, IllegalStateException {
+		HashMap<Integer, HashMap<String, RoomConnection>> result = new HashMap<>();
+		ReadCSV connFile = new ReadCSV("room_connections.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = connFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> it = tuple.iterator();
+
+				String fromKey = it.next();
+				String direction = it.next();
+				String toKey = it.next();
+				String description = it.next();
+
+				Integer fromId = roomIds.get(fromKey);
+				Integer toId = roomIds.get(toKey);
+
+				if (fromId == null || toId == null) {
+					throw new IllegalStateException(
+						"Invalid room reference in connections CSV: " +
+							fromKey + " -> " + toKey
+					);
+				}
+
+				Room targetRoom = rooms.get(toId);
+
+				RoomConnection connection =
+					new RoomConnection(targetRoom, description);
+
+				result
+					.computeIfAbsent(fromId, k -> new HashMap<>())
+					.put(direction, connection);
+			}
+
+			return result;
+
+		} finally {
+			connFile.close();
+		}
 	}
 
 	/**

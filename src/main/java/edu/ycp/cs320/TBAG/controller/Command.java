@@ -32,7 +32,8 @@ public enum Command {
 	),
 	INVENTORY(
 		"inventory",
-		GameEngine::inventory,
+		//GameEngine::inventory,
+		null,
 		"Shows all items currently carried by the player",
 		List.of(),
 		List.of(PlayerState.EXPLORING),
@@ -40,7 +41,8 @@ public enum Command {
 	),
 	INSPECT_ITEM(
 		"inspect",
-		GameEngine::inspectItem,
+//		GameEngine::inspectItem,
+		null,
 		"Provides a detailed description of a specific item from the player's inventory",
 		List.of("Item name"),
 		List.of(PlayerState.EXPLORING),
@@ -48,7 +50,8 @@ public enum Command {
 	),
 	SEARCH(
 		"search",
-		GameEngine::search,
+//		GameEngine::search,
+		null,
 		"Searches the current room for hidden items or clues",
 		List.of(),
 		List.of(PlayerState.EXPLORING),
@@ -56,7 +59,8 @@ public enum Command {
 	),
 	PICKUP(
 		"pickup",
-		GameEngine::pickupItem,
+//		GameEngine::pickupItem,
+		null,
 		"Collects an item from the current room and adds it to the player's inventory",
 		List.of("item name"),
 		List.of(PlayerState.EXPLORING),
@@ -64,7 +68,8 @@ public enum Command {
 	),
 	PICKUP_ALL(
 		"pickup-all",
-		GameEngine::pickupAllItems,
+//		GameEngine::pickupAllItems,
+		null,
 		"Collects all items from the current room and adds them to the player's inventory",
 		List.of(),
 		List.of(PlayerState.EXPLORING),
@@ -72,7 +77,8 @@ public enum Command {
 	),
 	DROP(
 		"drop",
-		GameEngine::dropItem,
+//		GameEngine::dropItem,
+		null,
 		"Removes an item from the player's inventory and places it in the current room",
 		List.of("Item name"),
 		List.of(PlayerState.EXPLORING),
@@ -80,7 +86,8 @@ public enum Command {
 	),
 	DROP_ALL(
 		"drop-all",
-		GameEngine::dropAllItems,
+//		GameEngine::dropAllItems,
+		null,
 		"Removes all items from the player's inventory and places them in the current room",
 		List.of(),
 		List.of(PlayerState.EXPLORING),
@@ -96,7 +103,8 @@ public enum Command {
 	),
 	TALK_TO(
 		"talk-to",
-		GameEngine::talkToNPC,
+//		GameEngine::talkToNPC,
+		null,
 		"Initiates a conversation with a specified NPC in the current room",
 		List.of("NPC name"),
 		List.of(PlayerState.EXPLORING),
@@ -104,7 +112,8 @@ public enum Command {
 	),
 	LEAVE(
 		"leave",
-		GameEngine::leaveNPC,
+//		GameEngine::leaveNPC,
+		null,
 		"Ends the current conversation with an NPC and returns to exploring state",
 		List.of(),
 		List.of(PlayerState.TALKING_TO_NPC),
@@ -112,7 +121,8 @@ public enum Command {
 	),
 	SEARCH_SHOP(
 		"search-shop",
-		GameEngine::searchShop,
+//		GameEngine::searchShop,
+		null,
 		"Displays the items available for purchase from the current NPC",
 		List.of(),
 		List.of(PlayerState.TALKING_TO_NPC),
@@ -120,7 +130,8 @@ public enum Command {
 	),
 	BUY(
 		"buy",
-		GameEngine::buyItem,
+//		GameEngine::buyItem,
+		null,
 		"Purchase an item from the current NPC's shop",
 		List.of("Amount", "Item name"),
 		List.of(PlayerState.TALKING_TO_NPC),
@@ -128,7 +139,8 @@ public enum Command {
 	),
 	SELL(
 		"sell",
-		GameEngine::sellItem,
+//		GameEngine::sellItem,
+		null,
 		"Sells an item from the player's inventory to the current NPC",
 		List.of("Amount", "Item name"),
 		List.of(PlayerState.TALKING_TO_NPC),
@@ -136,7 +148,8 @@ public enum Command {
 	),
 	SELL_ALL(
 		"sell-all",
-		GameEngine::sellAllItem,
+//		GameEngine::sellAllItem,
+		null,
 		"Sells all of a specific item from the player's inventory to the current NPC",
 		List.of("Item name"),
 		List.of(PlayerState.TALKING_TO_NPC),
@@ -144,7 +157,8 @@ public enum Command {
 	),
 	RESTART(
 		"restart",
-		GameEngine::restart,
+//		GameEngine::restart,
+		null,
 		"Restarts the game from the beginning",
 		List.of(),
 		List.of(PlayerState.EXPLORING, PlayerState.BATTLE, PlayerState.TALKING_TO_NPC),
