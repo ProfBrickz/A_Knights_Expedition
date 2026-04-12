@@ -1,4 +1,2 @@
-sep=|
-room_id|enemy_id|amount
-String|String|Integer
-
+room_id,enemy_id,amount
+String,String,Integer

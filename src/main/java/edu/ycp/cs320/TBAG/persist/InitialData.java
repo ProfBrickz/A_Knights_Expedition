@@ -95,7 +95,6 @@ public class InitialData {
 	 * Rooms do not have items, npcs, or enemies
 	 */
 	public static HashMap<Integer, Room> getRooms() throws IOException {
-
 		ReadCSV roomsFile = new ReadCSV("rooms.csv");
 
 		try {
@@ -128,8 +127,7 @@ public class InitialData {
 	/**
 	 * Returns a list of maps between room ids and a hashmap of (directions and room connection)
 	 */
-	public static HashMap<Integer, HashMap<String, RoomConnection>> getRoomConnections() throws IOException {
-
+	public static HashMap<Integer, HashMap<String, RoomConnection>> getRoomConnections() throws IOException, IllegalStateException {
 		HashMap<Integer, HashMap<String, RoomConnection>> result = new HashMap<>();
 		ReadCSV connFile = new ReadCSV("room_connections.csv");
 

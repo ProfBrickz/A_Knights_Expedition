@@ -17,8 +17,7 @@ public class ReadCSV implements Closeable {
 		}
 		this.reader = new BufferedReader(new FileReader(file));
 
-		// Skip first 3 lines that make it easier to read
-		this.next();
+		// Skip first 2 lines that make it easier to read
 		this.next();
 		this.next();
 	}
@@ -29,7 +28,7 @@ public class ReadCSV implements Closeable {
 			return null;
 		}
 		List<String> tuple = new ArrayList<String>();
-		StringTokenizer tok = new StringTokenizer(line, "|");
+		StringTokenizer tok = new StringTokenizer(line, ",");
 		while (tok.hasMoreTokens()) {
 			tuple.add(tok.nextToken().trim());
 		}

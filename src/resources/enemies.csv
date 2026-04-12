@@ -1,5 +1,5 @@
-id|name|max_health|health
-String|String|Integer|Integer
+id,name,max_health,health,
+String,String,Integer,Integer,
 1,temp,Moblin,10,10
 2,temp,Wolote,12,12
 3,temp,Porc,20,20
