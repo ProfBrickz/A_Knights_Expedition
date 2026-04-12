@@ -134,12 +134,56 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public void addItemToRoom(Room room, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null || item == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = room.getInventory().getItems().get(itemId);
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+
+		if (delta <= 0) {
+			return;
+		}
+
+		if (existing == null) {
+			room.getInventory().addItem(item);
+		} else {
+			existing.setAmount(existing.getAmount() + delta);
+		}
 	}
 
 	@Override
 	public void removeItemFromRoom(Room room, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null || item == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = room.getInventory().getItems().get(itemId);
+		if (existing == null) {
+			return;
+		}
+
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+		if (delta <= 0) {
+			return;
+		}
+
+		int newAmount = existing.getAmount() - delta;
+		if (newAmount > 0) {
+			existing.setAmount(newAmount);
+		} else {
+			room.getInventory().removeItem(existing);
+		}
 	}
 
 
@@ -203,12 +247,20 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public HashMap<Integer, Item> getItemsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(room.getInventory().getItems());
 	}
 
 	@Override
 	public HashMap<Integer, Item> getItemsForNPC(NPC npc) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (npc == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(npc.getInventory().getItems());
 	}
 
 	@Override

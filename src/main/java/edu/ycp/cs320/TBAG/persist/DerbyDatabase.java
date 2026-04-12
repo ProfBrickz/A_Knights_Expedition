@@ -574,12 +574,133 @@ public class DerbyDatabase implements Database {
 
 	@Override
 	public void addItemToRoom(Room room, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null || item == null) {
+			return;
+		}
+
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement selectStatement = null;
+				PreparedStatement insertStatement = null;
+				PreparedStatement updateStatement = null;
+				ResultSet resultSet = null;
+
+				try {
+					selectStatement = connection.prepareStatement("""
+							SELECT amount
+							FROM room_items
+							WHERE room_id = ? AND item_id = ?
+						""");
+					selectStatement.setInt(1, room.getID());
+					selectStatement.setInt(2, item.getId());
+					resultSet = selectStatement.executeQuery();
+
+					int delta = item.getAmount() == null ? 1 : item.getAmount();
+					if (delta <= 0) {
+						return true;
+					}
+
+					if (resultSet.next()) {
+						int currentAmount = resultSet.getInt(1);
+						int newAmount = currentAmount + delta;
+
+						updateStatement = connection.prepareStatement("""
+								UPDATE room_items
+								SET amount = ?
+								WHERE room_id = ? AND item_id = ?
+							""");
+						updateStatement.setInt(1, newAmount);
+						updateStatement.setInt(2, room.getID());
+						updateStatement.setInt(3, item.getId());
+						updateStatement.executeUpdate();
+					} else {
+						insertStatement = connection.prepareStatement("""
+								INSERT INTO room_items (room_id, item_id, amount)
+								VALUES (?, ?, ?)
+							""");
+						insertStatement.setInt(1, room.getID());
+						insertStatement.setInt(2, item.getId());
+						insertStatement.setInt(3, delta);
+						insertStatement.executeUpdate();
+					}
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(resultSet);
+					DBUtil.closeQuietly(selectStatement);
+					DBUtil.closeQuietly(insertStatement);
+					DBUtil.closeQuietly(updateStatement);
+				}
+			}
+		});
 	}
 
 	@Override
 	public void removeItemFromRoom(Room room, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null || item == null) {
+			return;
+		}
+
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement selectStatement = null;
+				PreparedStatement updateStatement = null;
+				PreparedStatement deleteStatement = null;
+				ResultSet resultSet = null;
+
+				try {
+					selectStatement = connection.prepareStatement("""
+							SELECT amount
+							FROM room_items
+							WHERE room_id = ? AND item_id = ?
+						""");
+					selectStatement.setInt(1, room.getID());
+					selectStatement.setInt(2, item.getId());
+					resultSet = selectStatement.executeQuery();
+
+					if (!resultSet.next()) {
+						return true;
+					}
+
+					int delta = item.getAmount() == null ? 1 : item.getAmount();
+					if (delta <= 0) {
+						return true;
+					}
+
+					int currentAmount = resultSet.getInt(1);
+					int newAmount = currentAmount - delta;
+
+					if (newAmount > 0) {
+						updateStatement = connection.prepareStatement("""
+								UPDATE room_items
+								SET amount = ?
+								WHERE room_id = ? AND item_id = ?
+							""");
+						updateStatement.setInt(1, newAmount);
+						updateStatement.setInt(2, room.getID());
+						updateStatement.setInt(3, item.getId());
+						updateStatement.executeUpdate();
+					} else {
+						deleteStatement = connection.prepareStatement("""
+								DELETE FROM room_items
+								WHERE room_id = ? AND item_id = ?
+							""");
+						deleteStatement.setInt(1, room.getID());
+						deleteStatement.setInt(2, item.getId());
+						deleteStatement.executeUpdate();
+					}
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(resultSet);
+					DBUtil.closeQuietly(selectStatement);
+					DBUtil.closeQuietly(updateStatement);
+					DBUtil.closeQuietly(deleteStatement);
+				}
+			}
+		});
 	}
 
 
@@ -664,12 +785,80 @@ public class DerbyDatabase implements Database {
 
 	@Override
 	public HashMap<Integer, Item> getItemsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		return executeTransaction(new Transaction<HashMap<Integer, Item>>() {
+			@Override
+			public HashMap<Integer, Item> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								items.id,
+								items.name,
+								items.description,
+								items.value,
+								items.type,
+								items.heal_amount,
+								items.defense,
+								items.active_armor,
+								room_items.amount
+							FROM room_items, items
+							WHERE items.id = room_items.item_id AND room_items.room_id = ?
+						""");
+					statement.setInt(1, room.getID());
+					resultSet = statement.executeQuery();
+
+					return getItemsFromResultSet(resultSet);
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override
 	public HashMap<Integer, Item> getItemsForNPC(NPC npc) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (npc == null) {
+			return new HashMap<>();
+		}
+
+		return executeTransaction(new Transaction<HashMap<Integer, Item>>() {
+			@Override
+			public HashMap<Integer, Item> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								items.id,
+								items.name,
+								items.description,
+								items.value,
+								items.type,
+								items.heal_amount,
+								items.defense,
+								items.active_armor,
+								npc_items.amount
+							FROM npc_items, items
+							WHERE items.id = npc_items.item_id AND npc_items.npc_id = ?
+						""");
+					statement.setInt(1, npc.getId());
+					resultSet = statement.executeQuery();
+
+					return getItemsFromResultSet(resultSet);
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override
