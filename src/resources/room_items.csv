@@ -1,3 +1,5 @@
-sep=|
-room_id|item_id|amount
-String|String|Integer
+room_id,item_id,amount
+String,String,Integer
+ForestRooms,22,1
+CanyonRooms,23,1
+Spatula_Room_KC,24,1

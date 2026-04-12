@@ -1,3 +1,5 @@
-sep=|
-item_id|amount
-String|Integer
+item_id,amount
+String,Integer
+1,1
+6,1
+11,2

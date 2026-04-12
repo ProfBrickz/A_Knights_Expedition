@@ -5,9 +5,10 @@ import edu.ycp.cs320.TBAG.model.*;
 import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public class DerbyDatabase implements Database {
-	// From lab 7
+	/// From lab 7
 	static {
 		try {
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
@@ -24,6 +25,75 @@ public class DerbyDatabase implements Database {
 	/// From lab 7
 	private static final int MAX_ATTEMPTS = 10;
 
+	/// From lab 7
+	public <ResultType> ResultType executeTransaction(Transaction<ResultType> txn) {
+		try {
+			return doExecuteTransaction(txn);
+		} catch (SQLException e) {
+			throw new PersistenceException("Transaction failed", e);
+		}
+	}
+
+	/// From lab 7
+	public <ResultType> ResultType doExecuteTransaction(Transaction<ResultType> txn) throws SQLException {
+		Connection conn = connect();
+
+		try {
+			int numAttempts = 0;
+			boolean success = false;
+			ResultType result = null;
+
+			while (!success && numAttempts < MAX_ATTEMPTS) {
+				try {
+					result = txn.execute(conn);
+					conn.commit();
+					success = true;
+				} catch (SQLException e) {
+					if (e.getSQLState() != null && e.getSQLState().equals("41000")) {
+						// Deadlock: retry (unless max retry count has been reached)
+						numAttempts++;
+					} else {
+						// Some other kind of SQLException
+						throw e;
+					}
+				}
+			}
+
+			if (!success) {
+				throw new SQLException("Transaction failed (too many retries)");
+			}
+
+			// Success!
+			return result;
+		} finally {
+			DBUtil.closeQuietly(conn);
+		}
+	}
+
+	/// From lab 7
+	private Connection connect() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:derby:database.db;create=true");
+
+		// Set autocommit too false to allow execution of
+		// multiple queries/statements as part of the same transaction.
+		conn.setAutoCommit(false);
+
+		return conn;
+	}
+
+	/// From lab 7
+	// The main method creates the database tables and loads the initial data.
+	public static void main(String[] args) throws IOException {
+		System.out.println("Creating tables...");
+		DerbyDatabase db = new DerbyDatabase();
+		db.createTables();
+
+		System.out.println("Loading initial data...");
+		db.loadInitialData();
+
+		System.out.println("Library DB successfully initialized!");
+	}
+
 
 	// General purpose methods
 	@Override
@@ -31,9 +101,16 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
+				HashMap<Integer, String> dialog;
 				Player player;
+				HashMap<Integer, Room> rooms;
+				// A map between a room's id and (a map of its directions and connections)
+				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
 
 				try {
+					dialog = InitialData.getDialog();
+					rooms = InitialData.getRooms();
+					roomConnections = InitialData.getRoomConnections();
 					player = InitialData.getPlayer();
 				} catch (IllegalStateException exception) {
 					throw new IllegalStateException("Initial data is incorrect", exception);
@@ -41,37 +118,106 @@ public class DerbyDatabase implements Database {
 					throw new IllegalStateException("Couldn't read initial data", exception);
 				}
 
-				PreparedStatement addPlayer = null;
+				PreparedStatement addDialogStatement = null;
+				PreparedStatement addPlayerStatement = null;
+				PreparedStatement addRoomsStatement = null;
+				PreparedStatement addRoomConnectionsStatement = null;
 
 				try {
-					addPlayer = connection.prepareStatement("""
-							INSERT INTO players (room_id, state, coins, max_health, health)
+					addDialogStatement = connection.prepareStatement("""
+							INSERT INTO dialog (id, text)
+							VALUES (?, ?)
+						""");
+					for (Map.Entry<Integer, String> entry : dialog.entrySet()) {
+						addDialogStatement.setInt(1, entry.getKey());
+						addDialogStatement.setString(2, entry.getValue());
+						addRoomsStatement.addBatch();
+					}
+					addDialogStatement.executeBatch();
+
+					addPlayerStatement = connection.prepareStatement("""
+							INSERT INTO player (room_id, state, coins, max_health, health)
 							VALUES (?, ?, ?, ?, ?)
 						""");
-					addPlayer.setInt(1, player.getRoom().getID());
-					addPlayer.setInt(2, player.getState().ordinal());
-					addPlayer.setInt(3, player.getCoins());
-					addPlayer.setInt(4, player.getMaxHealth());
-					addPlayer.setInt(5, player.getHealth());
-					addPlayer.executeUpdate();
+					addPlayerStatement.setInt(1, player.getRoom().getID());
+					addPlayerStatement.setInt(2, player.getState().ordinal());
+					addPlayerStatement.setInt(3, player.getCoins());
+					addPlayerStatement.setInt(4, player.getMaxHealth());
+					addPlayerStatement.setInt(5, player.getHealth());
+					addPlayerStatement.executeUpdate();
+
+					addRoomsStatement = connection.prepareStatement("""
+							INSERT INTO rooms (id, name, description, asset_name)
+							VALUES (?, ?, ?, ?)
+						""");
+					for (Room room : rooms.values()) {
+						addRoomsStatement.setInt(1, room.getID());
+						addRoomsStatement.setString(2, room.getName());
+						addRoomsStatement.setString(3, room.getDescription());
+						addRoomsStatement.setString(4, room.getAssetName());
+						addRoomsStatement.addBatch();
+					}
+					addRoomsStatement.executeBatch();
+
+					addRoomConnectionsStatement = connection.prepareStatement("""
+							INSERT INTO room_connections (
+								source_id,
+								destination_id,
+								direction,
+								description
+							)
+							VALUES (?, ?, ?, ?)
+						""");
+					for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
+						Integer roomId = entry.getKey();
+
+						for (Map.Entry<String, RoomConnection> entry1 : entry.getValue().entrySet()) {
+							String direction = entry1.getKey();
+							RoomConnection roomConnection = entry1.getValue();
+
+							addRoomConnectionsStatement.setInt(1, roomId);
+							addRoomConnectionsStatement.setInt(2, roomConnection.getRoom().getID());
+							addRoomConnectionsStatement.setString(3, direction);
+							addRoomConnectionsStatement.setString(4, roomConnection.getDescription());
+							addRoomConnectionsStatement.addBatch();
+						}
+					}
+					addRoomConnectionsStatement.executeBatch();
 
 					return true;
 				} finally {
-					DBUtil.closeQuietly(addPlayer);
+					DBUtil.closeQuietly(addDialogStatement);
+					DBUtil.closeQuietly(addPlayerStatement);
+					DBUtil.closeQuietly(addRoomsStatement);
+					DBUtil.closeQuietly(addRoomConnectionsStatement);
 				}
 			}
 		});
 	}
 
 	public void createTables() {
+		final Integer DIALOG_MAX_LENGTH = 128;
+		final Integer NAME_MAX_LENGTH = 128;
+		final Integer DESCRIPTION_MAX_LENGTH = 512;
+		final Integer DIRECTION_MAX_LENGTH = 64;
+
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement createDialogTableStatement = null;
 				PreparedStatement createPlayerTableStatement = null;
 				PreparedStatement createRoomsTableStatement = null;
 				PreparedStatement createRoomConnectionsTableStatement = null;
 
 				try {
+					createDialogTableStatement = connection.prepareStatement("""
+							CREATE TABLE dialog (
+								id INTEGER PRIMARY KEY,
+								text VARCHAR(%d) NOT NULL
+							)
+						""".formatted(DIALOG_MAX_LENGTH));
+					createDialogTableStatement.executeUpdate();
+
 					createPlayerTableStatement = connection.prepareStatement("""
 							CREATE TABLE player (
 								room_id INTEGER NOT NULL,
@@ -79,34 +225,44 @@ public class DerbyDatabase implements Database {
 								coins INTEGER NOT NULL,
 								max_health INTEGER NOT NULL,
 								health INTEGER NOT NULL
-							);
+							)
 						""");
 					createPlayerTableStatement.executeUpdate();
 
 					createRoomsTableStatement = connection.prepareStatement("""
 							CREATE TABLE rooms (
 								id INTEGER PRIMARY KEY,
-								name VARCHAR NOT NULL,
-								description VARCHAR NOT NULL,
-								asset_name VARCHAR NOT NULL
-							);
-						""");
+								name VARCHAR(%d) NOT NULL,
+								description VARCHAR(%d) NOT NULL,
+								asset_name VARCHAR(%d) NOT NULL
+							)
+						""".formatted(
+						NAME_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH,
+						NAME_MAX_LENGTH
+					));
 					createRoomsTableStatement.executeUpdate();
 
 					createRoomConnectionsTableStatement = connection.prepareStatement("""
 							CREATE TABLE room_connections (
 								source_id INTEGER,
+								direction VARCHAR(%d) NOT NULL,
 								destination_id INTEGER,
-								description VARCHAR NOT NULL,
+								description VARCHAR(%d) NOT NULL,
 								locked BOOLEAN,
-								locked_message VARCHAR,
+								locked_message VARCHAR(%d),
 								PRIMARY KEY (source_id, destination_id)
-							);
-						""");
+							)
+						""".formatted(
+						DIRECTION_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH
+					));
 					createRoomConnectionsTableStatement.execute();
 
 					return true;
 				} finally {
+					DBUtil.closeQuietly(createDialogTableStatement);
 					DBUtil.closeQuietly(createPlayerTableStatement);
 					DBUtil.closeQuietly(createRoomsTableStatement);
 					DBUtil.closeQuietly(createRoomConnectionsTableStatement);
@@ -115,6 +271,39 @@ public class DerbyDatabase implements Database {
 		});
 	}
 
+
+	@Override
+	public HashMap<Integer, String> getDialog() {
+		return executeTransaction(new Transaction<HashMap<Integer, String>>() {
+			@Override
+			public HashMap<Integer, String> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT id, text
+							FROM dialog
+						""");
+					resultSet = statement.executeQuery();
+
+					HashMap<Integer, String> result = new HashMap<>();
+
+					while (resultSet.next()) {
+						Integer id = resultSet.getInt(1);
+						String text = resultSet.getString(2);
+
+						result.put(id, text);
+					}
+
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
+	}
 
 	// Player-related methods
 	@Override
@@ -129,7 +318,6 @@ public class DerbyDatabase implements Database {
 					statement = connection.prepareStatement("""
 							SELECT room_id, state, coins, max_health, health
 							FROM player
-							LIMIT 1
 						""");
 					resultSet = statement.executeQuery();
 
@@ -326,8 +514,8 @@ public class DerbyDatabase implements Database {
 
 					Integer databaseId = resultSet.getInt(1);
 					String name = resultSet.getString(2);
-					String description = resultSet.getNString(3);
-					String assetName = resultSet.getNString(4);
+					String description = resultSet.getString(3);
+					String assetName = resultSet.getString(4);
 
 					return new Room(databaseId, name, description, assetName);
 				} finally {
@@ -349,13 +537,13 @@ public class DerbyDatabase implements Database {
 				try {
 					statement = connection.prepareStatement("""
 							SELECT
-								connection.description,
-								connection.direction,
-								room.id,
-								room.name,
-								room.description
-							FROM room_connections connection, rooms room
-							WHERE room.id = connection.destination_id AND connection.source_id = ?
+								room_connections.description,
+								room_connections.direction,
+								rooms.id,
+								rooms.name,
+								rooms.description
+							FROM room_connections, rooms
+							WHERE rooms.id = room_connections.destination_id AND room_connections.source_id = ?
 						""");
 					statement.setInt(1, room.getID());
 					resultSet = statement.executeQuery();
@@ -518,62 +706,5 @@ public class DerbyDatabase implements Database {
 	@Override
 	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) {
 		throw new UnsupportedOperationException("TODO - implement");
-	}
-
-
-	/// From lab 7
-	public <ResultType> ResultType executeTransaction(Transaction<ResultType> txn) {
-		try {
-			return doExecuteTransaction(txn);
-		} catch (SQLException e) {
-			throw new PersistenceException("Transaction failed", e);
-		}
-	}
-
-	/// From lab 7
-	public <ResultType> ResultType doExecuteTransaction(Transaction<ResultType> txn) throws SQLException {
-		Connection conn = connect();
-
-		try {
-			int numAttempts = 0;
-			boolean success = false;
-			ResultType result = null;
-
-			while (!success && numAttempts < MAX_ATTEMPTS) {
-				try {
-					result = txn.execute(conn);
-					conn.commit();
-					success = true;
-				} catch (SQLException e) {
-					if (e.getSQLState() != null && e.getSQLState().equals("41000")) {
-						// Deadlock: retry (unless max retry count has been reached)
-						numAttempts++;
-					} else {
-						// Some other kind of SQLException
-						throw e;
-					}
-				}
-			}
-
-			if (!success) {
-				throw new SQLException("Transaction failed (too many retries)");
-			}
-
-			// Success!
-			return result;
-		} finally {
-			DBUtil.closeQuietly(conn);
-		}
-	}
-
-	/// From lab 7
-	private Connection connect() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:derby:test.db;create=true");
-
-		// Set autocommit to false to allow execution of
-		// multiple queries/statements as part of the same transaction.
-		conn.setAutoCommit(false);
-
-		return conn;
 	}
 }
