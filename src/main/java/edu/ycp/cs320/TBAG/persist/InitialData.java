@@ -62,13 +62,6 @@ public class InitialData {
 					);
 				}
 				Integer roomIdA = roomIds.get(roomId);
-				if (roomIdA == null) {
-					throw new IllegalStateException(
-						"The room the player is in with the id \""
-							+ roomId
-							+ "\" does not exist in the initial CSV data."
-					);
-				}
 				Room playerRoom = rooms.get(roomIdA);
 				if (playerRoom == null) {
 					throw new IllegalStateException(
@@ -78,8 +71,14 @@ public class InitialData {
 					);
 				}
 
-				Integer stateOrdinal = Integer.parseInt(iterator.next());
-				PlayerState state = PlayerState.values()[stateOrdinal];
+				String stateString = iterator.next();
+				PlayerState state = PlayerState.getByName(stateString);
+				if (state == null) {
+					throw new IllegalStateException(
+						"Invalid player state: \"" + stateString + "\""
+					);
+				}
+
 				Integer coins = Integer.parseInt(iterator.next());
 				Integer health = Integer.parseInt(iterator.next());
 				Integer maxHealth = Integer.parseInt(iterator.next());
@@ -128,7 +127,7 @@ public class InitialData {
 				String assetName = it.next();
 
 				// Map CSV string ID → integer ID
-				Integer id = Integer.parseInt(roomKey);
+				Integer id = roomIds.size();
 				roomIds.put(roomKey, id);
 
 				Room room = new Room(id, name, description, assetName);
@@ -136,7 +135,6 @@ public class InitialData {
 			}
 
 			return rooms;
-
 		} finally {
 			roomsFile.close();
 		}

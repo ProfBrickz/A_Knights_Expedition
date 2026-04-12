@@ -1,2 +1,0 @@
-source_id,destination_id,direction,locked,locked_message,unlock_item_id
-String,String,String,Boolean (false or true),String,Integer

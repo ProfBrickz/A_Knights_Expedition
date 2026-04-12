@@ -20,8 +20,8 @@ public class FakeDatabase implements Database {
 		try {
 			dialog = InitialData.getDialog();
 			rooms = InitialData.getRooms();
-			player = InitialData.getPlayer();
 			roomConnections = InitialData.getRoomConnections();
+			player = InitialData.getPlayer();
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
 		} catch (IOException exception) {
@@ -29,7 +29,7 @@ public class FakeDatabase implements Database {
 		}
 	}
 
-	
+
 	@Override
 	public HashMap<Integer, String> getDialog() {
 		return dialog;

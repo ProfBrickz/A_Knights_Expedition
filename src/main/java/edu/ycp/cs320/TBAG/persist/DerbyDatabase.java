@@ -104,13 +104,14 @@ public class DerbyDatabase implements Database {
 				HashMap<Integer, String> dialog;
 				Player player;
 				HashMap<Integer, Room> rooms;
-				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
+				// A map between a room's id and (a map of its directions and connections)
+				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
 
 				try {
 					dialog = InitialData.getDialog();
-					player = InitialData.getPlayer();
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
+					player = InitialData.getPlayer();
 				} catch (IllegalStateException exception) {
 					throw new IllegalStateException("Initial data is incorrect", exception);
 				} catch (IOException exception) {
@@ -135,7 +136,7 @@ public class DerbyDatabase implements Database {
 					addDialogStatement.executeBatch();
 
 					addPlayerStatement = connection.prepareStatement("""
-							INSERT INTO players (room_id, state, coins, max_health, health)
+							INSERT INTO player (room_id, state, coins, max_health, health)
 							VALUES (?, ?, ?, ?, ?)
 						""");
 					addPlayerStatement.setInt(1, player.getRoom().getID());
@@ -165,7 +166,7 @@ public class DerbyDatabase implements Database {
 								direction,
 								description
 							)
-							VALUES (?, ?, ?)
+							VALUES (?, ?, ?, ?)
 						""");
 					for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
 						Integer roomId = entry.getKey();
@@ -245,8 +246,8 @@ public class DerbyDatabase implements Database {
 					createRoomConnectionsTableStatement = connection.prepareStatement("""
 							CREATE TABLE room_connections (
 								source_id INTEGER,
-								destination_id INTEGER,
 								direction VARCHAR(%d) NOT NULL,
+								destination_id INTEGER,
 								description VARCHAR(%d) NOT NULL,
 								locked BOOLEAN,
 								locked_message VARCHAR(%d),
@@ -317,7 +318,6 @@ public class DerbyDatabase implements Database {
 					statement = connection.prepareStatement("""
 							SELECT room_id, state, coins, max_health, health
 							FROM player
-							LIMIT 1
 						""");
 					resultSet = statement.executeQuery();
 
@@ -399,8 +399,8 @@ public class DerbyDatabase implements Database {
 
 					Integer databaseId = resultSet.getInt(1);
 					String name = resultSet.getString(2);
-					String description = resultSet.getNString(3);
-					String assetName = resultSet.getNString(4);
+					String description = resultSet.getString(3);
+					String assetName = resultSet.getString(4);
 
 					return new Room(databaseId, name, description, assetName);
 				} finally {
@@ -422,13 +422,13 @@ public class DerbyDatabase implements Database {
 				try {
 					statement = connection.prepareStatement("""
 							SELECT
-								connection.description,
-								connection.direction,
-								room.id,
-								room.name,
-								room.description
-							FROM room_connections connection, rooms room
-							WHERE room.id = connection.destination_id AND connection.source_id = ?
+								room_connections.description,
+								room_connections.direction,
+								rooms.id,
+								rooms.name,
+								rooms.description
+							FROM room_connections, rooms
+							WHERE rooms.id = room_connections.destination_id AND room_connections.source_id = ?
 						""");
 					statement.setInt(1, room.getID());
 					resultSet = statement.executeQuery();

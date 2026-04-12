@@ -68,6 +68,10 @@ public class Room {
 		return roomConnections;
 	}
 
+	public void setRoomConnections(HashMap<String, RoomConnection> roomConnections) {
+		this.roomConnections = roomConnections;
+	}
+
 	public void setDescription(String description) {
 		roomDescription = description;
 	}
