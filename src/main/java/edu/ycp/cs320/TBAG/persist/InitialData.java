@@ -21,7 +21,25 @@ public class InitialData {
 
 
 	public static HashMap<Integer, String> getDialog() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		HashMap<Integer, String> dialog = new HashMap<>();
+		ReadCSV dialogFile = new ReadCSV("dialog.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = dialogFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String text = iterator.next();
+
+				dialog.put(dialog.size(), text);
+			}
+
+			return dialog;
+		} finally {
+			dialogFile.close();
+		}
 	}
 
 	public static Player getPlayer() throws IOException, IllegalStateException {
