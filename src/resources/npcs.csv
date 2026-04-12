@@ -1,5 +1,5 @@
-id,room_id,name,max_health,health
-String,String,String,Integer,Integer
-1,Blacksmith_Store_NB,Euroland,999,999
-2,Shopkeeper_Store_NB,Morshu,200,200
-3,Arcadia_Cauldron_NB,Arcadia,100,90
+id,room_id,name,max_health,health,greeting,goodbye
+String,String,String,Integer,Integer,String,String
+1,Blacksmith_Store_NB,Euroland,999,999,"I'm Euroland, the blacksmith of New Brambleton. What do you want?",
+2,Shopkeeper_Store_NB,Morshu,200,200,"Hello adventure, I'm Morshu and if you want anything come to me, if you have the coin.",
+3,Arcadia_Cauldron_NB,Arcadia,100,90,,
