@@ -95,15 +95,82 @@ public class InitialData {
 	 * Rooms do not have items, npcs, or enemies
 	 */
 	public static HashMap<Integer, Room> getRooms() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
+
+    ReadCSV roomsFile = new ReadCSV("rooms.csv");
+
+    try {
+        while (true) {
+            List<String> tuple = roomsFile.next();
+            if (tuple == null) break;
+
+            Iterator<String> it = tuple.iterator();
+
+            String roomKey = it.next();   // CSV string ID
+            String name = it.next();
+            String description = it.next();
+            String assetName = it.next();
+
+            // Map CSV string ID → integer ID
+            Integer id = Integer.parseInt(roomKey);
+            roomIds.put(roomKey, id);
+
+            Room room = new Room(id, name, description, assetName);
+            rooms.put(id, room);
+        }
+
+        return rooms;
+
+    } finally {
+        roomsFile.close();
+    }
+}
 
 	/**
 	 * Returns a list of maps between room ids and a hashmap of (directions and room connection)
 	 */
 	public static HashMap<Integer, HashMap<String, RoomConnection>> getRoomConnections() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
+
+    HashMap<Integer, HashMap<String, RoomConnection>> result = new HashMap<>();
+    ReadCSV connFile = new ReadCSV("room_connections.csv");
+
+    try {
+        while (true) {
+            List<String> tuple = connFile.next();
+            if (tuple == null) break;
+
+            Iterator<String> it = tuple.iterator();
+
+            String fromKey = it.next();
+            String direction = it.next();
+            String toKey = it.next();
+            String description = it.next();
+
+            Integer fromId = roomIds.get(fromKey);
+            Integer toId = roomIds.get(toKey);
+
+            if (fromId == null || toId == null) {
+                throw new IllegalStateException(
+                    "Invalid room reference in connections CSV: " +
+                    fromKey + " -> " + toKey
+                );
+            }
+
+            Room targetRoom = rooms.get(toId);
+
+            RoomConnection connection =
+                new RoomConnection(targetRoom, description);
+
+            result
+                .computeIfAbsent(fromId, k -> new HashMap<>())
+                .put(direction, connection);
+        }
+
+        return result;
+
+    } finally {
+        connFile.close();
+    }
+}
 
 	/**
 	 * Returns a map between room ids and a list of items
