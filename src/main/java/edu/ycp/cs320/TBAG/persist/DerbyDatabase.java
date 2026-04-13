@@ -144,46 +144,43 @@ public class DerbyDatabase implements Database {
 					throw new IllegalStateException("Couldn't read initial data", exception);
 				}
 
-				PreparedStatement addDialogStatement = null;
-				PreparedStatement addPlayerStatement = null;
-				PreparedStatement addRoomsStatement = null;
-				PreparedStatement addRoomConnectionsStatement = null;
+				PreparedStatement statement = null;
 
 				try {
-					addDialogStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							INSERT INTO dialog ( text)
 							VALUES (?)
 						""");
 					for (Map.Entry<Integer, String> entry : dialog.entrySet()) {
-						addDialogStatement.setString(1, entry.getValue());
-						addRoomsStatement.addBatch();
+						statement.setString(1, entry.getValue());
+						statement.addBatch();
 					}
-					addDialogStatement.executeBatch();
+					statement.executeBatch();
 
-					addPlayerStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							INSERT INTO player (room_id, state, coins, max_health, health)
 							VALUES (?, ?, ?, ?, ?)
 						""");
-					addPlayerStatement.setInt(1, player.getRoom().getID());
-					addPlayerStatement.setInt(2, player.getState().ordinal());
-					addPlayerStatement.setInt(3, player.getCoins());
-					addPlayerStatement.setInt(4, player.getMaxHealth());
-					addPlayerStatement.setInt(5, player.getHealth());
-					addPlayerStatement.executeUpdate();
+					statement.setInt(1, player.getRoom().getID());
+					statement.setInt(2, player.getState().ordinal());
+					statement.setInt(3, player.getCoins());
+					statement.setInt(4, player.getMaxHealth());
+					statement.setInt(5, player.getHealth());
+					statement.executeUpdate();
 
-					addRoomsStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							INSERT INTO rooms (name, description, asset_name)
 							VALUES (?, ?, ?)
 						""");
 					for (Room room : rooms.values()) {
-						addRoomsStatement.setString(1, room.getName());
-						addRoomsStatement.setString(2, room.getDescription());
-						addRoomsStatement.setString(3, room.getAssetName());
-						addRoomsStatement.addBatch();
+						statement.setString(1, room.getName());
+						statement.setString(2, room.getDescription());
+						statement.setString(3, room.getAssetName());
+						statement.addBatch();
 					}
-					addRoomsStatement.executeBatch();
+					statement.executeBatch();
 
-					addRoomConnectionsStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							INSERT INTO room_connections (
 								source_id,
 								destination_id,
@@ -199,21 +196,18 @@ public class DerbyDatabase implements Database {
 							String direction = entry1.getKey();
 							RoomConnection roomConnection = entry1.getValue();
 
-							addRoomConnectionsStatement.setInt(1, roomId);
-							addRoomConnectionsStatement.setInt(2, roomConnection.getRoom().getID());
-							addRoomConnectionsStatement.setString(3, direction);
-							addRoomConnectionsStatement.setString(4, roomConnection.getDescription());
-							addRoomConnectionsStatement.addBatch();
+							statement.setInt(1, roomId);
+							statement.setInt(2, roomConnection.getRoom().getID());
+							statement.setString(3, direction);
+							statement.setString(4, roomConnection.getDescription());
+							statement.addBatch();
 						}
 					}
-					addRoomConnectionsStatement.executeBatch();
+					statement.executeBatch();
 
 					return true;
 				} finally {
-					DBUtil.closeQuietly(addDialogStatement);
-					DBUtil.closeQuietly(addPlayerStatement);
-					DBUtil.closeQuietly(addRoomsStatement);
-					DBUtil.closeQuietly(addRoomConnectionsStatement);
+					DBUtil.closeQuietly(statement);
 				}
 			}
 		});
