@@ -220,7 +220,7 @@ public class DerbyDatabase implements Database {
 	}
 
 	public void createTables() {
-		final Integer DIALOG_MAX_LENGTH = 128;
+		final Integer DIALOG_MAX_LENGTH = 2048;
 		final Integer NAME_MAX_LENGTH = 128;
 		final Integer DESCRIPTION_MAX_LENGTH = 512;
 		final Integer DIRECTION_MAX_LENGTH = 64;
