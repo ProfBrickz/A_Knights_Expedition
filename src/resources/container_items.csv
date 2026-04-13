@@ -1,2 +1,10 @@
 container_id,item_id,amount
 String,String,Integer
+Cartridge Chest,28,1
+OB_Chest,29,1
+MC_Sword_Chest,5,1
+Hotel_Chest,11,1
+Stump_Chest,17,2
+Stump_Chest,22,3
+Slimed_Cabinet,24,1
+Slimed_Cabinet,15,3
