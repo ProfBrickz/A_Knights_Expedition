@@ -31,9 +31,15 @@ public class FakeDatabase implements Database {
 	}
 
 
+	// Dialog methods
 	@Override
 	public HashMap<Integer, String> getDialog() {
 		return dialog;
+	}
+
+	@Override
+	public void addDialog(String text) {
+		dialog.put(dialog.size(), text);
 	}
 
 	// Player-related methods

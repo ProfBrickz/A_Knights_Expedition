@@ -17,7 +17,6 @@ public class GameEngine {
 	private Player player;
 
 	// Constructor
-
 	public GameEngine() {
 		DatabaseProvider.setInstance(new DerbyDatabase());
 		database = DatabaseProvider.getInstance();
@@ -33,6 +32,25 @@ public class GameEngine {
 	}
 
 
+	// Getters and setters
+	public String getDialog() {
+		StringBuilder dialog = new StringBuilder();
+
+		for (String text : database.getDialog().values()) {
+			dialog
+				.append(text)
+				.append("\n");
+			;
+		}
+
+		return dialog.toString();
+	}
+
+	public void addDialog(String text) {
+		database.addDialog(text);
+	}
+
+
 	// Input command
 
 	/**
@@ -42,7 +60,7 @@ public class GameEngine {
 	public String inputCommand(String commandName, ArrayList<String> arguments) {
 		commandName = commandName.trim().toLowerCase();
 
-		String output = "";
+		String output = "This should not happen, error in inputCommand";
 
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
@@ -51,9 +69,9 @@ public class GameEngine {
 				break;
 			}
 		}
-		if (output.isEmpty()) output = "Sorry, command not recognized.\n";
+		if (output.isEmpty()) output = "Sorry, command not recognized.";
 
-		return output + "\n";
+		return output;
 	}
 
 

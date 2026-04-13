@@ -125,12 +125,11 @@ public class DerbyDatabase implements Database {
 
 				try {
 					addDialogStatement = connection.prepareStatement("""
-							INSERT INTO dialog (id, text)
-							VALUES (?, ?)
+							INSERT INTO dialog ( text)
+							VALUES (?)
 						""");
 					for (Map.Entry<Integer, String> entry : dialog.entrySet()) {
-						addDialogStatement.setInt(1, entry.getKey());
-						addDialogStatement.setString(2, entry.getValue());
+						addDialogStatement.setString(1, entry.getValue());
 						addRoomsStatement.addBatch();
 					}
 					addDialogStatement.executeBatch();
@@ -147,14 +146,13 @@ public class DerbyDatabase implements Database {
 					addPlayerStatement.executeUpdate();
 
 					addRoomsStatement = connection.prepareStatement("""
-							INSERT INTO rooms (id, name, description, asset_name)
-							VALUES (?, ?, ?, ?)
+							INSERT INTO rooms (name, description, asset_name)
+							VALUES (?, ?, ?)
 						""");
 					for (Room room : rooms.values()) {
-						addRoomsStatement.setInt(1, room.getID());
-						addRoomsStatement.setString(2, room.getName());
-						addRoomsStatement.setString(3, room.getDescription());
-						addRoomsStatement.setString(4, room.getAssetName());
+						addRoomsStatement.setString(1, room.getName());
+						addRoomsStatement.setString(2, room.getDescription());
+						addRoomsStatement.setString(3, room.getAssetName());
 						addRoomsStatement.addBatch();
 					}
 					addRoomsStatement.executeBatch();
@@ -275,6 +273,7 @@ public class DerbyDatabase implements Database {
 	}
 
 
+	// Dialog methods
 	@Override
 	public HashMap<Integer, String> getDialog() {
 		return executeTransaction(new Transaction<HashMap<Integer, String>>() {
@@ -303,6 +302,29 @@ public class DerbyDatabase implements Database {
 				} finally {
 					DBUtil.closeQuietly(statement);
 					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void addDialog(String text) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"INSERT INTO dialog (text) VALUES (?)"
+					);
+					statement.setString(1, text);
+
+					statement.executeUpdate();
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
 				}
 			}
 		});

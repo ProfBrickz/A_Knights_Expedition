@@ -1,9 +1,6 @@
 package edu.ycp.cs320.TBAG.servlet;
 
 import edu.ycp.cs320.TBAG.controller.GameEngine;
-import edu.ycp.cs320.TBAG.model.ItemCatalog;
-import edu.ycp.cs320.TBAG.model.Player;
-import edu.ycp.cs320.TBAG.model.Room;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -12,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serial;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class TBAGServlet extends HttpServlet {
 	@Serial
@@ -24,20 +20,12 @@ public class TBAGServlet extends HttpServlet {
 
 		System.out.println("TBAG Servlet: doGet");
 
-		GameEngine gameEngine = (GameEngine) req.getSession().getAttribute("gameEngine");
-		if (gameEngine == null) {
-			// create Player model
-			Player player = new Player(100, 100);
-			ItemCatalog.addBaseItemsToInventory(player.getInventory());
+		GameEngine gameEngine = new GameEngine();
 
-			// create room models
-			HashMap<Integer, Room> rooms = new HashMap<>();
+		req.getSession().setAttribute("gameEngine", gameEngine);
+//		req.getSession().setAttribute("player", player);
+		req.setAttribute("dialog", gameEngine.getDialog());
 
-			gameEngine = new GameEngine(player, rooms);
-			req.getSession().setAttribute("gameEngine", gameEngine);
-			req.getSession().setAttribute("player", player);
-			req.setAttribute("dialog", "");
-		}
 
 		// call JSP to generate empty form
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);
@@ -51,28 +39,20 @@ public class TBAGServlet extends HttpServlet {
 
 		// create GameEngine controller
 
-		GameEngine gameEngine = (GameEngine) req.getSession().getAttribute("gameEngine");
+		GameEngine gameEngine = new GameEngine();
 
-		if (gameEngine == null) {
-			// create Player model
-			Player player = new Player(100, 100);
-			ItemCatalog.addBaseItemsToInventory(player.getInventory());
-
-			// create room models
-			HashMap<Integer, Room> rooms = new HashMap<>();
-
-			gameEngine = new GameEngine(player, rooms);
-			req.getSession().setAttribute("gameEngine", gameEngine);
-			req.getSession().setAttribute("player", player);
-		}
+		req.getSession().setAttribute("gameEngine", gameEngine);
+//		req.getSession().setAttribute("player", player);
+		req.setAttribute("dialog", gameEngine.getDialog());
 
 		// Get running dialog text
-		String dialog = req.getParameter("dialog");
+		String dialog = gameEngine.getDialog();
 
 		// get direction command from jsp
 		String input = req.getParameter("command");
 		// Append user's command
 		dialog += input + "\n";
+		gameEngine.addDialog(input);
 
 		String command = "";
 		ArrayList<String> arguments = new ArrayList<>();
@@ -111,7 +91,9 @@ public class TBAGServlet extends HttpServlet {
 		}
 
 		// Run command
-		dialog += gameEngine.inputCommand(command, arguments);
+		String output = gameEngine.inputCommand(command, arguments);
+		dialog += output;
+		gameEngine.addDialog(output);
 
 		// the JSP will display updated dialog
 		req.setAttribute("dialog", dialog);
