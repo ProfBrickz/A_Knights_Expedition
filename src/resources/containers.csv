@@ -3,3 +3,4 @@ String,String,String,Boolean (false or true),String
 Cartridge Chest,Game_Room_MC,Cartridge Display,FALSE,
 OB_Chest,Key_Room_OB,Worn Chest,FALSE,
 MC_Sword_Chest,Sword_room_MC,Katana Display,FALSE,
+Hotel_Chest,Hotel,Storage Chest,FALSE,
