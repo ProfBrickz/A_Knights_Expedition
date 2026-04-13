@@ -285,7 +285,7 @@ public class DerbyDatabase implements Database {
 								name VARCHAR(%d) NOT NULL,
 								description VARCHAR(%d) NOT NULL,
 								value INTEGER NOT NULL,
-								item_type INTEGER NOT NULL,
+								type INTEGER NOT NULL,
 								heal_amount INTEGER,
 								defense INTEGER,
 								active_armor BOOLEAN
