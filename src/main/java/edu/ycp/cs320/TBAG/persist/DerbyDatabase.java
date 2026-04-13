@@ -72,7 +72,7 @@ public class DerbyDatabase implements Database {
 
 	/// From lab 7
 	private Connection connect() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:derby:database.db;create=true");
+		Connection conn = DriverManager.getConnection("jdbc:derby:" + databasePath + ";create=true");
 
 		// Set autocommit too false to allow execution of
 		// multiple queries/statements as part of the same transaction.
@@ -92,6 +92,32 @@ public class DerbyDatabase implements Database {
 		db.loadInitialData();
 
 		System.out.println("Library DB successfully initialized!");
+	}
+
+	public void shutdown() {
+		try {
+			DriverManager.getConnection("jdbc:derby:" + databasePath + ";shutdown=true");
+		} catch (SQLException e) {
+			String state = e.getSQLState();
+
+			// These BOTH indicate successful shutdown
+			if ("XJ015".equals(state) || "08006".equals(state)) {
+				return; // success
+			}
+
+			e.printStackTrace(); // helpful while debugging
+			throw new RuntimeException("Derby shutdown failed: " + state, e);
+		}
+	}
+
+	private final String databasePath;
+
+	public DerbyDatabase(String databasePath) {
+		this.databasePath = databasePath;
+	}
+
+	public DerbyDatabase() {
+		this("database.db");
 	}
 
 
@@ -194,7 +220,7 @@ public class DerbyDatabase implements Database {
 	}
 
 	public void createTables() {
-		final Integer DIALOG_MAX_LENGTH = 128;
+		final Integer DIALOG_MAX_LENGTH = 2048;
 		final Integer NAME_MAX_LENGTH = 128;
 		final Integer DESCRIPTION_MAX_LENGTH = 512;
 		final Integer DIRECTION_MAX_LENGTH = 64;

@@ -8,11 +8,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 public class FakeDatabase implements Database {
-	private HashMap<Integer, String> dialog;
-	private Player player;
-	private HashMap<Integer, Room> rooms;
+	private HashMap<Integer, String> dialog = new HashMap<>();
+	private Player player = null;
+	private HashMap<Integer, Room> rooms = new HashMap<>();
 	// A map between a room's id and (a map of its directions and connections)
-	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
+	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
 
 
 	// General purpose methods
@@ -291,7 +291,7 @@ public class FakeDatabase implements Database {
 	// NPC-related methods
 	@Override
 	public HashMap<Integer, NPC> getNPCsForRoom(Room room) {
-		if (room == null){
+		if (room == null) {
 			return new HashMap<>();
 		}
 		return new HashMap<>(room.getNpcs());
