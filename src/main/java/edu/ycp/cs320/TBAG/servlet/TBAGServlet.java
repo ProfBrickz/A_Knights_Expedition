@@ -43,15 +43,11 @@ public class TBAGServlet extends HttpServlet {
 
 		req.getSession().setAttribute("gameEngine", gameEngine);
 //		req.getSession().setAttribute("player", player);
-		req.setAttribute("dialog", gameEngine.getDialog());
 
-		// Get running dialog text
-		String dialog = gameEngine.getDialog();
 
 		// get direction command from jsp
 		String input = req.getParameter("command");
 		// Append user's command
-		dialog += input + "\n";
 		gameEngine.addDialog(input);
 
 		String command = "";
@@ -92,11 +88,10 @@ public class TBAGServlet extends HttpServlet {
 
 		// Run command
 		String output = gameEngine.inputCommand(command, arguments);
-		dialog += output;
 		gameEngine.addDialog(output);
 
 		// the JSP will display updated dialog
-		req.setAttribute("dialog", dialog);
+		req.setAttribute("dialog", gameEngine.getDialog());
 
 		// now call the JSP to render the new page
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);

@@ -1,6 +1,7 @@
 package edu.ycp.cs320.TBAG.model;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Room {
 	private final Integer id;
@@ -69,7 +70,9 @@ public class Room {
 	}
 
 	public void setRoomConnections(HashMap<String, RoomConnection> roomConnections) {
-		this.roomConnections = roomConnections;
+		for (Map.Entry<String, RoomConnection> entry : roomConnections.entrySet()) {
+			this.roomConnections.put(entry.getKey().toLowerCase(), entry.getValue());
+		}
 	}
 
 	public void setDescription(String description) {

@@ -41,7 +41,7 @@ public class ReadCSV implements Closeable {
 					tuple.add("");
 				}
 			} else {
-				tuple.add(currentToken.trim());
+				tuple.add(currentToken.trim().replace("\\n", "\n"));
 			}
 
 			previousToken = currentToken;
