@@ -224,7 +224,8 @@ public class DerbyDatabase implements Database {
 								state INTEGER NOT NULL,
 								coins INTEGER NOT NULL,
 								max_health INTEGER NOT NULL,
-								health INTEGER NOT NULL
+								health INTEGER NOT NULL,
+								current_npc INTEGER
 							)
 						""");
 					createPlayerTableStatement.executeUpdate();
