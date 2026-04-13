@@ -1,7 +1,9 @@
 package edu.ycp.cs320.TBAG.persist;
 
+import edu.ycp.cs320.TBAG.Utils;
 import edu.ycp.cs320.TBAG.model.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
@@ -84,6 +86,9 @@ public class DerbyDatabase implements Database {
 	/// From lab 7
 	// The main method creates the database tables and loads the initial data.
 	public static void main(String[] args) throws IOException {
+		System.out.println("Deleting old database...");
+		Utils.deleteDirectory(new File(defaultDatabasePath));
+
 		System.out.println("Creating tables...");
 		DerbyDatabase db = new DerbyDatabase();
 		db.createTables();
@@ -110,6 +115,7 @@ public class DerbyDatabase implements Database {
 		}
 	}
 
+	private static final String defaultDatabasePath = "database.db";
 	private final String databasePath;
 
 	public DerbyDatabase(String databasePath) {
@@ -117,7 +123,7 @@ public class DerbyDatabase implements Database {
 	}
 
 	public DerbyDatabase() {
-		this("database.db");
+		this(defaultDatabasePath);
 	}
 
 

@@ -1,5 +1,6 @@
 package edu.ycp.cs320.TBAG.controller;
 
+import edu.ycp.cs320.TBAG.Utils;
 import edu.ycp.cs320.TBAG.persist.Database;
 import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
@@ -29,7 +30,7 @@ public class DatabaseTest {
 		@AfterEach
 		public void tearDown() throws IOException {
 			((DerbyDatabase) database).shutdown();
-			deleteDirectory(new File(databasePath));
+			Utils.deleteDirectory(new File(databasePath));
 
 			Assertions.assertFalse(Files.exists(Path.of(databasePath)));
 		}
@@ -69,21 +70,5 @@ public class DatabaseTest {
 		Assertions.assertEquals(2, dialog.size());
 		Assertions.assertEquals("a", dialog.get(0));
 		Assertions.assertEquals("b", dialog.get(1));
-	}
-
-
-	/// From https://stackoverflow.com/a/29175213
-	private static void deleteDirectory(File file) {
-		File[] contents = file.listFiles();
-
-		if (contents != null) {
-			for (File f : contents) {
-				if (!Files.isSymbolicLink(f.toPath())) {
-					deleteDirectory(f);
-				}
-			}
-		}
-
-		file.delete();
 	}
 }
