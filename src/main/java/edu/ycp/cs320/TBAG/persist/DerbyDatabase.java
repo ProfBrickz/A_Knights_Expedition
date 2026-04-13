@@ -982,8 +982,8 @@ public class DerbyDatabase implements Database {
 								npcs.health,
 								npcs.greeting,
 								npcs.goodbye
-							FROM npcs
-							WHERE npcs.room_id = ?
+							FROM room_npcs, npcs
+							WHERE npcs.id = room_npcs.npc_id AND npcs.room_id = ?
 						""");
 					statement.setInt(1, room.getID());
 					resultSet = statement.executeQuery();
