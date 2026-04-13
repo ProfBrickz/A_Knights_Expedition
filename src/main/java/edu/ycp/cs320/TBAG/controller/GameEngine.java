@@ -20,6 +20,8 @@ public class GameEngine {
 	public GameEngine() {
 		DatabaseProvider.setInstance(new DerbyDatabase());
 		database = DatabaseProvider.getInstance();
+
+		player = database.getPlayer();
 	}
 
 	/**
@@ -51,7 +53,6 @@ public class GameEngine {
 	}
 
 	public Player getPlayer() {
-		if (player == null) player = database.getPlayer();
 		return player;
 	}
 
@@ -69,7 +70,6 @@ public class GameEngine {
 
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
-				this.player = database.getPlayer();
 				output = command.run(this, arguments);
 				break;
 			}

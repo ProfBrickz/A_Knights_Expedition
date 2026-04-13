@@ -21,10 +21,9 @@ public class TBAGServlet extends HttpServlet {
 		System.out.println("TBAG Servlet: doGet");
 
 		GameEngine gameEngine = new GameEngine();
-
-		req.getSession().setAttribute("gameEngine", gameEngine);
-//		req.getSession().setAttribute("player", player);
+		
 		req.setAttribute("dialog", gameEngine.getDialog());
+		req.setAttribute("player", gameEngine.getPlayer());
 
 
 		// call JSP to generate empty form

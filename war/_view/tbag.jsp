@@ -67,8 +67,7 @@
     }
 
     .location-image {
-      width: 128px;
-      height: 128px;
+      width: 150px;
       object-fit: cover;
       border: 3px solid black;
       background: #ccc;
@@ -100,8 +99,7 @@
     }
 
     .item-icon {
-      width: 32px;
-      height: 32px;
+      width: 50px;
       object-fit: contain;
       image-rendering: auto;
     }
@@ -148,12 +146,12 @@
       <div class="location">
         <div class="location-name">${player.room.name}</div>
         <c:choose>
-          <c:when test="${player.room.name == 'NewBrambleton'}">
-            <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/NewBrambleton.gif" alt="${player.room.name}" />
-          </c:when>
-          <c:otherwise>
-            <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif" alt="${player.room.name}" />
-          </c:otherwise>
+           <c:when test="${not empty player.room.assetName}">
+			<img class="location-image" src="${pageContext.request.contextPath}/assets/locations/${player.room.assetName}" alt="${player.room.assetName}" />
+		  </c:when>
+		  <c:otherwise>
+			<img class="location-image" src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif" alt="${player.room.assetName}" />
+		  </c:otherwise>
         </c:choose>
       </div>
     </div>
