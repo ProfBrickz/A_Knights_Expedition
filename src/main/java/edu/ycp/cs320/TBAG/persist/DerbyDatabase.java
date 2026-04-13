@@ -412,7 +412,7 @@ public class DerbyDatabase implements Database {
 						"UPDATE player SET state = ?"
 					);
 
-					statement.setString(1, String.valueOf(playerState));
+					statement.setInt(1, playerState.ordinal());
 
 					int rowsUpdated = statement.executeUpdate();
 
