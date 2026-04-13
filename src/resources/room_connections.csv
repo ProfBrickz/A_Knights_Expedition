@@ -1,3 +1,8 @@
 source_id,direction,destination_id,description,locked,locked_message,unlock_item_id
 String,String,String,String,Boolean (false or true),String,Integer
-
+Hotel,North,South_Street_NB,temp,FALSE,,
+South_Street_NB,North,Center_NB,temp,FALSE,,
+South_Street_NB,South,Hotel,temp,FALSE,,
+Center_NB,North,North_Street_NB,temp,FALSE,,
+Center_NB,South,South_Street_NB,temp,FALSE,,
+North_Street_NB,South,Center_NB,temp,FALSE,,

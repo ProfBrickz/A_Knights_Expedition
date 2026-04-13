@@ -1,2 +1,6 @@
 id,name,description,asset_name
 String,String,String,String
+Hotel,Hotel,Your hotel room.,NewBrambleton
+South_Street_NB,South Street,Your in South Street. Its where most people live.,NewBrambleton
+Center_NB,Town Center,Your at the center of New Bramblton. There's a nice fountain nearby.,NewBrambleton
+North_Street_NB,North Street,Your in North Street. It's where most shops are.,NewBrambleton
