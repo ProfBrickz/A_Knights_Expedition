@@ -92,6 +92,7 @@ public class TBAGServlet extends HttpServlet {
 
 		// the JSP will display updated dialog
 		req.setAttribute("dialog", gameEngine.getDialog());
+		req.setAttribute("player", gameEngine.getPlayer());
 
 		// now call the JSP to render the new page
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);

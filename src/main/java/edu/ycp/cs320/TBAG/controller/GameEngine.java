@@ -50,6 +50,11 @@ public class GameEngine {
 		database.addDialog(text);
 	}
 
+	public Player getPlayer() {
+		if (player == null) player = database.getPlayer();
+		return player;
+	}
+
 
 	// Input command
 
