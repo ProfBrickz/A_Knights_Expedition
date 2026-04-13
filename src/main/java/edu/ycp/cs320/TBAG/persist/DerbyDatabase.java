@@ -202,22 +202,19 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
-				PreparedStatement createDialogTableStatement = null;
-				PreparedStatement createPlayerTableStatement = null;
-				PreparedStatement createRoomsTableStatement = null;
-				PreparedStatement createRoomConnectionsTableStatement = null;
+				PreparedStatement statement = null;
 
 				try {
-					createDialogTableStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							CREATE TABLE dialog (
 								id INTEGER PRIMARY KEY
 									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
 								text VARCHAR(%d) NOT NULL
 							)
 						""".formatted(DIALOG_MAX_LENGTH));
-					createDialogTableStatement.executeUpdate();
+					statement.executeUpdate();
 
-					createPlayerTableStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							CREATE TABLE player (
 								room_id INTEGER NOT NULL,
 								state INTEGER NOT NULL,
@@ -227,9 +224,9 @@ public class DerbyDatabase implements Database {
 								current_npc INTEGER
 							)
 						""");
-					createPlayerTableStatement.executeUpdate();
+					statement.executeUpdate();
 
-					createRoomsTableStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							CREATE TABLE rooms (
 								id INTEGER PRIMARY KEY
 									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
@@ -242,9 +239,9 @@ public class DerbyDatabase implements Database {
 						DESCRIPTION_MAX_LENGTH,
 						NAME_MAX_LENGTH
 					));
-					createRoomsTableStatement.executeUpdate();
+					statement.executeUpdate();
 
-					createRoomConnectionsTableStatement = connection.prepareStatement("""
+					statement = connection.prepareStatement("""
 							CREATE TABLE room_connections (
 								source_id INTEGER,
 								direction VARCHAR(%d) NOT NULL,
@@ -259,14 +256,47 @@ public class DerbyDatabase implements Database {
 						DESCRIPTION_MAX_LENGTH,
 						DESCRIPTION_MAX_LENGTH
 					));
-					createRoomConnectionsTableStatement.execute();
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE items (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								name VARCHAR(%d) NOT NULL,
+								description VARCHAR(%d) NOT NULL,
+								value INTEGER NOT NULL,
+								item_type INTEGER NOT NULL,
+								heal_amount INTEGER,
+								defense INTEGER,
+								active_armor BOOLEAN
+							)
+						""".formatted(
+						NAME_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH
+					));
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE player_items (
+								item_id INTEGER PRIMARY KEY,
+								amount INTEGER NOT NULL
+							)
+						""");
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE room_items (
+								room_id INTEGER,
+								item_id INTEGER,
+								amount INTEGER NOT NULL,
+								PRIMARY KEY (room_id, item_id)
+							)
+						""");
+					statement.execute();
 
 					return true;
 				} finally {
-					DBUtil.closeQuietly(createDialogTableStatement);
-					DBUtil.closeQuietly(createPlayerTableStatement);
-					DBUtil.closeQuietly(createRoomsTableStatement);
-					DBUtil.closeQuietly(createRoomConnectionsTableStatement);
+					DBUtil.closeQuietly(statement);
 				}
 			}
 		});
