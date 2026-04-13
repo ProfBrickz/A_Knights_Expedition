@@ -212,7 +212,8 @@ public class DerbyDatabase implements Database {
 				try {
 					createDialogTableStatement = connection.prepareStatement("""
 							CREATE TABLE dialog (
-								id INTEGER PRIMARY KEY,
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
 								text VARCHAR(%d) NOT NULL
 							)
 						""".formatted(DIALOG_MAX_LENGTH));
@@ -232,7 +233,8 @@ public class DerbyDatabase implements Database {
 
 					createRoomsTableStatement = connection.prepareStatement("""
 							CREATE TABLE rooms (
-								id INTEGER PRIMARY KEY,
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
 								name VARCHAR(%d) NOT NULL,
 								description VARCHAR(%d) NOT NULL,
 								asset_name VARCHAR(%d) NOT NULL
