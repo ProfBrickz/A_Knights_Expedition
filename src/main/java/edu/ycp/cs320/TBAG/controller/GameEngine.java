@@ -6,6 +6,7 @@ import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -36,16 +37,21 @@ public class GameEngine {
 
 	// Getters and setters
 	public String getDialog() {
-		StringBuilder dialog = new StringBuilder();
+		StringBuilder output = new StringBuilder();
 
-		for (String text : database.getDialog().values()) {
-			dialog
-				.append(text)
+		HashMap<Integer, String> dialog = database.getDialog();
+
+		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
+		Collections.sort(keys);
+
+		for (Integer key : keys) {
+			output
+				.append(dialog.get(key))
 				.append("\n");
 			;
 		}
 
-		return dialog.toString();
+		return output.toString();
 	}
 
 	public void addDialog(String text) {
