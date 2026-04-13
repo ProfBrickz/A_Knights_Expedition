@@ -1017,7 +1017,48 @@ public class DerbyDatabase implements Database {
 	// NPC-related methods
 	@Override
 	public HashMap<Integer, NPC> getNPCsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		return executeTransaction(new Transaction<HashMap<Integer, NPC>>() {
+			@Override
+			public HashMap<Integer, NPC> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								npcs.id,
+								npcs.name,
+								npcs.max_health,
+								npcs.health,
+								npcs.greeting,
+								npcs.goodbye
+							FROM room_npcs, npcs
+							WHERE npcs.id = room_npcs.npc_id AND npcs.room_id = ?
+						""");
+					statement.setInt(1, room.getID());
+					resultSet = statement.executeQuery();
+
+					HashMap<Integer, NPC> result = new HashMap<>();
+					while (resultSet.next()) {
+						Integer id = resultSet.getInt(1);
+						String name = resultSet.getString(2);
+						Integer maxHealth = resultSet.getInt(3);
+						Integer health = resultSet.getInt(4);
+						String greeting = resultSet.getString(5);
+						String goodbye = resultSet.getString(6);
+						result.put(id, new NPC(id, name, maxHealth, health, greeting, goodbye));
+					}
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 
