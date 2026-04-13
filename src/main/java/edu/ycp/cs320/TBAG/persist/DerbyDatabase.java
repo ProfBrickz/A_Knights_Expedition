@@ -431,7 +431,30 @@ public class DerbyDatabase implements Database {
 
 	@Override
 	public void setPlayerNPC(NPC npc) {
-		throw new UnsupportedOperationException("TODO - implement");
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET current_npc = ?"
+					);
+
+					statement.setInt(1, npc.getId());
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
 	}
 
 	@Override

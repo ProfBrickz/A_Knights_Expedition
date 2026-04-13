@@ -73,7 +73,10 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public void setPlayerNPC(NPC npc) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+		player.setCurrentNPC(npc);
 	}
 
 	@Override
