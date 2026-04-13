@@ -48,17 +48,27 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public void setPlayerRoom(Integer roomId) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+		Room room = rooms.get(roomId);
+		player.setRoom(room);
 	}
 
 	@Override
 	public void setPlayerCoins(Integer coins) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+		player.setCoins(coins);
 	}
 
 	@Override
 	public void setPlayerState(PlayerState playerState) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+		player.setState(playerState);
 	}
 
 	@Override
