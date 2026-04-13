@@ -285,7 +285,10 @@ public class FakeDatabase implements Database {
 	// NPC-related methods
 	@Override
 	public HashMap<Integer, NPC> getNPCsForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+		if (room == null){
+			return new HashMap<>();
+		}
+		return new HashMap<>(room.getNpcs());
 	}
 
 
