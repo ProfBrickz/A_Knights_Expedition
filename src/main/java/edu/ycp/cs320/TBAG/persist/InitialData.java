@@ -193,10 +193,10 @@ public class InitialData {
 	/**
 	 * Returns a list of the players items
 	 */
-	public static ArrayList<Item> getPlayerItems() throws IOException {
+	public static HashMap<Integer, Item> getPlayerItems() throws IOException {
 		ensureItemsLoaded();
 
-		ArrayList<Item> result = new ArrayList<>();
+		HashMap<Integer, Item> result = new HashMap<>();
 		ReadCSV playerItemsFile = new ReadCSV("player_items.csv");
 
 		try {
@@ -224,7 +224,7 @@ public class InitialData {
 
 				Item item = copyItemWithAmount(baseItem, amount);
 				if (item != null) {
-					result.add(item);
+					result.put(item.getId(), item);
 				}
 			}
 
@@ -381,7 +381,7 @@ public class InitialData {
 	/**
 	 * Returns a list of all items without amounts
 	 */
-	public static ArrayList<Item> getItems() throws IOException {
+	public static HashMap<Integer, Item> getItems() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 

@@ -138,12 +138,16 @@ public class DerbyDatabase implements Database {
 				HashMap<Integer, Room> rooms;
 				// A map between a room's id and (a map of its directions and connections)
 				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
+				HashMap<Integer, Item> items;
+				HashMap<Integer, Item> playerItems;
 
 				try {
 					dialog = InitialData.getDialog();
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
 					player = InitialData.getPlayer();
+					items = InitialData.getItems();
+					playerItems = InitialData.getPlayerItems();
 				} catch (IllegalStateException exception) {
 					throw new IllegalStateException("Initial data is incorrect", exception);
 				} catch (IOException exception) {
@@ -192,8 +196,7 @@ public class DerbyDatabase implements Database {
 								destination_id,
 								direction,
 								description
-							)
-							VALUES (?, ?, ?, ?)
+							) VALUES (?, ?, ?, ?)
 						""");
 					for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
 						Integer roomId = entry.getKey();
@@ -208,6 +211,48 @@ public class DerbyDatabase implements Database {
 							statement.setString(4, roomConnection.getDescription());
 							statement.addBatch();
 						}
+					}
+					statement.executeBatch();
+
+					statement = connection.prepareStatement("""
+							INSERT INTO items (
+								id,
+								name,
+								description,
+								value,
+								type,
+								heal_amount,
+								defense,
+								active_armor
+							) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+						""");
+					for (Item item : items.values()) {
+						statement.setInt(1, item.getId());
+						statement.setString(2, item.getName());
+						statement.setString(3, item.getDescription());
+						statement.setInt(4, item.getValue());
+						statement.setInt(5, ItemType.getByItem(item).ordinal());
+						if (item instanceof HealingItem healingItem) {
+							statement.setInt(6, healingItem.getHealAmount());
+						}
+						if (item instanceof Armor armor) {
+							statement.setInt(7, armor.getDefense());
+							statement.setBoolean(8, armor.getActive());
+						}
+						statement.addBatch();
+					}
+					statement.executeBatch();
+
+					statement = connection.prepareStatement("""
+							INSERT INTO player_items (
+								item_id,
+								amount
+							) values (?, ?)
+						""");
+					for (Item item : playerItems.values()) {
+						statement.setInt(1, item.getId());
+						statement.setInt(2, item.getAmount());
+						statement.addBatch();
 					}
 					statement.executeBatch();
 
