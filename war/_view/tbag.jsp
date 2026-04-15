@@ -77,6 +77,10 @@
       grid-column: 1;
       grid-row: 2;
       overflow-y: auto;
+
+      pre {
+      	text-wrap: balance;
+      }
     }
 
     .inventory {
@@ -181,14 +185,12 @@
     <div class="input">
   		<input type="text" name="command" placeholder="Enter command..." />
   		<button type="submit">Submit</button>
-  		<input name="dialog" type="hidden" value="${fn:escapeXml(dialog)}" />
 	</div>
 
     
     <div class="search">
       <input type="text" name="search" placeholder="Search item name..." />
       <button type="submit">Submit</button>
-      <input name="dialog" type="hidden" value="${fn:escapeXml(dialog)}" />
     </div>
 
   </div>

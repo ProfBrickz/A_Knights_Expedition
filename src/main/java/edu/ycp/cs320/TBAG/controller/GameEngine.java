@@ -72,7 +72,7 @@ public class GameEngine {
 	public String inputCommand(String commandName, ArrayList<String> arguments) {
 		commandName = commandName.trim().toLowerCase();
 
-		String output = "This should not happen, error in inputCommand";
+		String output = "";
 
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
@@ -80,7 +80,7 @@ public class GameEngine {
 				break;
 			}
 		}
-		if (output.isEmpty()) output = "Sorry, command not recognized.";
+		if (output.isEmpty()) output = "Sorry, command not recognized.\n";
 
 		return output;
 	}
