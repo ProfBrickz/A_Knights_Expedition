@@ -7,6 +7,10 @@
   <title>A Knight's Expedition</title>
 
   <style>
+  	* {
+  		box-sizing: border-box;
+  	}
+
     body {
       background: #ddd;
       font-family: sans-serif;
@@ -73,7 +77,7 @@
       background: #ccc;
     }
 
-    .log {
+    #log {
       grid-column: 1;
       grid-row: 2;
       overflow-y: auto;
@@ -120,8 +124,12 @@
   </style>
   <script>
   	window.addEventListener('load', () => {
-        const log = document.querySelector('.log');
-        log.scrollTop = log.scrollHeight;
+        let logDiv = document.getElementById('log');
+        logDiv.scrollTop = logDiv.scrollHeight;
+
+		let commandInput = document.getElementById('command');
+		commandInput.focus();
+		commandInput.select();
       });
   </script>
 </head>
@@ -160,7 +168,7 @@
       </div>
     </div>
 
-    <div class="log">
+    <div id="log">
   		<pre>${fn:escapeXml(dialog)}</pre>
 	</div>
 
@@ -183,13 +191,13 @@
     </div>
 
     <div class="input">
-  		<input type="text" name="command" placeholder="Enter command..." />
+  		<input id="command" type="text" name="command" placeholder="Enter command..." />
   		<button type="submit">Submit</button>
 	</div>
 
     
     <div class="search">
-      <input type="text" name="search" placeholder="Search item name..." />
+      <input id="search" type="text" name="search" placeholder="Search item name..." />
       <button type="submit">Submit</button>
     </div>
 
