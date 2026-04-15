@@ -925,7 +925,7 @@ public class DerbyDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
+	public HashMap<Integer, Item> getItemsForPlayer() {
 		return executeTransaction(new Transaction<HashMap<Integer, Item>>() {
 			@Override
 			public HashMap<Integer, Item> execute(Connection connection) throws SQLException {

@@ -23,6 +23,7 @@ public class GameEngine {
 		database = DatabaseProvider.getInstance();
 
 		player = database.getPlayer();
+		player.getInventory().addItems(new ArrayList<>(database.getItemsForPlayer().values()));
 	}
 
 	/**
@@ -118,7 +119,6 @@ public class GameEngine {
 	 * Returns the description of the current room.
 	 */
 	public String look(ArrayList<String> arguments) {
-		Player player = database.getPlayer();
 		Room playerRoom = player.getRoom();
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
@@ -136,13 +136,13 @@ public class GameEngine {
 	}
 
 
-//	/**
-//	 * Handles the "inventory" command.
-//	 * Lists all items in the player's inventory with quantities.
-//	 */
-//	public String inventory(ArrayList<String> arguments) {
-//		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
-//	}
+	/**
+	 * Handles the "inventory" command.
+	 * Lists all items in the player's inventory with quantities.
+	 */
+	public String inventory(ArrayList<String> arguments) {
+		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
+	}
 
 //	/**
 //	 * Handles the "inspect-item" command.

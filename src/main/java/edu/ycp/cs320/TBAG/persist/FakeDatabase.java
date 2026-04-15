@@ -256,7 +256,7 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
+	public HashMap<Integer, Item> getItemsForPlayer() {
 		if (player == null) {
 			return new HashMap<>();
 		}

@@ -32,8 +32,7 @@ public enum Command {
 	),
 	INVENTORY(
 		"inventory",
-		//GameEngine::inventory,
-		null,
+		GameEngine::inventory,
 		"Shows all items currently carried by the player",
 		List.of(),
 		List.of(PlayerState.EXPLORING),

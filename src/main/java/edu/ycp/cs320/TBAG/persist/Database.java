@@ -50,7 +50,7 @@ public interface Database {
 	// Item-related methods, all will use getItemsFromResultSet after the query
 	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet);
 
-	public HashMap<Integer, Item> getItemsForPlayer(Player player);
+	public HashMap<Integer, Item> getItemsForPlayer();
 
 	public HashMap<Integer, Item> getItemsForRoom(Room room);
 

@@ -1,5 +1,6 @@
 package edu.ycp.cs320.TBAG.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Inventory {
@@ -21,6 +22,12 @@ public class Inventory {
 		Integer key = item.getId();
 
 		items.put(key, item);
+	}
+
+	public void addItems(ArrayList<Item> items) {
+		for (Item item : items) {
+			this.addItem(item);
+		}
 	}
 
 	public void removeItem(Item item) {
