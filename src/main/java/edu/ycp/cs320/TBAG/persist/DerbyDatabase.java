@@ -714,7 +714,8 @@ public class DerbyDatabase implements Database {
 								room_connections.direction,
 								rooms.id,
 								rooms.name,
-								rooms.description
+								rooms.description,
+								rooms.asset_name
 							FROM room_connections, rooms
 							WHERE rooms.id = room_connections.destination_id AND room_connections.source_id = ?
 						""");
@@ -729,8 +730,9 @@ public class DerbyDatabase implements Database {
 						Integer roomId = resultSet.getInt(3);
 						String roomName = resultSet.getString(4);
 						String roomDescription = resultSet.getString(5);
+						String assetName = resultSet.getString(6);
 
-						Room room = new Room(roomId, roomName, roomDescription);
+						Room room = new Room(roomId, roomName, roomDescription, assetName);
 						RoomConnection roomConnection = new RoomConnection(room, connectionDescription);
 
 						result.put(direction, roomConnection);
