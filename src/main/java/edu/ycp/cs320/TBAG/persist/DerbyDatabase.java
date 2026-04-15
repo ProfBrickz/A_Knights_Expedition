@@ -216,7 +216,6 @@ public class DerbyDatabase implements Database {
 
 					statement = connection.prepareStatement("""
 							INSERT INTO items (
-								id,
 								name,
 								description,
 								value,
@@ -224,20 +223,19 @@ public class DerbyDatabase implements Database {
 								heal_amount,
 								defense,
 								active_armor
-							) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+							) VALUES (?, ?, ?, ?, ?, ?, ?)
 						""");
 					for (Item item : items.values()) {
-						statement.setInt(1, item.getId());
-						statement.setString(2, item.getName());
-						statement.setString(3, item.getDescription());
-						statement.setInt(4, item.getValue());
-						statement.setInt(5, ItemType.getByItem(item).ordinal());
+						statement.setString(1, item.getName());
+						statement.setString(2, item.getDescription());
+						statement.setInt(3, item.getValue());
+						statement.setInt(4, ItemType.getByItem(item).ordinal());
 						if (item instanceof HealingItem healingItem) {
-							statement.setInt(6, healingItem.getHealAmount());
+							statement.setInt(5, healingItem.getHealAmount());
 						}
 						if (item instanceof Armor armor) {
-							statement.setInt(7, armor.getDefense());
-							statement.setBoolean(8, armor.getActive());
+							statement.setInt(6, armor.getDefense());
+							statement.setBoolean(7, armor.getActive());
 						}
 						statement.addBatch();
 					}
