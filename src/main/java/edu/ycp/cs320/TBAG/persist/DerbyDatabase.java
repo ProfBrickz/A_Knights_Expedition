@@ -218,24 +218,26 @@ public class DerbyDatabase implements Database {
 							INSERT INTO items (
 								name,
 								description,
+								asset_name,
 								value,
 								type,
 								heal_amount,
 								defense,
 								active_armor
-							) VALUES (?, ?, ?, ?, ?, ?, ?)
+							) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 						""");
 					for (Item item : items.values()) {
 						statement.setString(1, item.getName());
 						statement.setString(2, item.getDescription());
-						statement.setInt(3, item.getValue());
-						statement.setInt(4, ItemType.getByItem(item).ordinal());
+						statement.setString(3, item.getAssetName());
+						statement.setInt(4, item.getValue());
+						statement.setInt(5, ItemType.getByItem(item).ordinal());
 						if (item instanceof HealingItem healingItem) {
-							statement.setInt(5, healingItem.getHealAmount());
+							statement.setInt(6, healingItem.getHealAmount());
 						}
 						if (item instanceof Armor armor) {
-							statement.setInt(6, armor.getDefense());
-							statement.setBoolean(7, armor.getActive());
+							statement.setInt(7, armor.getDefense());
+							statement.setBoolean(8, armor.getActive());
 						}
 						statement.addBatch();
 					}
@@ -333,6 +335,7 @@ public class DerbyDatabase implements Database {
 									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
 								name VARCHAR(%d) NOT NULL,
 								description VARCHAR(%d) NOT NULL,
+								asset_name VARCHAR(%d),
 								value INTEGER NOT NULL,
 								type INTEGER NOT NULL,
 								heal_amount INTEGER,
@@ -341,7 +344,8 @@ public class DerbyDatabase implements Database {
 							)
 						""".formatted(
 						NAME_MAX_LENGTH,
-						DESCRIPTION_MAX_LENGTH
+						DESCRIPTION_MAX_LENGTH,
+						NAME_MAX_LENGTH
 					));
 					statement.execute();
 
@@ -932,8 +936,9 @@ public class DerbyDatabase implements Database {
 				Integer id = resultSet.getInt("id");
 				String name = resultSet.getString("name");
 				String description = resultSet.getString("description");
+				String assetName = resultSet.getString("asset_name");
 				Integer value = resultSet.getInt("value");
-				String type = resultSet.getString("type");
+				ItemType type = ItemType.getByName(resultSet.getString("type"));
 				Integer amount = resultSet.getInt("amount");
 
 				if (resultSet.wasNull()) {
@@ -941,21 +946,18 @@ public class DerbyDatabase implements Database {
 				}
 
 				Item item;
-				if (type != null) {
-					type = type.trim().toLowerCase();
-				}
 
-				if ("weapon".equals(type)) {
-					item = new Weapon(id, name, description, value, amount);
-				} else if ("armor".equals(type)) {
+				if (type == ItemType.WEAPON) {
+					item = new Weapon(id, name, description, value, amount, assetName);
+				} else if (type == ItemType.ARMOR) {
 					Integer defense = resultSet.getInt("defense");
 					Boolean active = resultSet.getBoolean("active_armor");
-					item = new Armor(id, name, description, defense, active, value, amount);
-				} else if ("healing".equals(type)) {
+					item = new Armor(id, name, description, defense, active, value, amount, assetName);
+				} else if (type == ItemType.HEALING) {
 					Integer healAmount = resultSet.getInt("heal_amount");
-					item = new HealingItem(id, name, description, healAmount, value, amount);
+					item = new HealingItem(id, name, description, healAmount, value, amount, assetName);
 				} else {
-					item = new Item(id, name, description, value, amount);
+					item = new Item(id, name, description, value, amount, assetName);
 				}
 
 				items.put(id, item);
@@ -981,6 +983,7 @@ public class DerbyDatabase implements Database {
 								items.id,
 								items.name,
 								items.description,
+								items.asset_name,
 								items.value,
 								items.type,
 								items.heal_amount,
@@ -1019,6 +1022,7 @@ public class DerbyDatabase implements Database {
 								items.id,
 								items.name,
 								items.description,
+								items.asset_name,
 								items.value,
 								items.type,
 								items.heal_amount,
@@ -1058,6 +1062,7 @@ public class DerbyDatabase implements Database {
 								items.id,
 								items.name,
 								items.description,
+								items.asset_name,
 								items.value,
 								items.type,
 								items.heal_amount,

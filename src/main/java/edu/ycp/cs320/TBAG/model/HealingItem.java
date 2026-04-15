@@ -9,9 +9,23 @@ public class HealingItem extends Item {
 		String description,
 		Integer healAmount,
 		Integer value,
-		Integer amount
+		Integer amount,
+		String assetName
 	) {
-		super(id, name, description, value, amount);
+		super(id, name, description, value, amount, assetName);
+
+		this.healAmount = healAmount;
+	}
+
+	public HealingItem(
+		Integer id,
+		String name,
+		String description,
+		Integer healAmount,
+		Integer value,
+		String assetName
+	) {
+		super(id, name, description, value, assetName);
 
 		this.healAmount = healAmount;
 	}
@@ -27,6 +41,20 @@ public class HealingItem extends Item {
 
 		this.healAmount = healAmount;
 	}
+
+	public HealingItem(
+		Integer id,
+		String name,
+		String description,
+		Integer healAmount,
+		Integer value,
+		Integer amount
+	) {
+		super(id, name, description, value, amount);
+
+		this.healAmount = healAmount;
+	}
+
 
 	public Integer getHealAmount() {
 		return healAmount;

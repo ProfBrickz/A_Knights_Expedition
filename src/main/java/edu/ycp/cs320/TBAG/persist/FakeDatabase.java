@@ -13,7 +13,7 @@ public class FakeDatabase implements Database {
 	private HashMap<Integer, Room> rooms = new HashMap<>();
 	// A map between a room's id and (a map of its directions and connections)
 	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
-
+	private HashMap<Integer, Item> items = new HashMap<>();
 
 	// General purpose methods
 	@Override
@@ -23,6 +23,7 @@ public class FakeDatabase implements Database {
 			rooms = InitialData.getRooms();
 			roomConnections = InitialData.getRoomConnections();
 			player = InitialData.getPlayer();
+			items = InitialData.getItems();
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
 		} catch (IOException exception) {
