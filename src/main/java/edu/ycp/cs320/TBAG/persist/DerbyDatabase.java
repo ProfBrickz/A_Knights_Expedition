@@ -926,8 +926,7 @@ public class DerbyDatabase implements Database {
 	}
 
 
-	// Item-related methods
-	@Override
+	// Item-related methods, all use getItemsFromResultSet after the query
 	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet) {
 		HashMap<Integer, Item> items = new HashMap<>();
 

@@ -463,6 +463,9 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	
+	// Utility methods
+
 	private static Integer parseIntegerOrNull(String text) {
 		Integer integer = null;
 

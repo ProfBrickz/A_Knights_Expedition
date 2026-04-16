@@ -2,7 +2,6 @@ package edu.ycp.cs320.TBAG.persist;
 
 import edu.ycp.cs320.TBAG.model.*;
 
-import java.sql.ResultSet;
 import java.util.HashMap;
 
 public interface Database {
@@ -47,9 +46,7 @@ public interface Database {
 	public void removeItemFromRoom(Room room, Item item);
 
 
-	// Item-related methods, all will use getItemsFromResultSet after the query
-	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet);
-
+	// Item-related methods
 	public HashMap<Integer, Item> getItemsForPlayer();
 
 	public HashMap<Integer, Item> getItemsForRoom(Room room);
