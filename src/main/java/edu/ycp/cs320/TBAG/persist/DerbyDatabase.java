@@ -145,6 +145,7 @@ public class DerbyDatabase implements Database {
 				try {
 					dialog = InitialData.getDialog();
 					rooms = InitialData.getRooms();
+					Room a = getRoomById(0);
 					roomConnections = InitialData.getRoomConnections();
 					player = InitialData.getPlayer();
 					items = InitialData.getItems();
@@ -268,22 +269,16 @@ public class DerbyDatabase implements Database {
 	@Override
 	public Boolean reset() {
 		try {
-			// Backup dialog
-			ArrayList<String> dialog = getDialog();
-
 			// Delete database
-			shutdown();
-			Utils.deleteDirectory(new File(defaultDatabasePath));
+			File databaseFolder = new File(defaultDatabasePath);
+			while (databaseFolder.exists()) {
+				shutdown();
+				Utils.deleteDirectory(databaseFolder);
+			}
 
 			// Recreate database
 			createTables();
 			loadInitialData();
-
-			// Restore dialog
-			clearDialog();
-			for (String text : dialog) {
-				addDialog(text);
-			}
 
 			return true;
 		} catch (IOException exception) {

@@ -239,6 +239,8 @@ public class InitialData {
 	 */
 	public static HashMap<Integer, Room> getRooms() throws IOException {
 		ReadCSV roomsFile = new ReadCSV("rooms.csv");
+		rooms.clear();
+		roomIds.clear();
 
 		try {
 			while (true) {
@@ -382,8 +384,9 @@ public class InitialData {
 	 * Returns a list of all items without amounts
 	 */
 	public static HashMap<Integer, Item> getItems() throws IOException, IllegalStateException {
-		HashMap<Integer, Item> items = new HashMap<>();
 		ReadCSV itemsFile = new ReadCSV("items.csv");
+		items.clear();
+		itemIds.clear();
 
 		try {
 			while (true) {
@@ -392,7 +395,8 @@ public class InitialData {
 
 				Iterator<String> iterator = tuple.iterator();
 
-				Integer id = parseIntegerOrNull(iterator.next());
+				String idString = iterator.next();
+				Integer id = itemIds.size();
 				String name = iterator.next();
 				String description = iterator.next();
 				String assetName = iterator.next();
@@ -426,6 +430,8 @@ public class InitialData {
 				} else {
 					throw new IllegalStateException("The item: \"" + id + "\" has an invalid type " + typeString);
 				}
+				
+				itemIds.put(idString, id);
 			}
 
 			return items;
@@ -463,7 +469,7 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	
+
 	// Utility methods
 
 	private static Integer parseIntegerOrNull(String text) {

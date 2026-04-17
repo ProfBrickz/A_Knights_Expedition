@@ -21,7 +21,7 @@ public class TBAGServlet extends HttpServlet {
 		System.out.println("TBAG Servlet: doGet");
 
 		GameEngine gameEngine = new GameEngine();
-		
+
 		req.setAttribute("dialog", gameEngine.getDialog());
 		req.setAttribute("player", gameEngine.getPlayer());
 
@@ -87,7 +87,7 @@ public class TBAGServlet extends HttpServlet {
 
 		// Run command
 		String output = gameEngine.inputCommand(command, arguments);
-		gameEngine.addDialog(output);
+		if (output != null) gameEngine.addDialog(output);
 
 		// the JSP will display updated dialog
 		req.setAttribute("dialog", gameEngine.getDialog());

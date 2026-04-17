@@ -76,7 +76,7 @@ public class GameEngine {
 				break;
 			}
 		}
-		if (output.isEmpty()) output = "Sorry, command not recognized.\n";
+		if (output != null && output.isEmpty()) output = "Sorry, command not recognized.\n";
 
 		return output;
 	}
@@ -379,6 +379,12 @@ public class GameEngine {
 		}
 
 		return output.toString();
+	}
+
+	public String clear(ArrayList<String> arguments) {
+		database.clearDialog();
+
+		return null;
 	}
 
 

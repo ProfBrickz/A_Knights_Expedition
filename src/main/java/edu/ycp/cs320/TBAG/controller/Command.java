@@ -157,6 +157,14 @@ public enum Command {
 		List.of(),
 		List.of(PlayerState.EXPLORING, PlayerState.BATTLE, PlayerState.TALKING_TO_NPC),
 		List.of()
+	),
+	CLEAR(
+		"clear",
+		GameEngine::clear,
+		"Empties the dialog window",
+		List.of(),
+		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC, PlayerState.BATTLE),
+		List.of()
 	);
 
 	private final String name;
