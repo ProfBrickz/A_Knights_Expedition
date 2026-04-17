@@ -6,6 +6,7 @@ import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -20,6 +21,9 @@ public class GameEngine {
 	public GameEngine() {
 		DatabaseProvider.setInstance(new DerbyDatabase());
 		database = DatabaseProvider.getInstance();
+
+		player = database.getPlayer();
+		player.getInventory().addItems(new ArrayList<>(database.getItemsForPlayer().values()));
 	}
 
 	/**
@@ -34,20 +38,28 @@ public class GameEngine {
 
 	// Getters and setters
 	public String getDialog() {
-		StringBuilder dialog = new StringBuilder();
+		StringBuilder output = new StringBuilder();
 
-		for (String text : database.getDialog().values()) {
-			dialog
-				.append(text)
+		HashMap<Integer, String> dialog = database.getDialog();
+
+		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
+		Collections.sort(keys);
+
+		for (Integer key : keys) {
+			output
+				.append(dialog.get(key))
 				.append("\n");
-			;
 		}
 
-		return dialog.toString();
+		return output.toString();
 	}
 
 	public void addDialog(String text) {
 		database.addDialog(text);
+	}
+
+	public Player getPlayer() {
+		return player;
 	}
 
 
@@ -60,16 +72,15 @@ public class GameEngine {
 	public String inputCommand(String commandName, ArrayList<String> arguments) {
 		commandName = commandName.trim().toLowerCase();
 
-		String output = "This should not happen, error in inputCommand";
+		String output = "";
 
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
-				this.player = database.getPlayer();
 				output = command.run(this, arguments);
 				break;
 			}
 		}
-		if (output.isEmpty()) output = "Sorry, command not recognized.";
+		if (output.isEmpty()) output = "Sorry, command not recognized.\n";
 
 		return output;
 	}
@@ -107,7 +118,6 @@ public class GameEngine {
 	 * Returns the description of the current room.
 	 */
 	public String look(ArrayList<String> arguments) {
-		Player player = database.getPlayer();
 		Room playerRoom = player.getRoom();
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
@@ -125,13 +135,13 @@ public class GameEngine {
 	}
 
 
-//	/**
-//	 * Handles the "inventory" command.
-//	 * Lists all items in the player's inventory with quantities.
-//	 */
-//	public String inventory(ArrayList<String> arguments) {
-//		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
-//	}
+	/**
+	 * Handles the "inventory" command.
+	 * Lists all items in the player's inventory with quantities.
+	 */
+	public String inventory(ArrayList<String> arguments) {
+		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
+	}
 
 //	/**
 //	 * Handles the "inspect-item" command.

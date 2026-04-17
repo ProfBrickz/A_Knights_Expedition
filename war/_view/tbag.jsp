@@ -7,6 +7,10 @@
   <title>A Knight's Expedition</title>
 
   <style>
+  	* {
+  		box-sizing: border-box;
+  	}
+
     body {
       background: #ddd;
       font-family: sans-serif;
@@ -67,17 +71,20 @@
     }
 
     .location-image {
-      width: 128px;
-      height: 128px;
+      width: 150px;
       object-fit: cover;
       border: 3px solid black;
       background: #ccc;
     }
 
-    .log {
+    #log {
       grid-column: 1;
       grid-row: 2;
       overflow-y: auto;
+
+      pre {
+      	text-wrap: balance;
+      }
     }
 
     .inventory {
@@ -100,8 +107,7 @@
     }
 
     .item-icon {
-      width: 32px;
-      height: 32px;
+      width: 50px;
       object-fit: contain;
       image-rendering: auto;
     }
@@ -118,8 +124,12 @@
   </style>
   <script>
   	window.addEventListener('load', () => {
-        const log = document.querySelector('.log');
-        log.scrollTop = log.scrollHeight;
+        let logDiv = document.getElementById('log');
+        logDiv.scrollTop = logDiv.scrollHeight;
+
+		let commandInput = document.getElementById('command');
+		commandInput.focus();
+		commandInput.select();
       });
   </script>
 </head>
@@ -148,17 +158,17 @@
       <div class="location">
         <div class="location-name">${player.room.name}</div>
         <c:choose>
-          <c:when test="${player.room.name == 'NewBrambleton'}">
-            <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/NewBrambleton.gif" alt="${player.room.name}" />
-          </c:when>
-          <c:otherwise>
-            <img class="location-image" src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif" alt="${player.room.name}" />
-          </c:otherwise>
+           <c:when test="${not empty player.room.assetName}">
+			<img class="location-image" src="${pageContext.request.contextPath}/assets/locations/${player.room.assetName}" alt="${player.room.assetName}" />
+		  </c:when>
+		  <c:otherwise>
+			<img class="location-image" src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif" alt="${player.room.assetName}" />
+		  </c:otherwise>
         </c:choose>
       </div>
     </div>
 
-    <div class="log">
+    <div id="log">
   		<pre>${fn:escapeXml(dialog)}</pre>
 	</div>
 
@@ -181,16 +191,14 @@
     </div>
 
     <div class="input">
-  		<input type="text" name="command" placeholder="Enter command..." />
+  		<input id="command" type="text" name="command" placeholder="Enter command..." />
   		<button type="submit">Submit</button>
-  		<input name="dialog" type="hidden" value="${fn:escapeXml(dialog)}" />
 	</div>
 
     
     <div class="search">
-      <input type="text" name="search" placeholder="Search item name..." />
+      <input id="search" type="text" name="search" placeholder="Search item name..." />
       <button type="submit">Submit</button>
-      <input name="dialog" type="hidden" value="${fn:escapeXml(dialog)}" />
     </div>
 
   </div>

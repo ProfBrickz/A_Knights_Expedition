@@ -3,11 +3,10 @@ package edu.ycp.cs320.TBAG.persist;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /// From lab 7
 public class ReadCSV implements Closeable {
-	private BufferedReader reader;
+	private final BufferedReader reader;
 
 	/// Modified from lab 7 to work with different file structure
 	public ReadCSV(String resourceName) throws IOException {
@@ -29,28 +28,25 @@ public class ReadCSV implements Closeable {
 		}
 
 		List<String> tuple = new ArrayList<>();
-		StringTokenizer tokenizer = new StringTokenizer(line, ",", true);
-		String previousToken = null;
+		StringBuilder current = new StringBuilder();
+		boolean inQuotes = false;
 
-		while (tokenizer.hasMoreTokens()) {
-			String currentToken = tokenizer.nextToken();
+		for (int i = 0; i < line.length(); i++) {
+			char character = line.charAt(i);
 
-			if (currentToken.equals(",")) {
-				if (previousToken == null || previousToken.equals(",")) {
-					// consecutive comma -> empty field
-					tuple.add("");
-				}
+			if (character == '"') {
+				inQuotes = !inQuotes; // toggle quote state
+			} else if (character == ',' && !inQuotes) {
+				// comma outside quotes = field separator
+				tuple.add(current.toString().trim().replace("\\n", "\n"));
+				current.setLength(0);
 			} else {
-				tuple.add(currentToken.trim());
+				current.append(character);
 			}
-
-			previousToken = currentToken;
 		}
 
-		// handle trailing comma(s)
-		if (previousToken != null && previousToken.equals(",")) {
-			tuple.add("");
-		}
+		// add last field
+		tuple.add(current.toString().trim().replace("\\n", "\n"));
 
 		return tuple;
 	}

@@ -36,7 +36,7 @@ public class InitialData {
 				String itemKey = iterator.next();
 				String name = iterator.next();
 				String description = iterator.next();
-				Integer value = Integer.parseInt(iterator.next());
+				Integer value = parseIntegerOrNull(iterator.next());
 				String type = iterator.next();
 				String healAmountString = iterator.next();
 				String defenseString = iterator.next();
@@ -193,10 +193,10 @@ public class InitialData {
 	/**
 	 * Returns a list of the players items
 	 */
-	public static ArrayList<Item> getPlayerItems() throws IOException {
+	public static HashMap<Integer, Item> getPlayerItems() throws IOException {
 		ensureItemsLoaded();
 
-		ArrayList<Item> result = new ArrayList<>();
+		HashMap<Integer, Item> result = new HashMap<>();
 		ReadCSV playerItemsFile = new ReadCSV("player_items.csv");
 
 		try {
@@ -224,7 +224,7 @@ public class InitialData {
 
 				Item item = copyItemWithAmount(baseItem, amount);
 				if (item != null) {
-					result.add(item);
+					result.put(item.getId(), item);
 				}
 			}
 
@@ -381,8 +381,57 @@ public class InitialData {
 	/**
 	 * Returns a list of all items without amounts
 	 */
-	public static ArrayList<Item> getItems() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+	public static HashMap<Integer, Item> getItems() throws IOException, IllegalStateException {
+		HashMap<Integer, Item> items = new HashMap<>();
+		ReadCSV itemsFile = new ReadCSV("items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = itemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				Integer id = parseIntegerOrNull(iterator.next());
+				String name = iterator.next();
+				String description = iterator.next();
+				String assetName = iterator.next();
+				Integer value = parseIntegerOrNull(iterator.next());
+				String typeString = iterator.next().toLowerCase();
+				ItemType type = ItemType.getByName(typeString);
+				if (type == null) {
+					throw new IllegalStateException("The item: \"" + id + "\" has an invalid type " + typeString);
+				}
+				Integer healAmount = parseIntegerOrNull(iterator.next());
+				Integer defense = parseIntegerOrNull(iterator.next());
+				Boolean activeArmor = parseBooleanOrNull(iterator.next().toLowerCase());
+
+				if (type == ItemType.ARMOR) {
+					if (defense == null) {
+						throw new IllegalStateException("The armor: \"" + id + "\" does not have a defense set.");
+					}
+					if (activeArmor == null) {
+						throw new IllegalStateException("The armor: \"" + id + "\" has to have active set to \"true\" or \"false\".");
+					}
+					items.put(id, new Armor(id, name, description, defense, activeArmor, value, assetName));
+				} else if (type == ItemType.HEALING) {
+					if (healAmount == null) {
+						throw new IllegalStateException("The healing item: \"" + id + "\" does not have a heal amount set.");
+					}
+					items.put(id, new HealingItem(id, name, description, healAmount, value, assetName));
+				} else if (type == ItemType.WEAPON) {
+					items.put(id, new Weapon(id, name, description, value, assetName));
+				} else if (type == ItemType.ITEM) {
+					items.put(id, new Item(id, name, description, value, assetName));
+				} else {
+					throw new IllegalStateException("The item: \"" + id + "\" has an invalid type " + typeString);
+				}
+			}
+
+			return items;
+		} finally {
+			itemsFile.close();
+		}
 	}
 
 	public static ArrayList<NPC> getNPCs() throws IOException {
@@ -412,5 +461,28 @@ public class InitialData {
 	 */
 	public static HashMap<Integer, ArrayList<Item>> getEnemyItems() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	
+	// Utility methods
+
+	private static Integer parseIntegerOrNull(String text) {
+		Integer integer = null;
+
+		try {
+			integer = Integer.parseInt(text);
+		} catch (NumberFormatException ignored) {
+		}
+
+		return integer;
+	}
+
+	private static Boolean parseBooleanOrNull(String text) {
+		Boolean bool = null;
+
+		if (text.equals("true")) bool = true;
+		else if (text.equals("false")) bool = false;
+
+		return bool;
 	}
 }
