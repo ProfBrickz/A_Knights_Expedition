@@ -156,7 +156,7 @@ public class DerbyDatabase implements Database {
 						""");
 					for (Map.Entry<Integer, String> entry : dialog.entrySet()) {
 						addDialogStatement.setString(1, entry.getValue());
-						addRoomsStatement.addBatch();
+						addDialogStatement.addBatch();
 					}
 					addDialogStatement.executeBatch();
 
@@ -220,7 +220,7 @@ public class DerbyDatabase implements Database {
 	}
 
 	public void createTables() {
-		final Integer DIALOG_MAX_LENGTH = 2048;
+		final Integer DIALOG_MAX_LENGTH = 8192;
 		final Integer NAME_MAX_LENGTH = 128;
 		final Integer DESCRIPTION_MAX_LENGTH = 512;
 		final Integer DIRECTION_MAX_LENGTH = 64;
