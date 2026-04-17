@@ -49,7 +49,6 @@ public class GameEngine {
 			output
 				.append(dialog.get(key))
 				.append("\n");
-			;
 		}
 
 		return output.toString();

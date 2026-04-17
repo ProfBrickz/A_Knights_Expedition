@@ -21,7 +21,7 @@ public class DerbyDatabase implements Database {
 
 	/// From lab 7
 	private interface Transaction<ResultType> {
-		public ResultType execute(Connection conn) throws SQLException;
+		ResultType execute(Connection conn) throws SQLException;
 	}
 
 	/// From lab 7

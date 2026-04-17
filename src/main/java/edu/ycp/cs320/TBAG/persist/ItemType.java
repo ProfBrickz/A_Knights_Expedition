@@ -13,7 +13,7 @@ public enum ItemType {
 	ARMOR("armor"),
 	UNLOCK("unlock");
 
-	private String name;
+	private final String name;
 
 	ItemType(String name) {
 		this.name = name;
