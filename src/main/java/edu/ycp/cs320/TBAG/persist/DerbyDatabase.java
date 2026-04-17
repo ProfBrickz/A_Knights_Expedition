@@ -6,6 +6,7 @@ import edu.ycp.cs320.TBAG.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -264,6 +265,32 @@ public class DerbyDatabase implements Database {
 		});
 	}
 
+	@Override
+	public Boolean reset() {
+		try {
+			// Backup dialog
+			ArrayList<String> dialog = getDialog();
+
+			// Delete database
+			shutdown();
+			Utils.deleteDirectory(new File(defaultDatabasePath));
+
+			// Recreate database
+			createTables();
+			loadInitialData();
+
+			// Restore dialog
+			clearDialog();
+			for (String text : dialog) {
+				addDialog(text);
+			}
+
+			return true;
+		} catch (IOException exception) {
+			return false;
+		}
+	}
+
 	public void createTables() {
 		final Integer DIALOG_MAX_LENGTH = 2048;
 		final Integer NAME_MAX_LENGTH = 128;
@@ -378,27 +405,27 @@ public class DerbyDatabase implements Database {
 
 	// Dialog methods
 	@Override
-	public HashMap<Integer, String> getDialog() {
-		return executeTransaction(new Transaction<HashMap<Integer, String>>() {
+	public ArrayList<String> getDialog() {
+		return executeTransaction(new Transaction<ArrayList<String>>() {
 			@Override
-			public HashMap<Integer, String> execute(Connection connection) throws SQLException {
+			public ArrayList<String> execute(Connection connection) throws SQLException {
 				PreparedStatement statement = null;
 				ResultSet resultSet = null;
 
 				try {
 					statement = connection.prepareStatement("""
-							SELECT id, text
+							SELECT text
 							FROM dialog
+							ORDER BY id
 						""");
 					resultSet = statement.executeQuery();
 
-					HashMap<Integer, String> result = new HashMap<>();
+					ArrayList<String> result = new ArrayList<>();
 
 					while (resultSet.next()) {
-						Integer id = resultSet.getInt(1);
-						String text = resultSet.getString(2);
+						String text = resultSet.getString(1);
 
-						result.put(id, text);
+						result.add(text);
 					}
 
 					return result;
@@ -423,6 +450,27 @@ public class DerbyDatabase implements Database {
 					);
 					statement.setString(1, text);
 
+					statement.executeUpdate();
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void clearDialog() {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"DELETE FROM dialog"
+					);
 					statement.executeUpdate();
 
 					return null;

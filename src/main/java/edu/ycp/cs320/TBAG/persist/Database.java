@@ -2,16 +2,21 @@ package edu.ycp.cs320.TBAG.persist;
 
 import edu.ycp.cs320.TBAG.model.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface Database {
 	// General purpose methods
 	void loadInitialData();
 
+	Boolean reset();
+
 	// Dialog methods
-	HashMap<Integer, String> getDialog();
+	ArrayList<String> getDialog();
 
 	void addDialog(String text);
+
+	void clearDialog();
 
 	// Player-related methods
 

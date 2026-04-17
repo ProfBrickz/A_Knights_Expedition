@@ -6,7 +6,6 @@ import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -40,14 +39,11 @@ public class GameEngine {
 	public String getDialog() {
 		StringBuilder output = new StringBuilder();
 
-		HashMap<Integer, String> dialog = database.getDialog();
+		ArrayList<String> dialog = database.getDialog();
 
-		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
-		Collections.sort(keys);
-
-		for (Integer key : keys) {
+		for (String text : dialog) {
 			output
-				.append(dialog.get(key))
+				.append(text)
 				.append("\n");
 		}
 
@@ -367,21 +363,13 @@ public class GameEngine {
 //		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 //	}
 
-//	public String restart(ArrayList<String> arguments) {
-//		rooms.clear();
-//		roomController.loadDemo();
-//
-//		player.getInventory().getItems().clear();
-//		player.getArmor().clear();
-//		player.setState(PlayerState.EXPLORING);
-//		player.setCoins(0);
-//		ItemCatalog.addBaseItemsToInventory(player.getInventory());
-//
-//		// Set default room
-//		player.setRoom(rooms.get(defaultRoom));
-//
-//		return "Restarted game.\n";
-//	}
+	public String restart(ArrayList<String> arguments) {
+		Boolean success = database.reset();
+
+		if (!success) return "Reset failed, try again.\n";
+
+		return "Restarted game.\n";
+	}
 
 	public String help(ArrayList<String> arguments) {
 		StringBuilder output = new StringBuilder("Available commands:\n");

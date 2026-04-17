@@ -3,6 +3,8 @@ package edu.ycp.cs320.TBAG.persist;
 import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class FakeDatabase implements Database {
@@ -12,6 +14,7 @@ public class FakeDatabase implements Database {
 	// A map between a room's id and (a map of its directions and connections)
 	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
 	private HashMap<Integer, Item> items = new HashMap<>();
+
 
 	// General purpose methods
 	@Override
@@ -29,16 +32,41 @@ public class FakeDatabase implements Database {
 		}
 	}
 
+	@Override
+	public Boolean reset() {
+		player = null;
+		rooms.clear();
+		roomConnections.clear();
+		items.clear();
+
+		loadInitialData();
+
+		return true;
+	}
+
 
 	// Dialog methods
 	@Override
-	public HashMap<Integer, String> getDialog() {
-		return dialog;
+	public ArrayList<String> getDialog() {
+		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
+		Collections.sort(keys);
+
+		ArrayList<String> values = new ArrayList<>();
+		for (Integer key : keys) {
+			values.add(dialog.get(key));
+		}
+
+		return values;
 	}
 
 	@Override
 	public void addDialog(String text) {
 		dialog.put(dialog.size(), text);
+	}
+
+	@Override
+	public void clearDialog() {
+		dialog.clear();
 	}
 
 	// Player-related methods
