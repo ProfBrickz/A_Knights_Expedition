@@ -1,5 +1,6 @@
 package edu.ycp.cs320.TBAG.persist;
 
+import edu.ycp.cs320.TBAG.controller.Command;
 import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.IOException;
@@ -110,6 +111,16 @@ public class FakeDatabase implements Database {
 			throw new IllegalStateException("No player exists");
 		}
 		player.setCurrentNPC(npc);
+	}
+
+	@Override
+	public void setLastCommand(Command command) {
+		player.setLastCommand(command);
+	}
+
+	@Override
+	public void setConfirming(Boolean confirming) {
+		player.setConfirming(confirming);
 	}
 
 	@Override

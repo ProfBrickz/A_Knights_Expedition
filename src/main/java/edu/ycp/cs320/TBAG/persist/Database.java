@@ -1,5 +1,6 @@
 package edu.ycp.cs320.TBAG.persist;
 
+import edu.ycp.cs320.TBAG.controller.Command;
 import edu.ycp.cs320.TBAG.model.*;
 
 import java.util.ArrayList;
@@ -31,7 +32,11 @@ public interface Database {
 
 	void setPlayerState(PlayerState playerState);
 
+	void setConfirming(Boolean confirming);
+
 	void setPlayerNPC(NPC npc);
+
+	void setLastCommand(Command command);
 
 	void addItemToPlayer(Item item);
 

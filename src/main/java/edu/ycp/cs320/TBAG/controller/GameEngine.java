@@ -72,7 +72,20 @@ public class GameEngine {
 
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
+				String error = validateCommand(command, arguments);
+				if (error != null) return error;
+
+				Boolean confirming = player.getConfirming();
+
+				if (!confirming) {
+					player.setLastCommand(command);
+				}
 				output = command.run(this, arguments);
+				if (confirming) {
+					player.setLastCommand(command);
+				}
+				database.setLastCommand(command);
+
 				break;
 			}
 		}
@@ -364,11 +377,34 @@ public class GameEngine {
 //	}
 
 	public String restart(ArrayList<String> arguments) {
+		if (!player.getConfirming()) {
+			database.setConfirming(true);
+			return "Are you sure (yes or no)?\n";
+		}
+
 		Boolean success = database.reset();
 
 		if (!success) return "Reset failed, try again.\n";
 
 		return "Restarted game.\n";
+	}
+
+	public String yes(ArrayList<String> arguments) {
+		Command lastCommand = player.getLastCommand();
+
+		String output = lastCommand.run(this, arguments);
+
+		database.setConfirming(false);
+
+		return output;
+	}
+
+	public String no(ArrayList<String> arguments) {
+		Command lastCommand = player.getLastCommand();
+
+		database.setConfirming(false);
+
+		return lastCommand.getName() + " command canceled.\n";
 	}
 
 	public String help(ArrayList<String> arguments) {
@@ -431,7 +467,10 @@ public class GameEngine {
 	}
 
 	public String validateCommand(Command command, ArrayList<String> arguments) {
-		String error = validateCommandState(command);
+		String error = validatePlayerState(command);
+		if (error != null) return error;
+
+		error = validateConfirming(command);
 		if (error != null) return error;
 
 		error = validateCommandFormat(command, arguments);
@@ -450,9 +489,22 @@ public class GameEngine {
 		return null;
 	}
 
-	private String validateCommandState(Command command) {
+	private String validatePlayerState(Command command) {
 		if (!command.getAllowedPlayerStates().contains(player.getState())) {
 			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".\n";
+		}
+
+		return null;
+	}
+
+	private String validateConfirming(Command command) {
+		Boolean confirming = player.getConfirming();
+		Boolean isConfirmationCommand = command == Command.YES || command == Command.NO;
+
+		if (confirming && !isConfirmationCommand) {
+			return "You can not use " + command.getName() + " while confirming a command use yes or no.\n";
+		} else if (!confirming && isConfirmationCommand) {
+			return "There is nothing to confirm.\n";
 		}
 
 		return null;

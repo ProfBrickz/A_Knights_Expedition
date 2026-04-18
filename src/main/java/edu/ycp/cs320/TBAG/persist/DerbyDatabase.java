@@ -1,6 +1,7 @@
 package edu.ycp.cs320.TBAG.persist;
 
 import edu.ycp.cs320.TBAG.Utils;
+import edu.ycp.cs320.TBAG.controller.Command;
 import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.File;
@@ -314,7 +315,9 @@ public class DerbyDatabase implements Database {
 								coins INTEGER NOT NULL,
 								max_health INTEGER NOT NULL,
 								health INTEGER NOT NULL,
-								current_npc INTEGER
+								current_npc INTEGER,
+								last_command INTEGER,
+								confirming BOOLEAN
 							)
 						""");
 					statement.executeUpdate();
@@ -487,7 +490,7 @@ public class DerbyDatabase implements Database {
 
 				try {
 					statement = connection.prepareStatement("""
-							SELECT room_id, state, coins, max_health, health
+							SELECT room_id, state, coins, max_health, health, last_command, confirming
 							FROM player
 						""");
 					resultSet = statement.executeQuery();
@@ -502,9 +505,11 @@ public class DerbyDatabase implements Database {
 					Integer coins = resultSet.getInt(3);
 					Integer health = resultSet.getInt(4);
 					Integer maxHealth = resultSet.getInt(5);
+					Integer lastCommandOrdinal = resultSet.getInt(6);
+					Command lastCommand = Command.values()[lastCommandOrdinal];
+					Boolean confirming = resultSet.getBoolean(7);
 
-					Player player = new Player(maxHealth, health, state, room);
-					player.setCoins(coins);
+					Player player = new Player(maxHealth, health, state, room, coins, lastCommand, confirming);
 
 					return player;
 				} finally {
@@ -612,6 +617,60 @@ public class DerbyDatabase implements Database {
 					);
 
 					statement.setInt(1, npc.getId());
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void setLastCommand(Command command) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET last_command = ?"
+					);
+					statement.setInt(1, command.ordinal());
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void setConfirming(Boolean confirming) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET confirming = ?"
+					);
+					statement.setBoolean(1, confirming);
 
 					int rowsUpdated = statement.executeUpdate();
 

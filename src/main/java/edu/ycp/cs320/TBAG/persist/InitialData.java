@@ -172,9 +172,7 @@ public class InitialData {
 				Integer health = Integer.parseInt(iterator.next());
 				Integer maxHealth = Integer.parseInt(iterator.next());
 
-				Player player = new Player(maxHealth, health, state, null);
-				player.setRoom(playerRoom);
-				player.setCoins(coins);
+				Player player = new Player(maxHealth, health, state, playerRoom, coins);
 				players.add(player);
 			}
 
@@ -430,7 +428,7 @@ public class InitialData {
 				} else {
 					throw new IllegalStateException("The item: \"" + id + "\" has an invalid type " + typeString);
 				}
-				
+
 				itemIds.put(idString, id);
 			}
 

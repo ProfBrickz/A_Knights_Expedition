@@ -165,6 +165,22 @@ public enum Command {
 		List.of(),
 		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC, PlayerState.BATTLE),
 		List.of()
+	),
+	YES(
+		"yes",
+		GameEngine::yes,
+		"",
+		List.of(),
+		List.of(PlayerState.values()),
+		List.of()
+	),
+	NO(
+		"no",
+		GameEngine::no,
+		"",
+		List.of(),
+		List.of(PlayerState.values()),
+		List.of()
 	);
 
 	private final String name;
@@ -188,9 +204,6 @@ public enum Command {
 	}
 
 	public String run(GameEngine gameEngine, ArrayList<String> arguments) {
-		String error = gameEngine.validateCommand(this, arguments);
-		if (error != null) return error;
-
 		return method.apply(gameEngine, arguments);
 	}
 
