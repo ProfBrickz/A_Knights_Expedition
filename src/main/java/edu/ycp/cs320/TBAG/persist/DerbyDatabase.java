@@ -382,6 +382,33 @@ public class DerbyDatabase implements Database {
 					statement.execute();
 
 
+					// Enemies
+					statement = connection.prepareStatement("""
+							CREATE TABLE enemies (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								name VARCHAR(%d) NOT NULL,
+								max_health INTEGER,
+								health INTEGER
+							)
+						""".formatted(
+						NAME_MAX_LENGTH
+					));
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE enemy_items (
+								enemy_id INTEGER,
+								item_id INTEGER,
+								amount INTEGER NOT NULL,
+								PRIMARY KEY (enemy_id, item_id),
+								FOREIGN KEY (enemy_id) REFERENCES enemies(id),
+								FOREIGN KEY (item_id) REFERENCES items(id)
+							)
+						""");
+					statement.execute();
+
+
 					// Rooms
 					statement = connection.prepareStatement("""
 							CREATE TABLE rooms (
@@ -436,6 +463,17 @@ public class DerbyDatabase implements Database {
 								PRIMARY KEY (room_id, npc_id),
 								FOREIGN KEY (room_id) REFERENCES rooms(id),
 								FOREIGN KEY (npc_id) REFERENCES npcs(id)
+							)
+						""");
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE room_enemies (
+								room_id INTEGER,
+								enemy_id INTEGER,
+								PRIMARY KEY (room_id, enemy_id),
+								FOREIGN KEY (room_id) REFERENCES rooms(id),
+								FOREIGN KEY (enemy_id) REFERENCES enemies(id)
 							)
 						""");
 					statement.execute();
