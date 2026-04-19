@@ -146,7 +146,6 @@ public class DerbyDatabase implements Database {
 				try {
 					dialog = InitialData.getDialog();
 					rooms = InitialData.getRooms();
-					Room a = getRoomById(0);
 					roomConnections = InitialData.getRoomConnections();
 					player = InitialData.getPlayer();
 					items = InitialData.getItems();
@@ -169,17 +168,6 @@ public class DerbyDatabase implements Database {
 						statement.addBatch();
 					}
 					statement.executeBatch();
-
-					statement = connection.prepareStatement("""
-							INSERT INTO player (room_id, state, coins, max_health, health)
-							VALUES (?, ?, ?, ?, ?)
-						""");
-					statement.setInt(1, player.getRoom().getID());
-					statement.setInt(2, player.getState().ordinal());
-					statement.setInt(3, player.getCoins());
-					statement.setInt(4, player.getMaxHealth());
-					statement.setInt(5, player.getHealth());
-					statement.executeUpdate();
 
 					statement = connection.prepareStatement("""
 							INSERT INTO rooms (name, description, asset_name)
@@ -247,6 +235,17 @@ public class DerbyDatabase implements Database {
 					statement.executeBatch();
 
 					statement = connection.prepareStatement("""
+							INSERT INTO player (room_id, state, coins, max_health, health)
+							VALUES (?, ?, ?, ?, ?)
+						""");
+					statement.setInt(1, player.getRoom().getID());
+					statement.setInt(2, player.getState().ordinal());
+					statement.setInt(3, player.getCoins());
+					statement.setInt(4, player.getMaxHealth());
+					statement.setInt(5, player.getHealth());
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
 							INSERT INTO player_items (
 								item_id,
 								amount
@@ -309,20 +308,6 @@ public class DerbyDatabase implements Database {
 					statement.executeUpdate();
 
 					statement = connection.prepareStatement("""
-							CREATE TABLE player (
-								room_id INTEGER NOT NULL,
-								state INTEGER NOT NULL,
-								coins INTEGER NOT NULL,
-								max_health INTEGER NOT NULL,
-								health INTEGER NOT NULL,
-								current_npc INTEGER,
-								last_command INTEGER,
-								confirming BOOLEAN
-							)
-						""");
-					statement.executeUpdate();
-
-					statement = connection.prepareStatement("""
 							CREATE TABLE rooms (
 								id INTEGER PRIMARY KEY
 									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
@@ -340,12 +325,14 @@ public class DerbyDatabase implements Database {
 					statement = connection.prepareStatement("""
 							CREATE TABLE room_connections (
 								source_id INTEGER,
-								direction VARCHAR(%d) NOT NULL,
 								destination_id INTEGER,
+								direction VARCHAR(%d) NOT NULL,
 								description VARCHAR(%d) NOT NULL,
 								locked BOOLEAN,
 								locked_message VARCHAR(%d),
-								PRIMARY KEY (source_id, destination_id)
+								PRIMARY KEY (source_id, destination_id),
+								FOREIGN KEY (source_id) REFERENCES rooms(id),
+								FOREIGN KEY (destination_id) REFERENCES rooms(id)
 							)
 						""".formatted(
 						DIRECTION_MAX_LENGTH,
@@ -375,9 +362,25 @@ public class DerbyDatabase implements Database {
 					statement.execute();
 
 					statement = connection.prepareStatement("""
+							CREATE TABLE player (
+								room_id INTEGER NOT NULL,
+								state INTEGER NOT NULL,
+								coins INTEGER NOT NULL,
+								max_health INTEGER NOT NULL,
+								health INTEGER NOT NULL,
+								current_npc INTEGER,
+								last_command INTEGER,
+								confirming BOOLEAN,
+								FOREIGN KEY (room_id) REFERENCES rooms(id)
+							)
+						""");
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
 							CREATE TABLE player_items (
 								item_id INTEGER PRIMARY KEY,
-								amount INTEGER NOT NULL
+								amount INTEGER NOT NULL,
+								FOREIGN KEY (item_id) REFERENCES items(id)
 							)
 						""");
 					statement.execute();
@@ -387,7 +390,9 @@ public class DerbyDatabase implements Database {
 								room_id INTEGER,
 								item_id INTEGER,
 								amount INTEGER NOT NULL,
-								PRIMARY KEY (room_id, item_id)
+								PRIMARY KEY (room_id, item_id),
+								FOREIGN KEY (room_id) REFERENCES rooms(id),
+								FOREIGN KEY (item_id) REFERENCES items(id)
 							)
 						""");
 					statement.execute();
