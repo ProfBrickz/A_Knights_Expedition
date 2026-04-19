@@ -298,6 +298,7 @@ public class DerbyDatabase implements Database {
 				PreparedStatement statement = null;
 
 				try {
+					// Dialog
 					statement = connection.prepareStatement("""
 							CREATE TABLE dialog (
 								id INTEGER PRIMARY KEY
@@ -307,6 +308,54 @@ public class DerbyDatabase implements Database {
 						""".formatted(DIALOG_MAX_LENGTH));
 					statement.executeUpdate();
 
+
+					// Items
+					statement = connection.prepareStatement("""
+							CREATE TABLE items (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								name VARCHAR(%d) NOT NULL,
+								description VARCHAR(%d) NOT NULL,
+								asset_name VARCHAR(%d),
+								value INTEGER NOT NULL,
+								type INTEGER NOT NULL,
+								heal_amount INTEGER,
+								defense INTEGER,
+								active_armor BOOLEAN
+							)
+						""".formatted(
+						NAME_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH,
+						NAME_MAX_LENGTH
+					));
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE weapon_abilities (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								damage INTEGER NOT NULL,
+								attack_description VARCHAR(%d) NOT NULL
+							)
+						""".formatted(
+						DESCRIPTION_MAX_LENGTH
+					));
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE weapon_abilities_junction (
+								weapon_id INTEGER,
+								weapon_ability_id INTEGER,
+								PRIMARY KEY (weapon_id, weapon_ability_id),
+								FOREIGN KEY (weapon_id) REFERENCES item(id),
+								FOREIGN KEY (weapon_ability_id) REFERENCES weapon_abilities(id)
+							)
+						"""
+					);
+					statement.execute();
+
+
+					// Rooms
 					statement = connection.prepareStatement("""
 							CREATE TABLE rooms (
 								id INTEGER PRIMARY KEY
@@ -342,25 +391,19 @@ public class DerbyDatabase implements Database {
 					statement.execute();
 
 					statement = connection.prepareStatement("""
-							CREATE TABLE items (
-								id INTEGER PRIMARY KEY
-									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
-								name VARCHAR(%d) NOT NULL,
-								description VARCHAR(%d) NOT NULL,
-								asset_name VARCHAR(%d),
-								value INTEGER NOT NULL,
-								type INTEGER NOT NULL,
-								heal_amount INTEGER,
-								defense INTEGER,
-								active_armor BOOLEAN
+							CREATE TABLE room_items (
+								room_id INTEGER,
+								item_id INTEGER,
+								amount INTEGER NOT NULL,
+								PRIMARY KEY (room_id, item_id),
+								FOREIGN KEY (room_id) REFERENCES rooms(id),
+								FOREIGN KEY (item_id) REFERENCES items(id)
 							)
-						""".formatted(
-						NAME_MAX_LENGTH,
-						DESCRIPTION_MAX_LENGTH,
-						NAME_MAX_LENGTH
-					));
+						""");
 					statement.execute();
 
+
+					// Player
 					statement = connection.prepareStatement("""
 							CREATE TABLE player (
 								room_id INTEGER NOT NULL,
@@ -380,18 +423,6 @@ public class DerbyDatabase implements Database {
 							CREATE TABLE player_items (
 								item_id INTEGER PRIMARY KEY,
 								amount INTEGER NOT NULL,
-								FOREIGN KEY (item_id) REFERENCES items(id)
-							)
-						""");
-					statement.execute();
-
-					statement = connection.prepareStatement("""
-							CREATE TABLE room_items (
-								room_id INTEGER,
-								item_id INTEGER,
-								amount INTEGER NOT NULL,
-								PRIMARY KEY (room_id, item_id),
-								FOREIGN KEY (room_id) REFERENCES rooms(id),
 								FOREIGN KEY (item_id) REFERENCES items(id)
 							)
 						""");
