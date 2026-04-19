@@ -347,11 +347,38 @@ public class DerbyDatabase implements Database {
 								weapon_id INTEGER,
 								weapon_ability_id INTEGER,
 								PRIMARY KEY (weapon_id, weapon_ability_id),
-								FOREIGN KEY (weapon_id) REFERENCES item(id),
+								FOREIGN KEY (weapon_id) REFERENCES items(id),
 								FOREIGN KEY (weapon_ability_id) REFERENCES weapon_abilities(id)
 							)
 						"""
 					);
+					statement.execute();
+
+
+					// NPC
+					statement = connection.prepareStatement("""
+							CREATE TABLE npcs (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								name VARCHAR(%d) NOT NULL,
+								max_health INTEGER,
+								health INTEGER
+							)
+						""".formatted(
+						NAME_MAX_LENGTH
+					));
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE npc_items (
+								npc_id INTEGER,
+								item_id INTEGER,
+								amount INTEGER NOT NULL,
+								PRIMARY KEY (npc_id, item_id),
+								FOREIGN KEY (npc_id) REFERENCES npcs(id),
+								FOREIGN KEY (item_id) REFERENCES items(id)
+							)
+						""");
 					statement.execute();
 
 
@@ -398,6 +425,17 @@ public class DerbyDatabase implements Database {
 								PRIMARY KEY (room_id, item_id),
 								FOREIGN KEY (room_id) REFERENCES rooms(id),
 								FOREIGN KEY (item_id) REFERENCES items(id)
+							)
+						""");
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE room_npcs (
+								room_id INTEGER,
+								npc_id INTEGER,
+								PRIMARY KEY (room_id, npc_id),
+								FOREIGN KEY (room_id) REFERENCES rooms(id),
+								FOREIGN KEY (npc_id) REFERENCES npcs(id)
 							)
 						""");
 					statement.execute();
