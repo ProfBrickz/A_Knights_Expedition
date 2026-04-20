@@ -152,17 +152,20 @@ public class GameEngine {
 		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
 	}
 
-//	/**
-//	 * Handles the "inspect-item" command.
-//	 * Checks if the item exists in the inventory and returns inspection details.
-//	 */
-//	public String inspectItem(ArrayList<String> arguments) {
-//		String itemName = arguments.get(0);
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
-//
-//		return playerController.inspectItem(item) + "\n";
-//	}
+	/**
+	 * Handles the "inspect-item" command.
+	 * Checks if the item exists in the inventory and returns inspection details.
+	 */
+	public String inspectItem(ArrayList<String> arguments) {
+		InventoryController inventoryController = new InventoryController();
+		PlayerController playerController = new PlayerController(player, new BattleEntityController());
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
+
+		return playerController.inspectItem(item) + "\n";
+	}
 
 //	/**
 //	 * Handles the "search" command.

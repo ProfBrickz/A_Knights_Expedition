@@ -38,15 +38,15 @@ public enum Command {
 		List.of(PlayerState.EXPLORING),
 		List.of()
 	),
-	//	INSPECT_ITEM(
-//		"inspect",
-//		GameEngine::inspectItem,
-//		"Provides a detailed description of a specific item from the player's inventory",
-//		List.of("Item name"),
-//		List.of(PlayerState.EXPLORING),
-//		List.of("inspect sword", "inspect potion")
-//	),
-//	SEARCH(
+	INSPECT_ITEM(
+		"inspect",
+		GameEngine::inspectItem,
+		"Provides a detailed description of a specific item from the player's inventory",
+		List.of("Item name"),
+		List.of(PlayerState.EXPLORING),
+		List.of("inspect sword", "inspect potion")
+	),
+	//	SEARCH(
 //		"search",
 //		GameEngine::search,
 //		"Searches the current room for hidden items or clues",
