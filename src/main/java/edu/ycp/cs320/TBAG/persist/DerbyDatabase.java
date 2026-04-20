@@ -177,8 +177,8 @@ public class DerbyDatabase implements Database {
 							INSERT INTO dialog ( text)
 							VALUES (?)
 						""");
-					for (Map.Entry<Integer, String> entry : dialog.entrySet()) {
-						statement.setString(1, entry.getValue());
+					for (String text : dialog.values()) {
+						statement.setString(1, text);
 						statement.addBatch();
 					}
 					statement.executeBatch();
