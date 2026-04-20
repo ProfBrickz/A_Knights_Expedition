@@ -167,13 +167,18 @@ public class GameEngine {
 		return playerController.inspectItem(item) + "\n";
 	}
 
-//	/**
-//	 * Handles the "search" command.
-//	 * Checks if the room has any items and returns them.
-//	 */
-//	public String search(ArrayList<String> arguments) {
-//		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
-//	}
+	/**
+	 * Handles the "search" command.
+	 * Checks if the room has any items and returns them.
+	 */
+	public String search(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
+		HashMap<Integer, Item> roomItems = database.getItemsForRoom(playerRoom);
+
+		playerRoom.getInventory().addItems(new ArrayList<>(roomItems.values()));
+
+		return getInventoryString(playerRoom.getInventory(), "You found", "Nothing!");
+	}
 
 //	/**
 //	 * Handles the "pickup" command.

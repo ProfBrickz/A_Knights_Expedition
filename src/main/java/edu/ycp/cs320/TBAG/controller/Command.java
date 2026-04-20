@@ -46,15 +46,15 @@ public enum Command {
 		List.of(PlayerState.EXPLORING),
 		List.of("inspect sword", "inspect potion")
 	),
-	//	SEARCH(
-//		"search",
-//		GameEngine::search,
-//		"Searches the current room for hidden items or clues",
-//		List.of(),
-//		List.of(PlayerState.EXPLORING),
-//		List.of()
-//	),
-//	PICKUP(
+	SEARCH(
+		"search",
+		GameEngine::search,
+		"Searches the current room for hidden items or clues",
+		List.of(),
+		List.of(PlayerState.EXPLORING),
+		List.of()
+	),
+	//	PICKUP(
 //		"pickup",
 //		GameEngine::pickupItem,
 //		"Collects an item from the current room and adds it to the player's inventory",
