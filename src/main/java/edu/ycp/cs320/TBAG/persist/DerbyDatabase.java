@@ -147,10 +147,14 @@ public class DerbyDatabase implements Database {
 				HashMap<Integer, NPC> npcs;
 				HashMap<Integer, ArrayList<Item>> npcItems;
 
+
 				// Rooms
 				HashMap<Integer, Room> rooms;
 				// A map between a room's id and (a map of its directions and connections)
 				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
+				HashMap<Integer, ArrayList<Item>> roomItems;
+				HashMap<Integer, ArrayList<NPC>> roomNPCs;
+
 
 				// Player
 				Player player;
@@ -178,6 +182,8 @@ public class DerbyDatabase implements Database {
 					// Rooms
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
+					roomItems = InitialData.getRoomItems();
+					roomNPCs = InitialData.getRoomNPCs();
 
 					// Player
 					player = InitialData.getPlayer();
@@ -318,6 +324,36 @@ public class DerbyDatabase implements Database {
 							statement.setInt(2, roomConnection.getRoom().getID());
 							statement.setString(3, direction);
 							statement.setString(4, roomConnection.getDescription());
+							statement.addBatch();
+						}
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO room_items (room_id, item_id, amount)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<Item>> entry : npcItems.entrySet()) {
+						for (Item item : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, item.getId());
+							statement.setInt(3, item.getAmount());
+							statement.addBatch();
+						}
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO room_npcs (room_id, npc_id, health)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<NPC>> entry : roomNPCs.entrySet()) {
+						for (NPC npc : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, npc.getId());
+							statement.setInt(3, npc.getHealth());
 							statement.addBatch();
 						}
 					}

@@ -372,6 +372,13 @@ public class InitialData {
 	}
 
 	/**
+	 * Returns a map between room ids and a list of npcs
+	 */
+	public static HashMap<Integer, ArrayList<NPC>> getRoomNPCs() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	/**
 	 * Returns a map between room ids and a list of enemies
 	 */
 	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
