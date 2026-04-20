@@ -22,9 +22,8 @@ public class TBAGServlet extends HttpServlet {
 
 		GameEngine gameEngine = new GameEngine();
 
-		req.getSession().setAttribute("gameEngine", gameEngine);
-//		req.getSession().setAttribute("player", player);
 		req.setAttribute("dialog", gameEngine.getDialog());
+		req.setAttribute("player", gameEngine.getPlayer());
 
 
 		// call JSP to generate empty form
@@ -88,7 +87,7 @@ public class TBAGServlet extends HttpServlet {
 
 		// Run command
 		String output = gameEngine.inputCommand(command, arguments);
-		gameEngine.addDialog(output);
+		if (output != null) gameEngine.addDialog(output);
 
 		// the JSP will display updated dialog
 		req.setAttribute("dialog", gameEngine.getDialog());

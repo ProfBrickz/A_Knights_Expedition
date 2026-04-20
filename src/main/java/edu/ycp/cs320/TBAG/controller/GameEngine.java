@@ -20,6 +20,9 @@ public class GameEngine {
 	public GameEngine() {
 		DatabaseProvider.setInstance(new DerbyDatabase());
 		database = DatabaseProvider.getInstance();
+
+		player = database.getPlayer();
+		player.getInventory().addItems(new ArrayList<>(database.getItemsForPlayer().values()));
 	}
 
 	/**
@@ -34,16 +37,17 @@ public class GameEngine {
 
 	// Getters and setters
 	public String getDialog() {
-		StringBuilder dialog = new StringBuilder();
+		StringBuilder output = new StringBuilder();
 
-		for (String text : database.getDialog().values()) {
-			dialog
+		ArrayList<String> dialog = database.getDialog();
+
+		for (String text : dialog) {
+			output
 				.append(text)
 				.append("\n");
-			;
 		}
 
-		return dialog.toString();
+		return output.toString();
 	}
 
 	public void addDialog(String text) {
@@ -51,7 +55,6 @@ public class GameEngine {
 	}
 
 	public Player getPlayer() {
-		if (player == null) player = database.getPlayer();
 		return player;
 	}
 
@@ -65,16 +68,28 @@ public class GameEngine {
 	public String inputCommand(String commandName, ArrayList<String> arguments) {
 		commandName = commandName.trim().toLowerCase();
 
-		String output = "This should not happen, error in inputCommand";
+		String output = "";
 
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
-				this.player = database.getPlayer();
+				String error = validateCommand(command, arguments);
+				if (error != null) return error;
+
+				Boolean confirming = player.getConfirming();
+
+				if (!confirming) {
+					player.setLastCommand(command);
+				}
 				output = command.run(this, arguments);
+				if (confirming) {
+					player.setLastCommand(command);
+				}
+				database.setLastCommand(command);
+
 				break;
 			}
 		}
-		if (output.isEmpty()) output = "Sorry, command not recognized.";
+		if (output != null && output.isEmpty()) output = "Sorry, command not recognized.\n";
 
 		return output;
 	}
@@ -112,7 +127,6 @@ public class GameEngine {
 	 * Returns the description of the current room.
 	 */
 	public String look(ArrayList<String> arguments) {
-		Player player = database.getPlayer();
 		Room playerRoom = player.getRoom();
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
@@ -130,25 +144,28 @@ public class GameEngine {
 	}
 
 
-//	/**
-//	 * Handles the "inventory" command.
-//	 * Lists all items in the player's inventory with quantities.
-//	 */
-//	public String inventory(ArrayList<String> arguments) {
-//		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
-//	}
+	/**
+	 * Handles the "inventory" command.
+	 * Lists all items in the player's inventory with quantities.
+	 */
+	public String inventory(ArrayList<String> arguments) {
+		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
+	}
 
-//	/**
-//	 * Handles the "inspect-item" command.
-//	 * Checks if the item exists in the inventory and returns inspection details.
-//	 */
-//	public String inspectItem(ArrayList<String> arguments) {
-//		String itemName = arguments.get(0);
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
-//
-//		return playerController.inspectItem(item) + "\n";
-//	}
+	/**
+	 * Handles the "inspect-item" command.
+	 * Checks if the item exists in the inventory and returns inspection details.
+	 */
+	public String inspectItem(ArrayList<String> arguments) {
+		InventoryController inventoryController = new InventoryController();
+		PlayerController playerController = new PlayerController(player, new BattleEntityController());
+
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
+
+		return playerController.inspectItem(item) + "\n";
+	}
 
 //	/**
 //	 * Handles the "search" command.
@@ -362,21 +379,36 @@ public class GameEngine {
 //		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 //	}
 
-//	public String restart(ArrayList<String> arguments) {
-//		rooms.clear();
-//		roomController.loadDemo();
-//
-//		player.getInventory().getItems().clear();
-//		player.getArmor().clear();
-//		player.setState(PlayerState.EXPLORING);
-//		player.setCoins(0);
-//		ItemCatalog.addBaseItemsToInventory(player.getInventory());
-//
-//		// Set default room
-//		player.setRoom(rooms.get(defaultRoom));
-//
-//		return "Restarted game.\n";
-//	}
+	public String restart(ArrayList<String> arguments) {
+		if (!player.getConfirming()) {
+			database.setConfirming(true);
+			return "Are you sure (yes or no)?\n";
+		}
+
+		Boolean success = database.reset();
+
+		if (!success) return "Reset failed, try again.\n";
+
+		return "Restarted game.\n";
+	}
+
+	public String yes(ArrayList<String> arguments) {
+		Command lastCommand = player.getLastCommand();
+
+		String output = lastCommand.run(this, arguments);
+
+		database.setConfirming(false);
+
+		return output;
+	}
+
+	public String no(ArrayList<String> arguments) {
+		Command lastCommand = player.getLastCommand();
+
+		database.setConfirming(false);
+
+		return lastCommand.getName() + " command canceled.\n";
+	}
 
 	public String help(ArrayList<String> arguments) {
 		StringBuilder output = new StringBuilder("Available commands:\n");
@@ -386,6 +418,12 @@ public class GameEngine {
 		}
 
 		return output.toString();
+	}
+
+	public String clear(ArrayList<String> arguments) {
+		database.clearDialog();
+
+		return null;
 	}
 
 
@@ -432,7 +470,10 @@ public class GameEngine {
 	}
 
 	public String validateCommand(Command command, ArrayList<String> arguments) {
-		String error = validateCommandState(command);
+		String error = validatePlayerState(command);
+		if (error != null) return error;
+
+		error = validateConfirming(command);
 		if (error != null) return error;
 
 		error = validateCommandFormat(command, arguments);
@@ -451,9 +492,22 @@ public class GameEngine {
 		return null;
 	}
 
-	private String validateCommandState(Command command) {
+	private String validatePlayerState(Command command) {
 		if (!command.getAllowedPlayerStates().contains(player.getState())) {
 			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".\n";
+		}
+
+		return null;
+	}
+
+	private String validateConfirming(Command command) {
+		Boolean confirming = player.getConfirming();
+		Boolean isConfirmationCommand = command == Command.YES || command == Command.NO;
+
+		if (confirming && !isConfirmationCommand) {
+			return "You can not use " + command.getName() + " while confirming a command use yes or no.\n";
+		} else if (!confirming && isConfirmationCommand) {
+			return "There is nothing to confirm.\n";
 		}
 
 		return null;

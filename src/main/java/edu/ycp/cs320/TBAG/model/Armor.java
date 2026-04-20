@@ -11,6 +11,37 @@ public class Armor extends Item {
 		Integer defense,
 		Boolean active,
 		Integer sellValue,
+		Integer amount,
+		String assetName
+	) {
+		super(id, name, description, sellValue, amount, assetName);
+
+		this.defense = defense;
+		this.active = active;
+	}
+
+	public Armor(
+		Integer id,
+		String name,
+		String description,
+		Integer defense,
+		Boolean active,
+		Integer sellValue,
+		String assetName
+	) {
+		super(id, name, description, sellValue, assetName);
+
+		this.defense = defense;
+		this.active = active;
+	}
+
+	public Armor(
+		Integer id,
+		String name,
+		String description,
+		Integer defense,
+		Boolean active,
+		Integer sellValue,
 		Integer amount
 	) {
 		super(id, name, description, sellValue, amount);

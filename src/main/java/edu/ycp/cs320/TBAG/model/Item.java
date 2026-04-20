@@ -21,6 +21,10 @@ public class Item {
 		this(id, name, description, value, amount, null);
 	}
 
+	public Item(Integer id, String name, String description, Integer value, String assetName) {
+		this(id, name, description, value, null, assetName);
+	}
+
 	public Item(Integer id, String name, String description, Integer value) {
 		this(id, name, description, value, 1);
 	}

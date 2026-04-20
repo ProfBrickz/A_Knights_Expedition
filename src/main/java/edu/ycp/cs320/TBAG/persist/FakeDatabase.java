@@ -1,10 +1,11 @@
 package edu.ycp.cs320.TBAG.persist;
 
+import edu.ycp.cs320.TBAG.controller.Command;
 import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class FakeDatabase implements Database {
@@ -13,6 +14,7 @@ public class FakeDatabase implements Database {
 	private HashMap<Integer, Room> rooms = new HashMap<>();
 	// A map between a room's id and (a map of its directions and connections)
 	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
+	private HashMap<Integer, Item> items = new HashMap<>();
 
 
 	// General purpose methods
@@ -23,6 +25,7 @@ public class FakeDatabase implements Database {
 			rooms = InitialData.getRooms();
 			roomConnections = InitialData.getRoomConnections();
 			player = InitialData.getPlayer();
+			items = InitialData.getItems();
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
 		} catch (IOException exception) {
@@ -30,16 +33,41 @@ public class FakeDatabase implements Database {
 		}
 	}
 
+	@Override
+	public Boolean reset() {
+		player = null;
+		rooms.clear();
+		roomConnections.clear();
+		items.clear();
+
+		loadInitialData();
+
+		return true;
+	}
+
 
 	// Dialog methods
 	@Override
-	public HashMap<Integer, String> getDialog() {
-		return dialog;
+	public ArrayList<String> getDialog() {
+		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
+		Collections.sort(keys);
+
+		ArrayList<String> values = new ArrayList<>();
+		for (Integer key : keys) {
+			values.add(dialog.get(key));
+		}
+
+		return values;
 	}
 
 	@Override
 	public void addDialog(String text) {
 		dialog.put(dialog.size(), text);
+	}
+
+	@Override
+	public void clearDialog() {
+		dialog.clear();
 	}
 
 	// Player-related methods
@@ -83,6 +111,16 @@ public class FakeDatabase implements Database {
 			throw new IllegalStateException("No player exists");
 		}
 		player.setCurrentNPC(npc);
+	}
+
+	@Override
+	public void setLastCommand(Command command) {
+		player.setLastCommand(command);
+	}
+
+	@Override
+	public void setConfirming(Boolean confirming) {
+		player.setConfirming(confirming);
 	}
 
 	@Override
@@ -208,55 +246,7 @@ public class FakeDatabase implements Database {
 
 	// Item-related methods
 	@Override
-	public HashMap<Integer, Item> getItemsFromResultSet(ResultSet resultSet) {
-		HashMap<Integer, Item> items = new HashMap<>();
-
-		if (resultSet == null) {
-			return items;
-		}
-
-		try {
-			while (resultSet.next()) {
-				Integer id = resultSet.getInt("id");
-				String name = resultSet.getString("name");
-				String description = resultSet.getString("description");
-				Integer value = resultSet.getInt("value");
-				String type = resultSet.getString("type");
-				Integer amount = resultSet.getInt("amount");
-
-				if (resultSet.wasNull()) {
-					amount = 1;
-				}
-
-				Item item;
-				if (type != null) {
-					type = type.trim().toLowerCase();
-				}
-
-				if ("weapon".equals(type)) {
-					item = new Weapon(id, name, description, value, amount);
-				} else if ("armor".equals(type)) {
-					Integer defense = resultSet.getInt("defense");
-					Boolean active = resultSet.getBoolean("active_armor");
-					item = new Armor(id, name, description, defense, active, value, amount);
-				} else if ("healing".equals(type)) {
-					Integer healAmount = resultSet.getInt("heal_amount");
-					item = new HealingItem(id, name, description, healAmount, value, amount);
-				} else {
-					item = new Item(id, name, description, value, amount);
-				}
-
-				items.put(id, item);
-			}
-		} catch (SQLException e) {
-			throw new PersistenceException("Could not load items", e);
-		}
-
-		return items;
-	}
-
-	@Override
-	public HashMap<Integer, Item> getItemsForPlayer(Player player) {
+	public HashMap<Integer, Item> getItemsForPlayer() {
 		if (player == null) {
 			return new HashMap<>();
 		}

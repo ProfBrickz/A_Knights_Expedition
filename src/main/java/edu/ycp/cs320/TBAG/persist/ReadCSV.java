@@ -6,7 +6,7 @@ import java.util.List;
 
 /// From lab 7
 public class ReadCSV implements Closeable {
-	private BufferedReader reader;
+	private final BufferedReader reader;
 
 	/// Modified from lab 7 to work with different file structure
 	public ReadCSV(String resourceName) throws IOException {

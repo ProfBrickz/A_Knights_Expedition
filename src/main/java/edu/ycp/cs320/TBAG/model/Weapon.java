@@ -10,6 +10,27 @@ public class Weapon extends Item {
 		String name,
 		String description,
 		Integer value,
+		Integer amount,
+		String asset_name
+	) {
+		super(id, name, description, value, amount, asset_name);
+	}
+
+	public Weapon(
+		Integer id,
+		String name,
+		String description,
+		Integer value,
+		String asset_name
+	) {
+		super(id, name, description, value, asset_name);
+	}
+
+	public Weapon(
+		Integer id,
+		String name,
+		String description,
+		Integer value,
 		Integer amount
 	) {
 		super(id, name, description, value, amount);
