@@ -159,6 +159,7 @@ public class DerbyDatabase implements Database {
 				PreparedStatement statement = null;
 
 				try {
+					// Dialog
 					statement = connection.prepareStatement("""
 							INSERT INTO dialog ( text)
 							VALUES (?)
@@ -169,42 +170,8 @@ public class DerbyDatabase implements Database {
 					}
 					statement.executeBatch();
 
-					statement = connection.prepareStatement("""
-							INSERT INTO rooms (name, description, asset_name)
-							VALUES (?, ?, ?)
-						""");
-					for (Room room : rooms.values()) {
-						statement.setString(1, room.getName());
-						statement.setString(2, room.getDescription());
-						statement.setString(3, room.getAssetName());
-						statement.addBatch();
-					}
-					statement.executeBatch();
 
-					statement = connection.prepareStatement("""
-							INSERT INTO room_connections (
-								source_id,
-								destination_id,
-								direction,
-								description
-							) VALUES (?, ?, ?, ?)
-						""");
-					for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
-						Integer roomId = entry.getKey();
-
-						for (Map.Entry<String, RoomConnection> entry1 : entry.getValue().entrySet()) {
-							String direction = entry1.getKey();
-							RoomConnection roomConnection = entry1.getValue();
-
-							statement.setInt(1, roomId);
-							statement.setInt(2, roomConnection.getRoom().getID());
-							statement.setString(3, direction);
-							statement.setString(4, roomConnection.getDescription());
-							statement.addBatch();
-						}
-					}
-					statement.executeBatch();
-
+					// Items
 					statement = connection.prepareStatement("""
 							INSERT INTO items (
 								name,
@@ -234,6 +201,47 @@ public class DerbyDatabase implements Database {
 					}
 					statement.executeBatch();
 
+
+					// Rooms
+					statement = connection.prepareStatement("""
+							INSERT INTO rooms (name, description, asset_name)
+							VALUES (?, ?, ?)
+						""");
+					for (Room room : rooms.values()) {
+						statement.setString(1, room.getName());
+						statement.setString(2, room.getDescription());
+						statement.setString(3, room.getAssetName());
+						statement.addBatch();
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO room_connections (
+								source_id,
+								destination_id,
+								direction,
+								description
+							) VALUES (?, ?, ?, ?)
+						""");
+					for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
+						Integer roomId = entry.getKey();
+
+						for (Map.Entry<String, RoomConnection> entry1 : entry.getValue().entrySet()) {
+							String direction = entry1.getKey();
+							RoomConnection roomConnection = entry1.getValue();
+
+							statement.setInt(1, roomId);
+							statement.setInt(2, roomConnection.getRoom().getID());
+							statement.setString(3, direction);
+							statement.setString(4, roomConnection.getDescription());
+							statement.addBatch();
+						}
+					}
+					statement.executeBatch();
+
+
+					// Player
 					statement = connection.prepareStatement("""
 							INSERT INTO player (room_id, state, coins, max_health, health)
 							VALUES (?, ?, ?, ?, ?)
@@ -244,6 +252,7 @@ public class DerbyDatabase implements Database {
 					statement.setInt(4, player.getMaxHealth());
 					statement.setInt(5, player.getHealth());
 					statement.executeUpdate();
+
 
 					statement = connection.prepareStatement("""
 							INSERT INTO player_items (
@@ -257,6 +266,7 @@ public class DerbyDatabase implements Database {
 						statement.addBatch();
 					}
 					statement.executeBatch();
+
 
 					return true;
 				} finally {
@@ -355,7 +365,7 @@ public class DerbyDatabase implements Database {
 					statement.execute();
 
 
-					// NPC
+					// NPCs
 					statement = connection.prepareStatement("""
 							CREATE TABLE npcs (
 								id INTEGER PRIMARY KEY
