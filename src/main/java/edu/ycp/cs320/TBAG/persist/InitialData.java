@@ -456,7 +456,7 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	public static ArrayList<WeaponAbility> getWeaponAbilities() throws IOException {
+	public static HashMap<Integer, WeaponAbility> getWeaponAbilities() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
@@ -469,7 +469,7 @@ public class InitialData {
 	/**
 	 * Returns a list of enemies without items
 	 */
-	public static ArrayList<Enemy> getEnemies() throws IOException {
+	public static HashMap<Integer, Enemy> getEnemies() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 

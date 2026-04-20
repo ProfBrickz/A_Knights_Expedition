@@ -140,12 +140,17 @@ public class DerbyDatabase implements Database {
 
 				// Items
 				HashMap<Integer, Item> items;
-				ArrayList<WeaponAbility> weaponAbilities;
+				HashMap<Integer, WeaponAbility> weaponAbilities;
 				ArrayList<Pair<Integer, Integer>> weaponAbilitiesJunction;
 
 				// NPCs
 				HashMap<Integer, NPC> npcs;
 				HashMap<Integer, ArrayList<Item>> npcItems;
+
+
+				// Enemies
+				HashMap<Integer, Enemy> enemies;
+				HashMap<Integer, ArrayList<Item>> enemyItems;
 
 
 				// Rooms
@@ -154,6 +159,7 @@ public class DerbyDatabase implements Database {
 				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
 				HashMap<Integer, ArrayList<Item>> roomItems;
 				HashMap<Integer, ArrayList<NPC>> roomNPCs;
+				HashMap<Integer, ArrayList<Enemy>> roomEnemies;
 
 
 				// Player
@@ -168,7 +174,7 @@ public class DerbyDatabase implements Database {
 					// Items
 					items = InitialData.getItems();
 //					weaponAbilities = InitialData.getWeaponAbilities();
-					weaponAbilities = new ArrayList<>();
+					weaponAbilities = new HashMap<>();
 //					weaponAbilitiesJunction = InitialData.getWeaponAbilitiesJunction();
 					weaponAbilitiesJunction = new ArrayList<>();
 
@@ -179,11 +185,23 @@ public class DerbyDatabase implements Database {
 					npcItems = new HashMap<>();
 
 
+					// Enemies
+//					enemies = InitialData.getEnemies();
+					enemies = new HashMap<>();
+//					enemyItems = InitialData.getEnemyItems();
+					enemyItems = new HashMap<>();
+
+
 					// Rooms
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
-					roomItems = InitialData.getRoomItems();
-					roomNPCs = InitialData.getRoomNPCs();
+//					roomItems = InitialData.getRoomItems();
+					roomItems = new HashMap<>();
+//					roomNPCs = InitialData.getRoomNPCs();
+					roomNPCs = new HashMap<>();
+//					roomEnemies = InitialData.getRoomEnemies();
+					roomEnemies = new HashMap<>();
+
 
 					// Player
 					player = InitialData.getPlayer();
@@ -245,7 +263,7 @@ public class DerbyDatabase implements Database {
 							INSERT INTO weapon_abilities (damage, attack_description)
 							VALUES (?, ?)
 						""");
-					for (WeaponAbility ability : weaponAbilities) {
+					for (WeaponAbility ability : weaponAbilities.values()) {
 						statement.setInt(1, ability.getDamage());
 						statement.setString(2, ability.getAttackDescription());
 						statement.addBatch();
@@ -282,6 +300,32 @@ public class DerbyDatabase implements Database {
 							VALUES (?, ?, ?)
 						""");
 					for (Map.Entry<Integer, ArrayList<Item>> entry : npcItems.entrySet()) {
+						for (Item item : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, item.getId());
+							statement.setInt(3, item.getAmount());
+						}
+					}
+					statement.executeBatch();
+
+
+					// Enemies
+					statement = connection.prepareStatement("""
+							INSERT INTO enemies (name, max_health)
+							VALUES (?, ?)
+						""");
+					for (Enemy enemy : enemies.values()) {
+						statement.setString(1, enemy.getName());
+						statement.setInt(2, enemy.getMaxHealth());
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO enemy_items (enemy_id, item_id, amount)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<Item>> entry : enemyItems.entrySet()) {
 						for (Item item : entry.getValue()) {
 							statement.setInt(1, entry.getKey());
 							statement.setInt(2, item.getId());
@@ -354,6 +398,21 @@ public class DerbyDatabase implements Database {
 							statement.setInt(1, entry.getKey());
 							statement.setInt(2, npc.getId());
 							statement.setInt(3, npc.getHealth());
+							statement.addBatch();
+						}
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO room_enemies (room_id, enemy_id, health)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<Enemy>> entry : roomEnemies.entrySet()) {
+						for (Enemy enemy : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, enemy.getId());
+							statement.setInt(3, enemy.getHealth());
 							statement.addBatch();
 						}
 					}
