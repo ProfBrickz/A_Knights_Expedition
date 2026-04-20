@@ -24,8 +24,8 @@ public class TBAGServlet extends HttpServlet {
 
 		req.setAttribute("dialog", gameEngine.getDialog());
 		req.setAttribute("player", gameEngine.getPlayer());
-
-
+		req.setAttribute("commandHistory", gameEngine.getCommandHistory());
+		
 		// call JSP to generate empty form
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);
 	}
@@ -48,6 +48,8 @@ public class TBAGServlet extends HttpServlet {
 		String input = req.getParameter("command");
 		// Append user's command
 		gameEngine.addDialog(input);
+
+		gameEngine.addCommandToHistory(input);
 
 		String command = "";
 		ArrayList<String> arguments = new ArrayList<>();
@@ -92,6 +94,7 @@ public class TBAGServlet extends HttpServlet {
 		// the JSP will display updated dialog
 		req.setAttribute("dialog", gameEngine.getDialog());
 		req.setAttribute("player", gameEngine.getPlayer());
+		req.setAttribute("commandHistory", gameEngine.getCommandHistory());
 
 		// now call the JSP to render the new page
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);

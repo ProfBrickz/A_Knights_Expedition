@@ -121,6 +121,10 @@
       grid-column: 2;
       grid-row: 3;
     }
+
+    #command-history {
+    	display: none;
+    }
   </style>
   <script>
   	window.addEventListener('load', () => {
@@ -130,6 +134,26 @@
 		let commandInput = document.getElementById('command');
 		commandInput.focus();
 		commandInput.select();
+
+        const history = []; // Client-side history
+        for (command of document.getElementById("command-history").children) {
+        	history.push(command.innerText)
+        }
+        let currentIndex = history.length;
+
+        commandInput.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowUp') {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    commandInput.value = history[currentIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                if (currentIndex < history.length - 1) {
+                    currentIndex++;
+                    commandInput.value = history[currentIndex];
+                }
+            }
+        });
       });
   </script>
 </head>
@@ -176,25 +200,30 @@
     	<ul>
     		<c:forEach var="item" items="${player.inventory.items.values()}">
         		<li class="inventory-item">
-              <c:choose>
-                <c:when test="${not empty item.assetName}">
-                  <img class="item-icon" src="${pageContext.request.contextPath}/assets/items/${item.assetName}" alt="${item.name}" />
-                </c:when>
-                <c:otherwise>
-                  <img class="item-icon" src="${pageContext.request.contextPath}/assets/items/fixIt.png" alt="${item.name}" />
-                </c:otherwise>
-              </c:choose>
-              <span>${item.amount} x ${item.name}</span>
-            </li>
+					<c:choose>
+						<c:when test="${not empty item.assetName}">
+							<img class="item-icon" src="${pageContext.request.contextPath}/assets/items/${item.assetName}" alt="${item.name}" />
+						</c:when>
+						<c:otherwise>
+							<img class="item-icon" src="${pageContext.request.contextPath}/assets/items/fixIt.png" alt="${item.name}" />
+						</c:otherwise>
+				  </c:choose>
+				  <span>${item.amount} x ${item.name}</span>
+            	</li>
      		</c:forEach>
     	</ul>
     </div>
 
     <div class="input">
-  		<input id="command" type="text" name="command" placeholder="Enter command..." />
+  		<input id="command" type="text" name="command" autocomplete="off" placeholder="Enter command..." />
   		<button type="submit">Submit</button>
 	</div>
 
+	<ol id="command-history">
+		<c:forEach var="command" items="${commandHistory}">
+			<li>${command}</li>
+		</c:forEach>
+	</ol>
     
     <div class="search">
       <input id="search" type="text" name="search" placeholder="Search item name..." />

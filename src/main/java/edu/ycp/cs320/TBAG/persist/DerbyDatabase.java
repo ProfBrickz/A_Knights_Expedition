@@ -475,7 +475,7 @@ public class DerbyDatabase implements Database {
 	}
 
 	public void createTables() {
-		final Integer DIALOG_MAX_LENGTH = 2048;
+		final Integer DIALOG_MAX_LENGTH = 8192;
 		final Integer NAME_MAX_LENGTH = 128;
 		final Integer DESCRIPTION_MAX_LENGTH = 512;
 		final Integer DIRECTION_MAX_LENGTH = 64;
@@ -494,6 +494,15 @@ public class DerbyDatabase implements Database {
 								text VARCHAR(%d) NOT NULL
 							)
 						""".formatted(DIALOG_MAX_LENGTH));
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE command_history (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								command VARCHAR(%d) NOT NULL
+							)
+						""".formatted(DESCRIPTION_MAX_LENGTH));
 					statement.executeUpdate();
 
 
@@ -778,6 +787,74 @@ public class DerbyDatabase implements Database {
 			}
 		});
 	}
+
+	@Override
+	public ArrayList<String> getCommandHistory() {
+		return executeTransaction(new Transaction<ArrayList<String>>() {
+			@Override
+			public ArrayList<String> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"SELECT command FROM command_history"
+					);
+					resultSet = statement.executeQuery();
+
+					ArrayList<String> result = new ArrayList<>();
+
+					while (resultSet.next()) {
+						String command = resultSet.getString(1);
+
+						result.add(command);
+					}
+
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void addCommandToHistory(String command) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					// Remove command from history if already in it
+					statement = connection.prepareStatement("DELETE FROM command_history WHERE command = ?");
+					statement.setString(1, command);
+					statement.execute();
+
+					// Add command to history
+					statement = connection.prepareStatement("INSERT INTO command_history (command) VALUES (?)");
+					statement.setString(1, command);
+					statement.executeUpdate();
+
+					// Trim history if longer than max length
+					statement = connection.prepareStatement("""
+							DELETE FROM command_history WHERE id NOT IN (
+								SELECT id from command_history
+								ORDER BY id DESC
+								FETCH FIRST %d ROWS ONLY
+							)
+						""".formatted(MAX_HISTORY_SIZE));
+					statement.execute();
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
 
 	// Player-related methods
 	@Override
@@ -1339,7 +1416,8 @@ public class DerbyDatabase implements Database {
 				String description = resultSet.getString("description");
 				String assetName = resultSet.getString("asset_name");
 				Integer value = resultSet.getInt("value");
-				ItemType type = ItemType.getByName(resultSet.getString("type"));
+				Integer typeOrdinal = resultSet.getInt("type");
+				ItemType type = ItemType.values()[typeOrdinal];
 				Integer amount = resultSet.getInt("amount");
 
 				if (resultSet.wasNull()) {
@@ -1486,8 +1564,43 @@ public class DerbyDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) { // Hamed
+		if (enemy == null) {
+			return new HashMap<>();
+		}
+
+		return executeTransaction(new Transaction<HashMap<Integer, Item>>() {
+			@Override
+			public HashMap<Integer, Item> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								items.id,
+								items.name,
+								items.description,
+								items.asset_name,
+								items.value,
+								items.type,
+								items.heal_amount,
+								items.defense,
+								items.active_armor,
+								enemy_items.amount
+							FROM enemy_items, items
+							WHERE items.id = enemy_items.item_id AND enemy_items.enemy_id = ?
+						""");
+					statement.setInt(1, enemy.getId());
+					resultSet = statement.executeQuery();
+
+					return getItemsFromResultSet(resultSet);
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 
@@ -1541,24 +1654,218 @@ public class DerbyDatabase implements Database {
 
 	// Enemy-related methods
 	@Override
-	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) { // Hamed
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		return executeTransaction(new Transaction<HashMap<Integer, Enemy>>() {
+			@Override
+			public HashMap<Integer, Enemy> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								enemies.id,
+								enemies.name,
+								enemies.max_health,
+								room_enemies.health
+							FROM room_enemies, enemies
+							WHERE enemies.id = room_enemies.enemy_id AND room_enemies.room_id = ?
+						""");
+					statement.setInt(1, room.getID());
+					resultSet = statement.executeQuery();
+
+					HashMap<Integer, Enemy> result = new HashMap<>();
+					while (resultSet.next()) {
+						Integer id = resultSet.getInt(1);
+						String name = resultSet.getString(2);
+						Integer maxHealth = resultSet.getInt(3);
+						Integer health = resultSet.getInt(4);
+						result.put(id, new Enemy(id, name, maxHealth, health));
+					}
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 
 	@Override
-	public void addItemToEnemy(Enemy enemy, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public void addItemToEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
+			return;
+		}
+
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement selectStatement = null;
+				PreparedStatement insertStatement = null;
+				PreparedStatement updateStatement = null;
+				ResultSet resultSet = null;
+
+				try {
+					selectStatement = connection.prepareStatement("""
+							SELECT amount
+							FROM enemy_items
+							WHERE enemy_id = ? AND item_id = ?
+						""");
+					selectStatement.setInt(1, enemy.getId());
+					selectStatement.setInt(2, item.getId());
+					resultSet = selectStatement.executeQuery();
+
+					int delta = item.getAmount() == null ? 1 : item.getAmount();
+					if (delta <= 0) {
+						return true;
+					}
+
+					if (resultSet.next()) {
+						int currentAmount = resultSet.getInt(1);
+						int newAmount = currentAmount + delta;
+
+						updateStatement = connection.prepareStatement("""
+								UPDATE enemy_items
+								SET amount = ?
+								WHERE enemy_id = ? AND item_id = ?
+							""");
+						updateStatement.setInt(1, newAmount);
+						updateStatement.setInt(2, enemy.getId());
+						updateStatement.setInt(3, item.getId());
+						updateStatement.executeUpdate();
+					} else {
+						insertStatement = connection.prepareStatement("""
+								INSERT INTO enemy_items (enemy_id, item_id, amount)
+								VALUES (?, ?, ?)
+							""");
+						insertStatement.setInt(1, enemy.getId());
+						insertStatement.setInt(2, item.getId());
+						insertStatement.setInt(3, delta);
+						insertStatement.executeUpdate();
+					}
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(resultSet);
+					DBUtil.closeQuietly(selectStatement);
+					DBUtil.closeQuietly(insertStatement);
+					DBUtil.closeQuietly(updateStatement);
+				}
+			}
+		});
 	}
 
 	@Override
-	public void removeItemFromEnemy(Enemy enemy, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public void removeItemFromEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
+			return;
+		}
+
+		executeTransaction(new Transaction<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				PreparedStatement selectStatement = null;
+				PreparedStatement updateStatement = null;
+				PreparedStatement deleteStatement = null;
+				ResultSet resultSet = null;
+
+				try {
+					selectStatement = connection.prepareStatement("""
+							SELECT amount
+							FROM enemy_items
+							WHERE enemy_id = ? AND item_id = ?
+						""");
+					selectStatement.setInt(1, enemy.getId());
+					selectStatement.setInt(2, item.getId());
+					resultSet = selectStatement.executeQuery();
+
+					if (!resultSet.next()) {
+						return true;
+					}
+
+					int delta = item.getAmount() == null ? 1 : item.getAmount();
+					if (delta <= 0) {
+						return true;
+					}
+
+					int currentAmount = resultSet.getInt(1);
+					int newAmount = currentAmount - delta;
+
+					if (newAmount > 0) {
+						updateStatement = connection.prepareStatement("""
+								UPDATE enemy_items
+								SET amount = ?
+								WHERE enemy_id = ? AND item_id = ?
+							""");
+						updateStatement.setInt(1, newAmount);
+						updateStatement.setInt(2, enemy.getId());
+						updateStatement.setInt(3, item.getId());
+						updateStatement.executeUpdate();
+					} else {
+						deleteStatement = connection.prepareStatement("""
+								DELETE FROM enemy_items
+								WHERE enemy_id = ? AND item_id = ?
+							""");
+						deleteStatement.setInt(1, enemy.getId());
+						deleteStatement.setInt(2, item.getId());
+						deleteStatement.executeUpdate();
+					}
+
+					return true;
+				} finally {
+					DBUtil.closeQuietly(resultSet);
+					DBUtil.closeQuietly(selectStatement);
+					DBUtil.closeQuietly(updateStatement);
+					DBUtil.closeQuietly(deleteStatement);
+				}
+			}
+		});
 	}
 
 
 	// WeaponAbility-related methods
 	@Override
-	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) { // Hamed
+		if (weapon == null) {
+			return new HashMap<>();
+		}
+
+		return executeTransaction(new Transaction<HashMap<Integer, WeaponAbility>>() {
+			@Override
+			public HashMap<Integer, WeaponAbility> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement("""
+							SELECT
+								weapon_abilities.id,
+								weapon_abilities.damage,
+								weapon_abilities.attack_description
+							FROM weapon_abilities_junction, weapon_abilities
+							WHERE weapon_abilities.id = weapon_abilities_junction.weapon_ability_id
+								AND weapon_abilities_junction.weapon_id = ?
+						""");
+					statement.setInt(1, weapon.getId());
+					resultSet = statement.executeQuery();
+
+					HashMap<Integer, WeaponAbility> result = new HashMap<>();
+					while (resultSet.next()) {
+						Integer id = resultSet.getInt(1);
+						Integer damage = resultSet.getInt(2);
+						String attackDescription = resultSet.getString(3);
+						result.put(id, new WeaponAbility(id, damage, attackDescription));
+					}
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
 	}
 }

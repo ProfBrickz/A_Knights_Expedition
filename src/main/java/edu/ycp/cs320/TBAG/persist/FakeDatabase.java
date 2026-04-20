@@ -11,20 +11,22 @@ import java.util.Map;
 
 public class FakeDatabase implements Database {
 	// Dialog
-	private HashMap<Integer, String> dialog = new HashMap<>();
+	private final HashMap<Integer, String> dialog = new HashMap<>();
+	private ArrayList<String> commandHistory = new ArrayList<>();
+
 
 	// Items
-	private HashMap<Integer, Item> items = new HashMap<>();
-	private HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
+	private final HashMap<Integer, Item> items = new HashMap<>();
+	private final HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
 
 	// NPCs
-	private HashMap<Integer, NPC> npcs = new HashMap<>();
+	private final HashMap<Integer, NPC> npcs = new HashMap<>();
 
 	// Enemies
-	private HashMap<Integer, Enemy> enemies = new HashMap<>();
+	private final HashMap<Integer, Enemy> enemies = new HashMap<>();
 
 	// Rooms
-	private HashMap<Integer, Room> rooms = new HashMap<>();
+	private final HashMap<Integer, Room> rooms = new HashMap<>();
 
 	// Player
 	private Player player = null;
@@ -120,6 +122,26 @@ public class FakeDatabase implements Database {
 	public void clearDialog() {
 		dialog.clear();
 	}
+
+	@Override
+	public ArrayList<String> getCommandHistory() {
+		return commandHistory;
+	}
+
+	@Override
+	public void addCommandToHistory(String command) {
+		// Remove command from history if already in it
+		commandHistory.remove(command);
+
+		// Add command to history
+		commandHistory.add(command);
+
+		// Trim history if longer than max length
+		while (commandHistory.size() > Database.MAX_HISTORY_SIZE) {
+			commandHistory.remove(0);
+		}
+	}
+
 
 	// Player-related methods
 	@Override
@@ -324,8 +346,12 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) { // Hamed
+		if (enemy == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(enemy.getInventory().getItems());
 	}
 
 
@@ -341,24 +367,76 @@ public class FakeDatabase implements Database {
 
 	// Enemy-related methods
 	@Override
-	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) { // Hamed
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(room.getEnemies());
 	}
 
 	@Override
-	public void addItemToEnemy(Enemy enemy, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public void addItemToEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = enemy.getInventory().getItems().get(itemId);
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+
+		if (delta <= 0) {
+			return;
+		}
+
+		if (existing == null) {
+			enemy.getInventory().addItem(item);
+		} else {
+			existing.setAmount(existing.getAmount() + delta);
+		}
 	}
 
 	@Override
-	public void removeItemFromEnemy(Enemy enemy, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public void removeItemFromEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = enemy.getInventory().getItems().get(itemId);
+		if (existing == null) {
+			return;
+		}
+
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+		if (delta <= 0) {
+			return;
+		}
+
+		int newAmount = existing.getAmount() - delta;
+		if (newAmount > 0) {
+			existing.setAmount(newAmount);
+		} else {
+			enemy.getInventory().removeItem(existing);
+		}
 	}
 
 
 	// WeaponAbility-related methods
 	@Override
-	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) { // Hamed
+		if (weapon == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(weapon.getAbilities());
 	}
 }

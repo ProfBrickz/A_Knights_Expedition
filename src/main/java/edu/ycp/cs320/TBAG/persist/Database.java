@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface Database {
+	public static final Integer MAX_HISTORY_SIZE = 10;
+
 	// General purpose methods
 	void loadInitialData();
 
@@ -18,6 +20,12 @@ public interface Database {
 	void addDialog(String text);
 
 	void clearDialog();
+
+	/// Up to 15 commands long
+	ArrayList<String> getCommandHistory();
+
+	// Will also remove the oldest command
+	void addCommandToHistory(String command);
 
 	// Player-related methods
 
