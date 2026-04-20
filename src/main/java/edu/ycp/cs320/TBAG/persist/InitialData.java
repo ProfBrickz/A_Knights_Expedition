@@ -438,7 +438,7 @@ public class InitialData {
 		}
 	}
 
-	public static ArrayList<NPC> getNPCs() throws IOException {
+	public static HashMap<Integer, NPC> getNPCs() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 

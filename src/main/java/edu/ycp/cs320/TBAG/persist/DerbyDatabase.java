@@ -135,15 +135,27 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
+				// Dialog
 				HashMap<Integer, String> dialog;
-				Player player;
+
+				// Items
+				HashMap<Integer, Item> items;
+				ArrayList<WeaponAbility> weaponAbilities;
+				ArrayList<Pair<Integer, Integer>> weaponAbilitiesJunction;
+
+				// NPCs
+				HashMap<Integer, NPC> npcs;
+				HashMap<Integer, ArrayList<Item>> npcItems;
+
+				// Rooms
 				HashMap<Integer, Room> rooms;
 				// A map between a room's id and (a map of its directions and connections)
 				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
-				HashMap<Integer, Item> items;
+
+				// Player
+				Player player;
 				HashMap<Integer, Item> playerItems;
-				ArrayList<WeaponAbility> weaponAbilities;
-				ArrayList<Pair<Integer, Integer>> weaponAbilitiesJunction;
+
 
 				try {
 					// Dialog
@@ -155,6 +167,13 @@ public class DerbyDatabase implements Database {
 					weaponAbilities = new ArrayList<>();
 //					weaponAbilitiesJunction = InitialData.getWeaponAbilitiesJunction();
 					weaponAbilitiesJunction = new ArrayList<>();
+
+					// NPCs
+//					npcs = InitialData.getNPCs();
+					npcs = new HashMap<>();
+//					npcItems = InitialData.getNPCItems();
+					npcItems = new HashMap<>();
+
 
 					// Rooms
 					rooms = InitialData.getRooms();
@@ -228,7 +247,7 @@ public class DerbyDatabase implements Database {
 					statement.executeBatch();
 
 
-					statement = connect().prepareStatement("""
+					statement = connection.prepareStatement("""
 							INSERT INTO weapon_abilities_junction (weapon_id, weapon_ability_id)
 							VALUES (?, ?)
 						""");
@@ -238,6 +257,33 @@ public class DerbyDatabase implements Database {
 						statement.addBatch();
 					}
 					statement.executeBatch();
+
+
+					// NPCs
+					statement = connection.prepareStatement("""
+							INSERT INTO npcs (name, max_health)
+							VALUES (?, ?)
+						""");
+					for (NPC npc : npcs.values()) {
+						statement.setString(1, npc.getName());
+						statement.setInt(2, npc.getMaxHealth());
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO npc_items (npc_id, item_id, amount)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<Item>> entry : npcItems.entrySet()) {
+						for (Item item : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, item.getId());
+							statement.setInt(3, item.getAmount());
+						}
+					}
+					statement.executeBatch();
+
 
 					// Rooms
 					statement = connection.prepareStatement("""
