@@ -1,20 +1,20 @@
-id,name,max_health,health
-String,String,Integer,Integer
-1,Moblin,10,10
-2,Wolote,12,12
-3,Porc,20,20
-4,Bizzard,15,15
-5,Gecko-man,23,23
-6,Possesed Pots and Pans,28,28
-7,Glitter Slime,26,26
-8,[REDACTED],30,30
-9,Skeleton Spelunker,32,32
-10,Cardboard Cutout,37,37
-11,Pillow Snake,40,40
-12,"Rick, Founder of the Forest",18,18
-13,Porc Queen Bakon,40,40
-14,Fillian,35,35
-15,Possesed Cauldron,43,43
-16,Ted the Vlogger,49,49
-17,The Dragoon,60,60
-18,The Black Beast of Aaaaargh,999,999
+id,name,max_health
+String,String,Integer
+1,Moblin,10
+2,Wolote,12
+3,Porc,20
+4,Bizzard,15
+5,Gecko-man,23
+6,Possesed Pots and Pans,28
+7,Glitter Slime,26
+8,[REDACTED],30
+9,Skeleton Spelunker,32
+10,Cardboard Cutout,37
+11,Pillow Snake,40
+12,"Rick, Founder of the Forest",18
+13,Porc Queen Bakon,40
+14,Fillian,35
+15,Possesed Cauldron,43
+16,Ted the Vlogger,49
+17,The Dragoon,60
+18,The Black Beast of Aaaaargh,999
