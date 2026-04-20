@@ -1,11 +1,13 @@
 package edu.ycp.cs320.TBAG.persist;
 
 import edu.ycp.cs320.TBAG.Utils;
+import edu.ycp.cs320.TBAG.controller.Command;
 import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -133,20 +135,76 @@ public class DerbyDatabase implements Database {
 		executeTransaction(new Transaction<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
+				// Dialog
 				HashMap<Integer, String> dialog;
-				Player player;
+
+				// Items
+				HashMap<Integer, Item> items;
+				HashMap<Integer, WeaponAbility> weaponAbilities;
+				ArrayList<Pair<Integer, Integer>> weaponAbilitiesJunction;
+
+				// NPCs
+				HashMap<Integer, NPC> npcs;
+				HashMap<Integer, ArrayList<Item>> npcItems;
+
+
+				// Enemies
+				HashMap<Integer, Enemy> enemies;
+				HashMap<Integer, ArrayList<Item>> enemyItems;
+
+
+				// Rooms
 				HashMap<Integer, Room> rooms;
 				// A map between a room's id and (a map of its directions and connections)
 				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
-				HashMap<Integer, Item> items;
+				HashMap<Integer, ArrayList<Item>> roomItems;
+				HashMap<Integer, ArrayList<NPC>> roomNPCs;
+				HashMap<Integer, ArrayList<Enemy>> roomEnemies;
+
+
+				// Player
+				Player player;
 				HashMap<Integer, Item> playerItems;
 
+
 				try {
+					// Dialog
 					dialog = InitialData.getDialog();
+
+					// Items
+					items = InitialData.getItems();
+//					weaponAbilities = InitialData.getWeaponAbilities();
+					weaponAbilities = new HashMap<>();
+//					weaponAbilitiesJunction = InitialData.getWeaponAbilitiesJunction();
+					weaponAbilitiesJunction = new ArrayList<>();
+
+					// NPCs
+//					npcs = InitialData.getNPCs();
+					npcs = new HashMap<>();
+//					npcItems = InitialData.getNPCItems();
+					npcItems = new HashMap<>();
+
+
+					// Enemies
+//					enemies = InitialData.getEnemies();
+					enemies = new HashMap<>();
+//					enemyItems = InitialData.getEnemyItems();
+					enemyItems = new HashMap<>();
+
+
+					// Rooms
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
+//					roomItems = InitialData.getRoomItems();
+					roomItems = new HashMap<>();
+//					roomNPCs = InitialData.getRoomNPCs();
+					roomNPCs = new HashMap<>();
+//					roomEnemies = InitialData.getRoomEnemies();
+					roomEnemies = new HashMap<>();
+
+
+					// Player
 					player = InitialData.getPlayer();
-					items = InitialData.getItems();
 					playerItems = InitialData.getPlayerItems();
 				} catch (IllegalStateException exception) {
 					throw new IllegalStateException("Initial data is incorrect", exception);
@@ -157,27 +215,127 @@ public class DerbyDatabase implements Database {
 				PreparedStatement statement = null;
 
 				try {
+					// Dialog
 					statement = connection.prepareStatement("""
 							INSERT INTO dialog ( text)
 							VALUES (?)
 						""");
-					for (Map.Entry<Integer, String> entry : dialog.entrySet()) {
-						statement.setString(1, entry.getValue());
+					for (String text : dialog.values()) {
+						statement.setString(1, text);
 						statement.addBatch();
 					}
 					statement.executeBatch();
 
-					statement = connection.prepareStatement("""
-							INSERT INTO player (room_id, state, coins, max_health, health)
-							VALUES (?, ?, ?, ?, ?)
-						""");
-					statement.setInt(1, player.getRoom().getID());
-					statement.setInt(2, player.getState().ordinal());
-					statement.setInt(3, player.getCoins());
-					statement.setInt(4, player.getMaxHealth());
-					statement.setInt(5, player.getHealth());
-					statement.executeUpdate();
 
+					// Items
+					statement = connection.prepareStatement("""
+							INSERT INTO items (
+								name,
+								description,
+								asset_name,
+								value,
+								type,
+								heal_amount,
+								defense,
+								active_armor
+							) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+						""");
+					for (Item item : items.values()) {
+						statement.setString(1, item.getName());
+						statement.setString(2, item.getDescription());
+						statement.setString(3, item.getAssetName());
+						statement.setInt(4, item.getValue());
+						statement.setInt(5, ItemType.getByItem(item).ordinal());
+
+						if (item instanceof HealingItem healingItem) {
+							statement.setInt(6, healingItem.getHealAmount());
+						} else if (item instanceof Armor armor) {
+							statement.setInt(7, armor.getDefense());
+							statement.setBoolean(8, armor.getActive());
+						}
+
+						statement.addBatch();
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO weapon_abilities (damage, attack_description)
+							VALUES (?, ?)
+						""");
+					for (WeaponAbility ability : weaponAbilities.values()) {
+						statement.setInt(1, ability.getDamage());
+						statement.setString(2, ability.getAttackDescription());
+						statement.addBatch();
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO weapon_abilities_junction (weapon_id, weapon_ability_id)
+							VALUES (?, ?)
+						""");
+					for (Pair<Integer, Integer> abilityJunction : weaponAbilitiesJunction) {
+						statement.setInt(1, abilityJunction.getLeft());
+						statement.setInt(2, abilityJunction.getRight());
+						statement.addBatch();
+					}
+					statement.executeBatch();
+
+
+					// NPCs
+					statement = connection.prepareStatement("""
+							INSERT INTO npcs (name, max_health)
+							VALUES (?, ?)
+						""");
+					for (NPC npc : npcs.values()) {
+						statement.setString(1, npc.getName());
+						statement.setInt(2, npc.getMaxHealth());
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO npc_items (npc_id, item_id, amount)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<Item>> entry : npcItems.entrySet()) {
+						for (Item item : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, item.getId());
+							statement.setInt(3, item.getAmount());
+						}
+					}
+					statement.executeBatch();
+
+
+					// Enemies
+					statement = connection.prepareStatement("""
+							INSERT INTO enemies (name, max_health)
+							VALUES (?, ?)
+						""");
+					for (Enemy enemy : enemies.values()) {
+						statement.setString(1, enemy.getName());
+						statement.setInt(2, enemy.getMaxHealth());
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO enemy_items (enemy_id, item_id, amount)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<Item>> entry : enemyItems.entrySet()) {
+						for (Item item : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, item.getId());
+							statement.setInt(3, item.getAmount());
+						}
+					}
+					statement.executeBatch();
+
+
+					// Rooms
 					statement = connection.prepareStatement("""
 							INSERT INTO rooms (name, description, asset_name)
 							VALUES (?, ?, ?)
@@ -189,6 +347,7 @@ public class DerbyDatabase implements Database {
 						statement.addBatch();
 					}
 					statement.executeBatch();
+
 
 					statement = connection.prepareStatement("""
 							INSERT INTO room_connections (
@@ -214,34 +373,64 @@ public class DerbyDatabase implements Database {
 					}
 					statement.executeBatch();
 
+
 					statement = connection.prepareStatement("""
-							INSERT INTO items (
-								name,
-								description,
-								asset_name,
-								value,
-								type,
-								heal_amount,
-								defense,
-								active_armor
-							) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+							INSERT INTO room_items (room_id, item_id, amount)
+							VALUES (?, ?, ?)
 						""");
-					for (Item item : items.values()) {
-						statement.setString(1, item.getName());
-						statement.setString(2, item.getDescription());
-						statement.setString(3, item.getAssetName());
-						statement.setInt(4, item.getValue());
-						statement.setInt(5, ItemType.getByItem(item).ordinal());
-						if (item instanceof HealingItem healingItem) {
-							statement.setInt(6, healingItem.getHealAmount());
+					for (Map.Entry<Integer, ArrayList<Item>> entry : npcItems.entrySet()) {
+						for (Item item : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, item.getId());
+							statement.setInt(3, item.getAmount());
+							statement.addBatch();
 						}
-						if (item instanceof Armor armor) {
-							statement.setInt(7, armor.getDefense());
-							statement.setBoolean(8, armor.getActive());
-						}
-						statement.addBatch();
 					}
 					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO room_npcs (room_id, npc_id, health)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<NPC>> entry : roomNPCs.entrySet()) {
+						for (NPC npc : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, npc.getId());
+							statement.setInt(3, npc.getHealth());
+							statement.addBatch();
+						}
+					}
+					statement.executeBatch();
+
+
+					statement = connection.prepareStatement("""
+							INSERT INTO room_enemies (room_id, enemy_id, health)
+							VALUES (?, ?, ?)
+						""");
+					for (Map.Entry<Integer, ArrayList<Enemy>> entry : roomEnemies.entrySet()) {
+						for (Enemy enemy : entry.getValue()) {
+							statement.setInt(1, entry.getKey());
+							statement.setInt(2, enemy.getId());
+							statement.setInt(3, enemy.getHealth());
+							statement.addBatch();
+						}
+					}
+					statement.executeBatch();
+
+
+					// Player
+					statement = connection.prepareStatement("""
+							INSERT INTO player (room_id, state, coins, max_health, health)
+							VALUES (?, ?, ?, ?, ?)
+						""");
+					statement.setInt(1, player.getRoom().getID());
+					statement.setInt(2, player.getState().ordinal());
+					statement.setInt(3, player.getCoins());
+					statement.setInt(4, player.getMaxHealth());
+					statement.setInt(5, player.getHealth());
+					statement.executeUpdate();
+
 
 					statement = connection.prepareStatement("""
 							INSERT INTO player_items (
@@ -256,12 +445,33 @@ public class DerbyDatabase implements Database {
 					}
 					statement.executeBatch();
 
+
 					return true;
 				} finally {
 					DBUtil.closeQuietly(statement);
 				}
 			}
 		});
+	}
+
+	@Override
+	public Boolean reset() {
+		try {
+			// Delete database
+			File databaseFolder = new File(defaultDatabasePath);
+			while (databaseFolder.exists()) {
+				shutdown();
+				Utils.deleteDirectory(databaseFolder);
+			}
+
+			// Recreate database
+			createTables();
+			loadInitialData();
+
+			return true;
+		} catch (IOException exception) {
+			return false;
+		}
 	}
 
 	public void createTables() {
@@ -276,6 +486,7 @@ public class DerbyDatabase implements Database {
 				PreparedStatement statement = null;
 
 				try {
+					// Dialog
 					statement = connection.prepareStatement("""
 							CREATE TABLE dialog (
 								id INTEGER PRIMARY KEY
@@ -285,50 +496,8 @@ public class DerbyDatabase implements Database {
 						""".formatted(DIALOG_MAX_LENGTH));
 					statement.executeUpdate();
 
-					statement = connection.prepareStatement("""
-							CREATE TABLE player (
-								room_id INTEGER NOT NULL,
-								state INTEGER NOT NULL,
-								coins INTEGER NOT NULL,
-								max_health INTEGER NOT NULL,
-								health INTEGER NOT NULL,
-								current_npc INTEGER
-							)
-						""");
-					statement.executeUpdate();
 
-					statement = connection.prepareStatement("""
-							CREATE TABLE rooms (
-								id INTEGER PRIMARY KEY
-									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
-								name VARCHAR(%d) NOT NULL,
-								description VARCHAR(%d) NOT NULL,
-								asset_name VARCHAR(%d) NOT NULL
-							)
-						""".formatted(
-						NAME_MAX_LENGTH,
-						DESCRIPTION_MAX_LENGTH,
-						NAME_MAX_LENGTH
-					));
-					statement.executeUpdate();
-
-					statement = connection.prepareStatement("""
-							CREATE TABLE room_connections (
-								source_id INTEGER,
-								direction VARCHAR(%d) NOT NULL,
-								destination_id INTEGER,
-								description VARCHAR(%d) NOT NULL,
-								locked BOOLEAN,
-								locked_message VARCHAR(%d),
-								PRIMARY KEY (source_id, destination_id)
-							)
-						""".formatted(
-						DIRECTION_MAX_LENGTH,
-						DESCRIPTION_MAX_LENGTH,
-						DESCRIPTION_MAX_LENGTH
-					));
-					statement.execute();
-
+					// Items
 					statement = connection.prepareStatement("""
 							CREATE TABLE items (
 								id INTEGER PRIMARY KEY
@@ -350,11 +519,115 @@ public class DerbyDatabase implements Database {
 					statement.execute();
 
 					statement = connection.prepareStatement("""
-							CREATE TABLE player_items (
-								item_id INTEGER PRIMARY KEY,
-								amount INTEGER NOT NULL
+							CREATE TABLE weapon_abilities (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								damage INTEGER NOT NULL,
+								attack_description VARCHAR(%d) NOT NULL
+							)
+						""".formatted(
+						DESCRIPTION_MAX_LENGTH
+					));
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE weapon_abilities_junction (
+								weapon_id INTEGER,
+								weapon_ability_id INTEGER,
+								PRIMARY KEY (weapon_id, weapon_ability_id),
+								FOREIGN KEY (weapon_id) REFERENCES items(id),
+								FOREIGN KEY (weapon_ability_id) REFERENCES weapon_abilities(id)
+							)
+						"""
+					);
+					statement.execute();
+
+
+					// NPCs
+					statement = connection.prepareStatement("""
+							CREATE TABLE npcs (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								name VARCHAR(%d) NOT NULL,
+								max_health INTEGER
+							)
+						""".formatted(
+						NAME_MAX_LENGTH
+					));
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE npc_items (
+								npc_id INTEGER,
+								item_id INTEGER,
+								amount INTEGER NOT NULL,
+								PRIMARY KEY (npc_id, item_id),
+								FOREIGN KEY (npc_id) REFERENCES npcs(id),
+								FOREIGN KEY (item_id) REFERENCES items(id)
 							)
 						""");
+					statement.execute();
+
+
+					// Enemies
+					statement = connection.prepareStatement("""
+							CREATE TABLE enemies (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								name VARCHAR(%d) NOT NULL,
+								max_health INTEGER
+							)
+						""".formatted(
+						NAME_MAX_LENGTH
+					));
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE enemy_items (
+								enemy_id INTEGER,
+								item_id INTEGER,
+								amount INTEGER NOT NULL,
+								PRIMARY KEY (enemy_id, item_id),
+								FOREIGN KEY (enemy_id) REFERENCES enemies(id),
+								FOREIGN KEY (item_id) REFERENCES items(id)
+							)
+						""");
+					statement.execute();
+
+
+					// Rooms
+					statement = connection.prepareStatement("""
+							CREATE TABLE rooms (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								name VARCHAR(%d) NOT NULL,
+								description VARCHAR(%d) NOT NULL,
+								asset_name VARCHAR(%d) NOT NULL
+							)
+						""".formatted(
+						NAME_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH,
+						NAME_MAX_LENGTH
+					));
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE room_connections (
+								source_id INTEGER,
+								destination_id INTEGER,
+								direction VARCHAR(%d) NOT NULL,
+								description VARCHAR(%d) NOT NULL,
+								locked BOOLEAN,
+								locked_message VARCHAR(%d),
+								PRIMARY KEY (source_id, destination_id),
+								FOREIGN KEY (source_id) REFERENCES rooms(id),
+								FOREIGN KEY (destination_id) REFERENCES rooms(id)
+							)
+						""".formatted(
+						DIRECTION_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH,
+						DESCRIPTION_MAX_LENGTH
+					));
 					statement.execute();
 
 					statement = connection.prepareStatement("""
@@ -362,7 +635,59 @@ public class DerbyDatabase implements Database {
 								room_id INTEGER,
 								item_id INTEGER,
 								amount INTEGER NOT NULL,
-								PRIMARY KEY (room_id, item_id)
+								PRIMARY KEY (room_id, item_id),
+								FOREIGN KEY (room_id) REFERENCES rooms(id),
+								FOREIGN KEY (item_id) REFERENCES items(id)
+							)
+						""");
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE room_npcs (
+								room_id INTEGER,
+								npc_id INTEGER,
+								PRIMARY KEY (room_id, npc_id),
+								FOREIGN KEY (room_id) REFERENCES rooms(id),
+								FOREIGN KEY (npc_id) REFERENCES npcs(id),
+								health INTEGER
+							)
+						""");
+					statement.execute();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE room_enemies (
+								room_id INTEGER,
+								enemy_id INTEGER,
+								PRIMARY KEY (room_id, enemy_id),
+								FOREIGN KEY (room_id) REFERENCES rooms(id),
+								FOREIGN KEY (enemy_id) REFERENCES enemies(id),
+								health INTEGER
+							)
+						""");
+					statement.execute();
+
+
+					// Player
+					statement = connection.prepareStatement("""
+							CREATE TABLE player (
+								room_id INTEGER NOT NULL,
+								state INTEGER NOT NULL,
+								coins INTEGER NOT NULL,
+								max_health INTEGER NOT NULL,
+								health INTEGER NOT NULL,
+								current_npc INTEGER,
+								last_command INTEGER,
+								confirming BOOLEAN,
+								FOREIGN KEY (room_id) REFERENCES rooms(id)
+							)
+						""");
+					statement.executeUpdate();
+
+					statement = connection.prepareStatement("""
+							CREATE TABLE player_items (
+								item_id INTEGER PRIMARY KEY,
+								amount INTEGER NOT NULL,
+								FOREIGN KEY (item_id) REFERENCES items(id)
 							)
 						""");
 					statement.execute();
@@ -378,27 +703,27 @@ public class DerbyDatabase implements Database {
 
 	// Dialog methods
 	@Override
-	public HashMap<Integer, String> getDialog() {
-		return executeTransaction(new Transaction<HashMap<Integer, String>>() {
+	public ArrayList<String> getDialog() {
+		return executeTransaction(new Transaction<ArrayList<String>>() {
 			@Override
-			public HashMap<Integer, String> execute(Connection connection) throws SQLException {
+			public ArrayList<String> execute(Connection connection) throws SQLException {
 				PreparedStatement statement = null;
 				ResultSet resultSet = null;
 
 				try {
 					statement = connection.prepareStatement("""
-							SELECT id, text
+							SELECT text
 							FROM dialog
+							ORDER BY id
 						""");
 					resultSet = statement.executeQuery();
 
-					HashMap<Integer, String> result = new HashMap<>();
+					ArrayList<String> result = new ArrayList<>();
 
 					while (resultSet.next()) {
-						Integer id = resultSet.getInt(1);
-						String text = resultSet.getString(2);
+						String text = resultSet.getString(1);
 
-						result.put(id, text);
+						result.add(text);
 					}
 
 					return result;
@@ -433,6 +758,27 @@ public class DerbyDatabase implements Database {
 		});
 	}
 
+	@Override
+	public void clearDialog() {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"DELETE FROM dialog"
+					);
+					statement.executeUpdate();
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
 	// Player-related methods
 	@Override
 	public Player getPlayer() {
@@ -444,7 +790,7 @@ public class DerbyDatabase implements Database {
 
 				try {
 					statement = connection.prepareStatement("""
-							SELECT room_id, state, coins, max_health, health
+							SELECT room_id, state, coins, max_health, health, last_command, confirming
 							FROM player
 						""");
 					resultSet = statement.executeQuery();
@@ -459,9 +805,11 @@ public class DerbyDatabase implements Database {
 					Integer coins = resultSet.getInt(3);
 					Integer health = resultSet.getInt(4);
 					Integer maxHealth = resultSet.getInt(5);
+					Integer lastCommandOrdinal = resultSet.getInt(6);
+					Command lastCommand = Command.values()[lastCommandOrdinal];
+					Boolean confirming = resultSet.getBoolean(7);
 
-					Player player = new Player(maxHealth, health, state, room);
-					player.setCoins(coins);
+					Player player = new Player(maxHealth, health, state, room, coins, lastCommand, confirming);
 
 					return player;
 				} finally {
@@ -569,6 +917,60 @@ public class DerbyDatabase implements Database {
 					);
 
 					statement.setInt(1, npc.getId());
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void setLastCommand(Command command) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET last_command = ?"
+					);
+					statement.setInt(1, command.ordinal());
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void setConfirming(Boolean confirming) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET confirming = ?"
+					);
+					statement.setBoolean(1, confirming);
 
 					int rowsUpdated = statement.executeUpdate();
 

@@ -172,9 +172,7 @@ public class InitialData {
 				Integer health = Integer.parseInt(iterator.next());
 				Integer maxHealth = Integer.parseInt(iterator.next());
 
-				Player player = new Player(maxHealth, health, state, null);
-				player.setRoom(playerRoom);
-				player.setCoins(coins);
+				Player player = new Player(maxHealth, health, state, playerRoom, coins);
 				players.add(player);
 			}
 
@@ -239,6 +237,8 @@ public class InitialData {
 	 */
 	public static HashMap<Integer, Room> getRooms() throws IOException {
 		ReadCSV roomsFile = new ReadCSV("rooms.csv");
+		rooms.clear();
+		roomIds.clear();
 
 		try {
 			while (true) {
@@ -372,6 +372,13 @@ public class InitialData {
 	}
 
 	/**
+	 * Returns a map between room ids and a list of npcs
+	 */
+	public static HashMap<Integer, ArrayList<NPC>> getRoomNPCs() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	/**
 	 * Returns a map between room ids and a list of enemies
 	 */
 	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
@@ -382,8 +389,9 @@ public class InitialData {
 	 * Returns a list of all items without amounts
 	 */
 	public static HashMap<Integer, Item> getItems() throws IOException, IllegalStateException {
-		HashMap<Integer, Item> items = new HashMap<>();
 		ReadCSV itemsFile = new ReadCSV("items.csv");
+		items.clear();
+		itemIds.clear();
 
 		try {
 			while (true) {
@@ -392,7 +400,8 @@ public class InitialData {
 
 				Iterator<String> iterator = tuple.iterator();
 
-				Integer id = parseIntegerOrNull(iterator.next());
+				String idString = iterator.next();
+				Integer id = itemIds.size();
 				String name = iterator.next();
 				String description = iterator.next();
 				String assetName = iterator.next();
@@ -426,6 +435,8 @@ public class InitialData {
 				} else {
 					throw new IllegalStateException("The item: \"" + id + "\" has an invalid type " + typeString);
 				}
+
+				itemIds.put(idString, id);
 			}
 
 			return items;
@@ -434,7 +445,7 @@ public class InitialData {
 		}
 	}
 
-	public static ArrayList<NPC> getNPCs() throws IOException {
+	public static HashMap<Integer, NPC> getNPCs() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
@@ -445,14 +456,20 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	public static ArrayList<WeaponAbility> getWeaponAbilities() throws IOException {
+	public static HashMap<Integer, WeaponAbility> getWeaponAbilities() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
+
+	/// The left is the item id, the right is the weapon ability id
+	public static ArrayList<Pair<Integer, Integer>> getWeaponAbilitiesJunction() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
 
 	/**
 	 * Returns a list of enemies without items
 	 */
-	public static ArrayList<Enemy> getEnemies() throws IOException {
+	public static HashMap<Integer, Enemy> getEnemies() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
@@ -463,7 +480,7 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	
+
 	// Utility methods
 
 	private static Integer parseIntegerOrNull(String text) {

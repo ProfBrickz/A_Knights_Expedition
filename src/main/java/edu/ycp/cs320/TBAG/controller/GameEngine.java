@@ -6,7 +6,6 @@ import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -40,14 +39,11 @@ public class GameEngine {
 	public String getDialog() {
 		StringBuilder output = new StringBuilder();
 
-		HashMap<Integer, String> dialog = database.getDialog();
+		ArrayList<String> dialog = database.getDialog();
 
-		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
-		Collections.sort(keys);
-
-		for (Integer key : keys) {
+		for (String text : dialog) {
 			output
-				.append(dialog.get(key))
+				.append(text)
 				.append("\n");
 		}
 
@@ -76,11 +72,24 @@ public class GameEngine {
 
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
+				String error = validateCommand(command, arguments);
+				if (error != null) return error;
+
+				Boolean confirming = player.getConfirming();
+
+				if (!confirming) {
+					player.setLastCommand(command);
+				}
 				output = command.run(this, arguments);
+				if (confirming) {
+					player.setLastCommand(command);
+				}
+				database.setLastCommand(command);
+
 				break;
 			}
 		}
-		if (output.isEmpty()) output = "Sorry, command not recognized.\n";
+		if (output != null && output.isEmpty()) output = "Sorry, command not recognized.\n";
 
 		return output;
 	}
@@ -143,25 +152,33 @@ public class GameEngine {
 		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
 	}
 
-//	/**
-//	 * Handles the "inspect-item" command.
-//	 * Checks if the item exists in the inventory and returns inspection details.
-//	 */
-//	public String inspectItem(ArrayList<String> arguments) {
-//		String itemName = arguments.get(0);
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
-//
-//		return playerController.inspectItem(item) + "\n";
-//	}
+	/**
+	 * Handles the "inspect-item" command.
+	 * Checks if the item exists in the inventory and returns inspection details.
+	 */
+	public String inspectItem(ArrayList<String> arguments) {
+		InventoryController inventoryController = new InventoryController();
+		PlayerController playerController = new PlayerController(player, new BattleEntityController());
 
-//	/**
-//	 * Handles the "search" command.
-//	 * Checks if the room has any items and returns them.
-//	 */
-//	public String search(ArrayList<String> arguments) {
-//		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
-//	}
+		String itemName = arguments.get(0);
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
+
+		return playerController.inspectItem(item) + "\n";
+	}
+
+	/**
+	 * Handles the "search" command.
+	 * Checks if the room has any items and returns them.
+	 */
+	public String search(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
+		HashMap<Integer, Item> roomItems = database.getItemsForRoom(playerRoom);
+
+		playerRoom.getInventory().addItems(new ArrayList<>(roomItems.values()));
+
+		return getInventoryString(playerRoom.getInventory(), "You found", "Nothing!");
+	}
 
 //	/**
 //	 * Handles the "pickup" command.
@@ -367,21 +384,36 @@ public class GameEngine {
 //		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 //	}
 
-//	public String restart(ArrayList<String> arguments) {
-//		rooms.clear();
-//		roomController.loadDemo();
-//
-//		player.getInventory().getItems().clear();
-//		player.getArmor().clear();
-//		player.setState(PlayerState.EXPLORING);
-//		player.setCoins(0);
-//		ItemCatalog.addBaseItemsToInventory(player.getInventory());
-//
-//		// Set default room
-//		player.setRoom(rooms.get(defaultRoom));
-//
-//		return "Restarted game.\n";
-//	}
+	public String restart(ArrayList<String> arguments) {
+		if (!player.getConfirming()) {
+			database.setConfirming(true);
+			return "Are you sure (yes or no)?\n";
+		}
+
+		Boolean success = database.reset();
+
+		if (!success) return "Reset failed, try again.\n";
+
+		return "Restarted game.\n";
+	}
+
+	public String yes(ArrayList<String> arguments) {
+		Command lastCommand = player.getLastCommand();
+
+		String output = lastCommand.run(this, arguments);
+
+		database.setConfirming(false);
+
+		return output;
+	}
+
+	public String no(ArrayList<String> arguments) {
+		Command lastCommand = player.getLastCommand();
+
+		database.setConfirming(false);
+
+		return lastCommand.getName() + " command canceled.\n";
+	}
 
 	public String help(ArrayList<String> arguments) {
 		StringBuilder output = new StringBuilder("Available commands:\n");
@@ -391,6 +423,12 @@ public class GameEngine {
 		}
 
 		return output.toString();
+	}
+
+	public String clear(ArrayList<String> arguments) {
+		database.clearDialog();
+
+		return null;
 	}
 
 
@@ -437,7 +475,10 @@ public class GameEngine {
 	}
 
 	public String validateCommand(Command command, ArrayList<String> arguments) {
-		String error = validateCommandState(command);
+		String error = validatePlayerState(command);
+		if (error != null) return error;
+
+		error = validateConfirming(command);
 		if (error != null) return error;
 
 		error = validateCommandFormat(command, arguments);
@@ -456,9 +497,22 @@ public class GameEngine {
 		return null;
 	}
 
-	private String validateCommandState(Command command) {
+	private String validatePlayerState(Command command) {
 		if (!command.getAllowedPlayerStates().contains(player.getState())) {
 			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".\n";
+		}
+
+		return null;
+	}
+
+	private String validateConfirming(Command command) {
+		Boolean confirming = player.getConfirming();
+		Boolean isConfirmationCommand = command == Command.YES || command == Command.NO;
+
+		if (confirming && !isConfirmationCommand) {
+			return "You can not use " + command.getName() + " while confirming a command use yes or no.\n";
+		} else if (!confirming && isConfirmationCommand) {
+			return "There is nothing to confirm.\n";
 		}
 
 		return null;

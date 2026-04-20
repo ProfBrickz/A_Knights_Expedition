@@ -1,17 +1,23 @@
 package edu.ycp.cs320.TBAG.persist;
 
+import edu.ycp.cs320.TBAG.controller.Command;
 import edu.ycp.cs320.TBAG.model.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface Database {
 	// General purpose methods
 	void loadInitialData();
 
+	Boolean reset();
+
 	// Dialog methods
-	HashMap<Integer, String> getDialog();
+	ArrayList<String> getDialog();
 
 	void addDialog(String text);
+
+	void clearDialog();
 
 	// Player-related methods
 
@@ -26,7 +32,11 @@ public interface Database {
 
 	void setPlayerState(PlayerState playerState);
 
+	void setConfirming(Boolean confirming);
+
 	void setPlayerNPC(NPC npc);
+
+	void setLastCommand(Command command);
 
 	void addItemToPlayer(Item item);
 

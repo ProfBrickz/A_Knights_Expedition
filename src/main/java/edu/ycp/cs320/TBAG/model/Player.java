@@ -1,15 +1,18 @@
 package edu.ycp.cs320.TBAG.model;
 
+import edu.ycp.cs320.TBAG.controller.Command;
+
 import java.util.ArrayList;
 
 public class Player extends BattleEntity {
 	private Room room;
 	private final ArrayList<Armor> armor;
 	private PlayerState playerState;
-	private final Inventory inventory = new Inventory();
 	private Integer coins;
 	// The current NPC the player is talking to (if any)
 	private NPC currentNPC = null;
+	private Command lastCommand = null;
+	private Boolean confirming = false;
 
 	public Player(Integer maxHealth, Integer health) {
 		super(maxHealth, health);
@@ -20,14 +23,40 @@ public class Player extends BattleEntity {
 		this.coins = 0;
 	}
 
-	public Player(Integer maxHealth, Integer health, PlayerState playerState, Room room) {
+	public Player(
+		Integer maxHealth,
+		Integer health,
+		PlayerState playerState,
+		Room room,
+		Integer coins,
+		Command lastCommand,
+		Boolean confirming
+	) {
 		super(maxHealth, health);
 
 		this.room = room;
 		this.armor = new ArrayList<>();
 		this.playerState = playerState;
-		this.coins = 0;
+		this.coins = coins;
+		this.lastCommand = lastCommand;
+		this.confirming = confirming;
 	}
+
+	public Player(
+		Integer maxHealth,
+		Integer health,
+		PlayerState playerState,
+		Room room,
+		Integer coins
+	) {
+		super(maxHealth, health);
+
+		this.room = room;
+		this.armor = new ArrayList<>();
+		this.playerState = playerState;
+		this.coins = coins;
+	}
+
 
 	// --- Getters & Setters ---
 	public Room getRoom() {
@@ -40,10 +69,6 @@ public class Player extends BattleEntity {
 
 	public ArrayList<Armor> getArmor() {
 		return armor;
-	}
-
-	public Inventory getInventory() {
-		return inventory;
 	}
 
 	public PlayerState getState() {
@@ -68,5 +93,21 @@ public class Player extends BattleEntity {
 
 	public void setCurrentNPC(NPC currentNPC) {
 		this.currentNPC = currentNPC;
+	}
+
+	public Command getLastCommand() {
+		return lastCommand;
+	}
+
+	public void setLastCommand(Command lastCommand) {
+		this.lastCommand = lastCommand;
+	}
+
+	public Boolean getConfirming() {
+		return confirming;
+	}
+
+	public void setConfirming(Boolean confirming) {
+		this.confirming = confirming;
 	}
 }
