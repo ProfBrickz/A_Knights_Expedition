@@ -11,20 +11,22 @@ import java.util.Map;
 
 public class FakeDatabase implements Database {
 	// Dialog
-	private HashMap<Integer, String> dialog = new HashMap<>();
+	private final HashMap<Integer, String> dialog = new HashMap<>();
+	private ArrayList<String> commandHistory = new ArrayList<>();
+
 
 	// Items
-	private HashMap<Integer, Item> items = new HashMap<>();
-	private HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
+	private final HashMap<Integer, Item> items = new HashMap<>();
+	private final HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
 
 	// NPCs
-	private HashMap<Integer, NPC> npcs = new HashMap<>();
+	private final HashMap<Integer, NPC> npcs = new HashMap<>();
 
 	// Enemies
-	private HashMap<Integer, Enemy> enemies = new HashMap<>();
+	private final HashMap<Integer, Enemy> enemies = new HashMap<>();
 
 	// Rooms
-	private HashMap<Integer, Room> rooms = new HashMap<>();
+	private final HashMap<Integer, Room> rooms = new HashMap<>();
 
 	// Player
 	private Player player = null;
@@ -120,6 +122,26 @@ public class FakeDatabase implements Database {
 	public void clearDialog() {
 		dialog.clear();
 	}
+
+	@Override
+	public ArrayList<String> getCommandHistory() {
+		return commandHistory;
+	}
+
+	@Override
+	public void addCommandToHistory(String command) {
+		// Remove command from history if already in it
+		commandHistory.remove(command);
+
+		// Add command to history
+		commandHistory.add(command);
+
+		// Trim history if longer than max length
+		while (commandHistory.size() > Database.MAX_HISTORY_SIZE) {
+			commandHistory.remove(0);
+		}
+	}
+
 
 	// Player-related methods
 	@Override

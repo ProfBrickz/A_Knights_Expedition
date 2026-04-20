@@ -496,6 +496,15 @@ public class DerbyDatabase implements Database {
 						""".formatted(DIALOG_MAX_LENGTH));
 					statement.executeUpdate();
 
+					statement = connection.prepareStatement("""
+							CREATE TABLE command_history (
+								id INTEGER PRIMARY KEY
+									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
+								command VARCHAR(%d) NOT NULL
+							)
+						""".formatted(DESCRIPTION_MAX_LENGTH));
+					statement.executeUpdate();
+
 
 					// Items
 					statement = connection.prepareStatement("""
@@ -778,6 +787,74 @@ public class DerbyDatabase implements Database {
 			}
 		});
 	}
+
+	@Override
+	public ArrayList<String> getCommandHistory() {
+		return executeTransaction(new Transaction<ArrayList<String>>() {
+			@Override
+			public ArrayList<String> execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"SELECT command FROM command_history"
+					);
+					resultSet = statement.executeQuery();
+
+					ArrayList<String> result = new ArrayList<>();
+
+					while (resultSet.next()) {
+						String command = resultSet.getString(1);
+
+						result.add(command);
+					}
+
+					return result;
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void addCommandToHistory(String command) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					// Remove command from history if already in it
+					statement = connection.prepareStatement("DELETE FROM command_history WHERE command = ?");
+					statement.setString(1, command);
+					statement.execute();
+
+					// Add command to history
+					statement = connection.prepareStatement("INSERT INTO command_history (command) VALUES (?)");
+					statement.setString(1, command);
+					statement.executeUpdate();
+
+					// Trim history if longer than max length
+					statement = connection.prepareStatement("""
+							DELETE FROM command_history WHERE id NOT IN (
+								SELECT id from command_history
+								ORDER BY id DESC
+								FETCH FIRST %d ROWS ONLY
+							)
+						""".formatted(MAX_HISTORY_SIZE));
+					statement.execute();
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
 
 	// Player-related methods
 	@Override

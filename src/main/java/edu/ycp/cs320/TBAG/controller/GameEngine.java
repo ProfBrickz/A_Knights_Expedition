@@ -58,6 +58,13 @@ public class GameEngine {
 		return player;
 	}
 
+	public ArrayList<String> getCommandHistory() {
+		return database.getCommandHistory();
+	}
+
+	public void addCommandToHistory(String command) {
+		database.addCommandToHistory(command);
+	}
 
 	// Input command
 
