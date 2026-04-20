@@ -142,13 +142,26 @@ public class DerbyDatabase implements Database {
 				HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
 				HashMap<Integer, Item> items;
 				HashMap<Integer, Item> playerItems;
+				ArrayList<WeaponAbility> weaponAbilities;
+				ArrayList<Pair<Integer, Integer>> weaponAbilitiesJunction;
 
 				try {
+					// Dialog
 					dialog = InitialData.getDialog();
+
+					// Items
+					items = InitialData.getItems();
+//					weaponAbilities = InitialData.getWeaponAbilities();
+					weaponAbilities = new ArrayList<>();
+//					weaponAbilitiesJunction = InitialData.getWeaponAbilitiesJunction();
+					weaponAbilitiesJunction = new ArrayList<>();
+
+					// Rooms
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
+
+					// Player
 					player = InitialData.getPlayer();
-					items = InitialData.getItems();
 					playerItems = InitialData.getPlayerItems();
 				} catch (IllegalStateException exception) {
 					throw new IllegalStateException("Initial data is incorrect", exception);
@@ -190,17 +203,41 @@ public class DerbyDatabase implements Database {
 						statement.setString(3, item.getAssetName());
 						statement.setInt(4, item.getValue());
 						statement.setInt(5, ItemType.getByItem(item).ordinal());
+
 						if (item instanceof HealingItem healingItem) {
 							statement.setInt(6, healingItem.getHealAmount());
-						}
-						if (item instanceof Armor armor) {
+						} else if (item instanceof Armor armor) {
 							statement.setInt(7, armor.getDefense());
 							statement.setBoolean(8, armor.getActive());
 						}
+
 						statement.addBatch();
 					}
 					statement.executeBatch();
 
+
+					statement = connection.prepareStatement("""
+							INSERT INTO weapon_abilities (damage, attack_description)
+							VALUES (?, ?)
+						""");
+					for (WeaponAbility ability : weaponAbilities) {
+						statement.setInt(1, ability.getDamage());
+						statement.setString(2, ability.getAttackDescription());
+						statement.addBatch();
+					}
+					statement.executeBatch();
+
+
+					statement = connect().prepareStatement("""
+							INSERT INTO weapon_abilities_junction (weapon_id, weapon_ability_id)
+							VALUES (?, ?)
+						""");
+					for (Pair<Integer, Integer> abilityJunction : weaponAbilitiesJunction) {
+						statement.setInt(1, abilityJunction.getLeft());
+						statement.setInt(2, abilityJunction.getRight());
+						statement.addBatch();
+					}
+					statement.executeBatch();
 
 					// Rooms
 					statement = connection.prepareStatement("""

@@ -453,6 +453,12 @@ public class InitialData {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
+	/// The left is the item id, the right is the weapon ability id
+	public static ArrayList<Pair<Integer, Integer>> getWeaponAbilitiesJunction() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+
 	/**
 	 * Returns a list of enemies without items
 	 */
