@@ -2,6 +2,7 @@ package edu.ycp.cs320.TBAG.model;
 
 public class Entity {
 	private Integer health, maxHealth;
+	private final Inventory inventory = new Inventory();
 
 	public Entity(Integer maxHealth, Integer health) {
 		this.maxHealth = maxHealth;
@@ -22,5 +23,9 @@ public class Entity {
 
 	public void setHealth(Integer health) {
 		this.health = health;
+	}
+
+	public Inventory getInventory() {
+		return inventory;
 	}
 }

@@ -7,25 +7,77 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class FakeDatabase implements Database {
+	// Dialog
 	private HashMap<Integer, String> dialog = new HashMap<>();
-	private Player player = null;
-	private HashMap<Integer, Room> rooms = new HashMap<>();
-	// A map between a room's id and (a map of its directions and connections)
-	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
+
+	// Items
 	private HashMap<Integer, Item> items = new HashMap<>();
+	private HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
+
+	// NPCs
+	private HashMap<Integer, NPC> npcs = new HashMap<>();
+
+	// Enemies
+	private HashMap<Integer, Enemy> enemies = new HashMap<>();
+
+	// Rooms
+	private HashMap<Integer, Room> rooms = new HashMap<>();
+
+	// Player
+	private Player player = null;
 
 
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
 		try {
-			dialog = InitialData.getDialog();
-			rooms = InitialData.getRooms();
-			roomConnections = InitialData.getRoomConnections();
+			// Dialog
+			dialog.putAll(InitialData.getDialog());
+
+			// Items
+			items.putAll(InitialData.getItems());
+			weaponAbilities.putAll(InitialData.getWeaponAbilities());
+			for (Pair<Integer, Integer> abilityJunction : InitialData.getWeaponAbilitiesJunction()) {
+				Item item = items.get(abilityJunction.getLeft());
+				if (!(item instanceof Weapon weapon)) continue;
+
+				weapon.addAbility(weaponAbilities.get(abilityJunction.getRight()));
+			}
+
+			// NPCs
+			npcs.putAll(InitialData.getNPCs());
+			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getNPCItems().entrySet()) {
+				npcs.get(entry.getKey()).getInventory().addItems(entry.getValue());
+			}
+
+
+			// Enemies
+			enemies.putAll(InitialData.getEnemies());
+			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getEnemyItems().entrySet()) {
+				enemies.get(entry.getKey()).getInventory().addItems(entry.getValue());
+			}
+
+			// Rooms
+			rooms.putAll(InitialData.getRooms());
+			for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : InitialData.getRoomConnections().entrySet()) {
+				rooms.get(entry.getKey()).getRoomConnections().putAll(entry.getValue());
+			}
+			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getRoomItems().entrySet()) {
+				rooms.get(entry.getKey()).getInventory().addItems(entry.getValue());
+			}
+			for (Map.Entry<Integer, ArrayList<NPC>> entry : InitialData.getRoomNPCs().entrySet()) {
+				rooms.get(entry.getKey()).addNPCs(entry.getValue());
+			}
+			for (Map.Entry<Integer, ArrayList<Enemy>> entry : InitialData.getRoomEnemies().entrySet()) {
+				rooms.get(entry.getKey()).addEnemies(entry.getValue());
+			}
+
+			// Player
 			player = InitialData.getPlayer();
-			items = InitialData.getItems();
+			player.getInventory().addItems(new ArrayList<>(InitialData.getPlayerItems().values()));
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
 		} catch (IOException exception) {
@@ -37,7 +89,6 @@ public class FakeDatabase implements Database {
 	public Boolean reset() {
 		player = null;
 		rooms.clear();
-		roomConnections.clear();
 		items.clear();
 
 		loadInitialData();
@@ -186,7 +237,7 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
-		return roomConnections.get(room.getID());
+		return rooms.get(room.getID()).getRoomConnections();
 	}
 
 	@Override
