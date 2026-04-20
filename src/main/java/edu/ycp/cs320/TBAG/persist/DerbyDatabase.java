@@ -361,8 +361,7 @@ public class DerbyDatabase implements Database {
 								id INTEGER PRIMARY KEY
 									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
 								name VARCHAR(%d) NOT NULL,
-								max_health INTEGER,
-								health INTEGER
+								max_health INTEGER
 							)
 						""".formatted(
 						NAME_MAX_LENGTH
@@ -388,8 +387,7 @@ public class DerbyDatabase implements Database {
 								id INTEGER PRIMARY KEY
 									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
 								name VARCHAR(%d) NOT NULL,
-								max_health INTEGER,
-								health INTEGER
+								max_health INTEGER
 							)
 						""".formatted(
 						NAME_MAX_LENGTH
@@ -462,7 +460,8 @@ public class DerbyDatabase implements Database {
 								npc_id INTEGER,
 								PRIMARY KEY (room_id, npc_id),
 								FOREIGN KEY (room_id) REFERENCES rooms(id),
-								FOREIGN KEY (npc_id) REFERENCES npcs(id)
+								FOREIGN KEY (npc_id) REFERENCES npcs(id),
+								health INTEGER
 							)
 						""");
 					statement.execute();
@@ -473,7 +472,8 @@ public class DerbyDatabase implements Database {
 								enemy_id INTEGER,
 								PRIMARY KEY (room_id, enemy_id),
 								FOREIGN KEY (room_id) REFERENCES rooms(id),
-								FOREIGN KEY (enemy_id) REFERENCES enemies(id)
+								FOREIGN KEY (enemy_id) REFERENCES enemies(id),
+								health INTEGER
 							)
 						""");
 					statement.execute();
