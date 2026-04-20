@@ -148,9 +148,9 @@ public class GameEngine {
 	 * Handles the "inventory" command.
 	 * Lists all items in the player's inventory with quantities.
 	 */
-	public String inventory(ArrayList<String> arguments) {
-		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
-	}
+//	public String inventory(ArrayList<String> arguments) {
+//
+//	}
 
 	/**
 	 * Handles the "inspect-item" command.
@@ -277,51 +277,63 @@ public class GameEngine {
 		return output + ".\n";
 	}
 
-//	public String talkToNPC(ArrayList<String> arguments) {
-//		Room playerRoom = player.getRoom();
-//
-//		String npcName = arguments.get(0);
-//		NPC npc = roomController.getNPCByNameCaseInsensitive(playerRoom, npcName);
-//		if (npc == null) return npcName + " is not in this room.\n";
-//
-//		player.setCurrentNPC(npc);
-//		player.setState(PlayerState.TALKING_TO_NPC);
-//
-//		return npc.getGreeting() + "\n";
-//	}
+	public String talkToNPC(ArrayList<String> arguments) {
 
-//	public String leaveNPC(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String goodbye = npc.getGoodbye() + "\n";
-//
-//		player.setCurrentNPC(null);
-//		player.setState(PlayerState.EXPLORING);
-//
-//		return goodbye;
-//	}
+		HashMap<Integer, NPC> npcs = database.getNPCsForRoom(player.getRoom());
+		String npcName = arguments.get(0);
+		NPC currentNPC = null;
 
-//	public String searchShop(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//
-//		if (npc.getInventory().getItems().isEmpty()) return "I am not selling anything.\n";
-//
-//		StringBuilder output = new StringBuilder("I am selling:\n");
-//
-//		for (Item item : npc.getInventory().getItems().values()) {
-//			output
-//				.append("- ")
-//				.append(item.getAmount())
-//				.append(" x ")
-//				.append(item.getName())
-//				.append(" for ")
-//				.append(item.getPrice() * item.getAmount())
-//				.append(" coins\n");
-//		}
-//
-//		return output.toString();
-//	}
+		for (NPC npc : npcs.values()){
+			if (npc.getName().equalsIgnoreCase(npcName)){
+				currentNPC = npc;
+			}
+		}
+
+		if (currentNPC == null) return npcName + " is not in this room.\n";
+
+		database.setPlayerNPC(currentNPC);
+		player.setCurrentNPC(currentNPC);
+		database.setPlayerState(PlayerState.TALKING_TO_NPC);
+		player.setState(PlayerState.TALKING_TO_NPC);
+
+		return currentNPC.getGreeting() + "\n";
+	}
+
+	public String leaveNPC(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String goodbye = npc.getGoodbye() + "\n";
+
+		database.setPlayerNPC(null);
+		player.setCurrentNPC(null);
+		database.setPlayerState(PlayerState.EXPLORING);
+		player.setState(PlayerState.EXPLORING);
+
+		return goodbye;
+	}
+
+	public String searchShop(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
+
+		if (npcItems == null) return "I am not selling anything.\n";
+
+		StringBuilder output = new StringBuilder("I am selling:\n");
+
+		for (Item item : npcItems.values()) {
+			output
+				.append("- ")
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append(" for ")
+				.append(item.getPrice() * item.getAmount())
+				.append(" coins\n");
+		}
+
+		return output.toString();
+	}
 
 //	public String buyItem(ArrayList<String> arguments) {
 //		NPC npc = player.getCurrentNPC();
