@@ -61,7 +61,8 @@ public class InventoryController {
 				item.getName(),
 				item.getDescription(),
 				item.getValue(),
-				item.getAmount()
+				item.getAmount(),
+				item.getAssetName()
 			));
 		}
 	}

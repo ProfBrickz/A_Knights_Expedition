@@ -54,38 +54,38 @@ public enum Command {
 		List.of(PlayerState.EXPLORING),
 		List.of()
 	),
-	//	PICKUP(
-//		"pickup",
-//		GameEngine::pickupItem,
-//		"Collects an item from the current room and adds it to the player's inventory",
-//		List.of("item name"),
-//		List.of(PlayerState.EXPLORING),
-//		List.of("pickup sword", "pickup stick", "pickup \"Old book\"")
-//	),
-//	PICKUP_ALL(
-//		"pickup-all",
-//		GameEngine::pickupAllItems,
-//		"Collects all items from the current room and adds them to the player's inventory",
-//		List.of(),
-//		List.of(PlayerState.EXPLORING),
-//		List.of()
-//	),
-//	DROP(
-//		"drop",
-//		GameEngine::dropItem,
-//		"Removes an item from the player's inventory and places it in the current room",
-//		List.of("Item name"),
-//		List.of(PlayerState.EXPLORING),
-//		List.of("drop sword", "drop potion", "drop \"Old book\"")
-//	),
-//	DROP_ALL(
-//		"drop-all",
-//		GameEngine::dropAllItems,
-//		"Removes all items from the player's inventory and places them in the current room",
-//		List.of(),
-//		List.of(PlayerState.EXPLORING),
-//		List.of()
-//	),
+	PICKUP(
+		"pickup",
+		GameEngine::pickupItem,
+		"Collects an item from the current room and adds it to the player's inventory",
+		List.of("item name"),
+		List.of(PlayerState.EXPLORING),
+		List.of("pickup sword", "pickup stick", "pickup \"Old book\"")
+	),
+	PICKUP_ALL(
+		"pickup-all",
+		GameEngine::pickupAllItems,
+		"Collects all items from the current room and adds them to the player's inventory",
+		List.of(),
+		List.of(PlayerState.EXPLORING),
+		List.of()
+	),
+	DROP(
+		"drop",
+		GameEngine::dropItem,
+		"Removes an item from the player's inventory and places it in the current room",
+		List.of("Item name"),
+		List.of(PlayerState.EXPLORING),
+		List.of("drop sword", "drop potion", "drop \"Old book\"")
+	),
+	DROP_ALL(
+		"drop-all",
+		GameEngine::dropAllItems,
+		"Removes all items from the player's inventory and places them in the current room",
+		List.of(),
+		List.of(PlayerState.EXPLORING),
+		List.of()
+	),
 	WALLET(
 		"wallet",
 		GameEngine::wallet,
