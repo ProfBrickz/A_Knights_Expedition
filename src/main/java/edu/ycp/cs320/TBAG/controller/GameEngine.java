@@ -15,16 +15,16 @@ import java.util.Iterator;
  */
 public class GameEngine {
 	private final Database database;
-	private Player player;
+	private final Player player;
 	private final InventoryController inventoryController = new InventoryController();
 
 	// Constructor
-	public GameEngine() {
-		DatabaseProvider.setInstance(new DerbyDatabase());
-		database = DatabaseProvider.getInstance();
+	public GameEngine(Database database) {
+		DatabaseProvider.setInstance(database);
+		this.database = DatabaseProvider.getInstance();
 
-		player = database.getPlayer();
-		player.getInventory().addItems((database.getItemsForPlayer()));
+		player = this.database.getPlayer();
+		player.getInventory().addItems((this.database.getItemsForPlayer()));
 	}
 
 	/**
@@ -32,8 +32,8 @@ public class GameEngine {
 	 * Loads a demo room if no rooms are provided.
 	 * Sets the player's starting room to "0" if not already set.
 	 */
-	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
-		this();
+	public GameEngine() {
+		this(new DerbyDatabase());
 	}
 
 
@@ -140,11 +140,12 @@ public class GameEngine {
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
 		if (!playerRoom.getNpcs().isEmpty()) {
-			output.append("\nYou see:\n");
+			if (!output.isEmpty()) output.append("\n");
+			output.append("You see:\n");
 		}
 		for (NPC npc : playerRoom.getNpcs().values()) {
 			output
-				.append("-  ")
+				.append("- ")
 				.append(npc.getName())
 				.append("\n");
 		}

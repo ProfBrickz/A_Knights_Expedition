@@ -136,7 +136,7 @@ public class DerbyDatabase implements Database {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
 				// Dialog
-				HashMap<Integer, String> dialog;
+				ArrayList<String> dialog;
 
 				// Items
 				HashMap<Integer, Item> items;
@@ -217,10 +217,10 @@ public class DerbyDatabase implements Database {
 				try {
 					// Dialog
 					statement = connection.prepareStatement("""
-							INSERT INTO dialog ( text)
+							INSERT INTO dialog (text)
 							VALUES (?)
 						""");
-					for (String text : dialog.values()) {
+					for (String text : dialog) {
 						statement.setString(1, text);
 						statement.addBatch();
 					}
