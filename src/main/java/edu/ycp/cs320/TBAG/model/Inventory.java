@@ -30,6 +30,10 @@ public class Inventory {
 		}
 	}
 
+	public void addItems(HashMap<Integer, Item> items) {
+		addItems(new ArrayList<>(items.values()));
+	}
+
 	public void removeItem(Item item) {
 		if (item == null) {
 			return;

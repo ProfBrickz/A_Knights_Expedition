@@ -5,27 +5,79 @@ import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class FakeDatabase implements Database {
-	private HashMap<Integer, String> dialog = new HashMap<>();
+	// Dialog
+	private final ArrayList<String> dialog = new ArrayList<>();
+	private final ArrayList<String> commandHistory = new ArrayList<>();
+	
+	// Items
+	private final HashMap<Integer, Item> items = new HashMap<>();
+	private final HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
+
+	// NPCs
+	private final HashMap<Integer, NPC> npcs = new HashMap<>();
+
+	// Enemies
+	private final HashMap<Integer, Enemy> enemies = new HashMap<>();
+
+	// Rooms
+	private final HashMap<Integer, Room> rooms = new HashMap<>();
+
+	// Player
 	private Player player = null;
-	private HashMap<Integer, Room> rooms = new HashMap<>();
-	// A map between a room's id and (a map of its directions and connections)
-	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections = new HashMap<>();
-	private HashMap<Integer, Item> items = new HashMap<>();
 
 
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
 		try {
-			dialog = InitialData.getDialog();
-			rooms = InitialData.getRooms();
-			roomConnections = InitialData.getRoomConnections();
+			// Dialog
+			dialog.addAll(InitialData.getDialog());
+
+			// Items
+			items.putAll(InitialData.getItems());
+			weaponAbilities.putAll(InitialData.getWeaponAbilities());
+			for (Pair<Integer, Integer> abilityJunction : InitialData.getWeaponAbilitiesJunction()) {
+				Item item = items.get(abilityJunction.getLeft());
+				if (!(item instanceof Weapon weapon)) continue;
+
+				weapon.addAbility(weaponAbilities.get(abilityJunction.getRight()));
+			}
+
+			// NPCs
+			npcs.putAll(InitialData.getNPCs());
+			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getNPCItems().entrySet()) {
+				npcs.get(entry.getKey()).getInventory().addItems(entry.getValue());
+			}
+
+
+			// Enemies
+			enemies.putAll(InitialData.getEnemies());
+			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getEnemyItems().entrySet()) {
+				enemies.get(entry.getKey()).getInventory().addItems(entry.getValue());
+			}
+
+			// Rooms
+			rooms.putAll(InitialData.getRooms());
+			for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : InitialData.getRoomConnections().entrySet()) {
+				rooms.get(entry.getKey()).getRoomConnections().putAll(entry.getValue());
+			}
+			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getRoomItems().entrySet()) {
+				rooms.get(entry.getKey()).getInventory().addItems(entry.getValue());
+			}
+			for (Map.Entry<Integer, ArrayList<NPC>> entry : InitialData.getRoomNPCs().entrySet()) {
+				rooms.get(entry.getKey()).addNPCs(entry.getValue());
+			}
+			for (Map.Entry<Integer, ArrayList<Enemy>> entry : InitialData.getRoomEnemies().entrySet()) {
+				rooms.get(entry.getKey()).addEnemies(entry.getValue());
+			}
+
+			// Player
 			player = InitialData.getPlayer();
-			items = InitialData.getItems();
+			player.getInventory().addItems(new ArrayList<>(InitialData.getPlayerItems().values()));
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
 		} catch (IOException exception) {
@@ -37,7 +89,6 @@ public class FakeDatabase implements Database {
 	public Boolean reset() {
 		player = null;
 		rooms.clear();
-		roomConnections.clear();
 		items.clear();
 
 		loadInitialData();
@@ -49,26 +100,38 @@ public class FakeDatabase implements Database {
 	// Dialog methods
 	@Override
 	public ArrayList<String> getDialog() {
-		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
-		Collections.sort(keys);
-
-		ArrayList<String> values = new ArrayList<>();
-		for (Integer key : keys) {
-			values.add(dialog.get(key));
-		}
-
-		return values;
+		return dialog;
 	}
 
 	@Override
 	public void addDialog(String text) {
-		dialog.put(dialog.size(), text);
+		dialog.add(text);
 	}
 
 	@Override
 	public void clearDialog() {
 		dialog.clear();
 	}
+
+	@Override
+	public ArrayList<String> getCommandHistory() {
+		return commandHistory;
+	}
+
+	@Override
+	public void addCommandToHistory(String command) {
+		// Remove command from history if already in it
+		commandHistory.remove(command);
+
+		// Add command to history
+		commandHistory.add(command);
+
+		// Trim history if longer than max length
+		while (commandHistory.size() > Database.MAX_HISTORY_SIZE) {
+			commandHistory.remove(0);
+		}
+	}
+
 
 	// Player-related methods
 	@Override
@@ -186,7 +249,7 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
-		return roomConnections.get(room.getID());
+		return rooms.get(room.getID()).getRoomConnections();
 	}
 
 	@Override
@@ -273,8 +336,12 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) { // Hamed
+		if (enemy == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(enemy.getInventory().getItems());
 	}
 
 
@@ -290,24 +357,76 @@ public class FakeDatabase implements Database {
 
 	// Enemy-related methods
 	@Override
-	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) { // Hamed
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(room.getEnemies());
 	}
 
 	@Override
-	public void addItemToEnemy(Enemy enemy, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public void addItemToEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = enemy.getInventory().getItems().get(itemId);
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+
+		if (delta <= 0) {
+			return;
+		}
+
+		if (existing == null) {
+			enemy.getInventory().addItem(item);
+		} else {
+			existing.setAmount(existing.getAmount() + delta);
+		}
 	}
 
 	@Override
-	public void removeItemFromEnemy(Enemy enemy, Item item) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public void removeItemFromEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
+			return;
+		}
+
+		Integer itemId = item.getId();
+		if (itemId == null) {
+			return;
+		}
+
+		Item existing = enemy.getInventory().getItems().get(itemId);
+		if (existing == null) {
+			return;
+		}
+
+		int delta = item.getAmount() == null ? 1 : item.getAmount();
+		if (delta <= 0) {
+			return;
+		}
+
+		int newAmount = existing.getAmount() - delta;
+		if (newAmount > 0) {
+			existing.setAmount(newAmount);
+		} else {
+			enemy.getInventory().removeItem(existing);
+		}
 	}
 
 
 	// WeaponAbility-related methods
 	@Override
-	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) {
-		throw new UnsupportedOperationException("TODO - implement");
+	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) { // Hamed
+		if (weapon == null) {
+			return new HashMap<>();
+		}
+
+		return new HashMap<>(weapon.getAbilities());
 	}
 }

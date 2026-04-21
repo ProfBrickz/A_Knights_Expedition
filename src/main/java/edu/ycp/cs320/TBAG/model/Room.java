@@ -1,5 +1,6 @@
 package edu.ycp.cs320.TBAG.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,6 +106,12 @@ public class Room {
 		return enemies.put(enemy.getId(), enemy);
 	}
 
+	public void addEnemies(ArrayList<Enemy> enemies) {
+		for (Enemy enemy : enemies) {
+			addEnemy(enemy);
+		}
+	}
+
 	public Enemy removeEnemy(Enemy enemy) {
 		return enemies.remove(enemy.getId());
 	}
@@ -119,6 +126,12 @@ public class Room {
 
 	public NPC addNPC(NPC npc) {
 		return npcs.put(npc.getId(), npc);
+	}
+
+	public void addNPCs(ArrayList<NPC> npcs) {
+		for (NPC npc : npcs) {
+			addNPC(npc);
+		}
 	}
 
 	public NPC removeNPC(NPC npc) {

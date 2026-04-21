@@ -1,9 +1,8 @@
 package edu.ycp.cs320.TBAG.model;
 
-public class NPC extends Entity{
+public class NPC extends Entity {
 	private final Integer id;
 	private String name;
-	private final Inventory inventory = new Inventory();
 	private String greeting;
 	private String goodbye;
 
@@ -36,10 +35,6 @@ public class NPC extends Entity{
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Inventory getInventory() {
-		return inventory;
 	}
 
 	public String getGreeting() {

@@ -109,8 +109,8 @@ public class InitialData {
 		return copy;
 	}
 
-	public static HashMap<Integer, String> getDialog() throws IOException {
-		HashMap<Integer, String> dialog = new HashMap<>();
+	public static ArrayList<String> getDialog() throws IOException {
+		ArrayList<String> dialog = new ArrayList<>();
 		ReadCSV dialogFile = new ReadCSV("dialog.csv");
 
 		try {
@@ -122,7 +122,7 @@ public class InitialData {
 
 				String text = iterator.next();
 
-				dialog.put(dialog.size(), text);
+				dialog.add(text);
 			}
 
 			return dialog;

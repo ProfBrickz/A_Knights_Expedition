@@ -7,6 +7,7 @@ import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 
 /**
@@ -14,15 +15,16 @@ import java.util.HashMap;
  */
 public class GameEngine {
 	private final Database database;
-	private Player player;
+	private final Player player;
+	private final InventoryController inventoryController = new InventoryController();
 
 	// Constructor
-	public GameEngine() {
-		DatabaseProvider.setInstance(new DerbyDatabase());
-		database = DatabaseProvider.getInstance();
+	public GameEngine(Database database) {
+		DatabaseProvider.setInstance(database);
+		this.database = DatabaseProvider.getInstance();
 
-		player = database.getPlayer();
-		player.getInventory().addItems(new ArrayList<>(database.getItemsForPlayer().values()));
+		player = this.database.getPlayer();
+		player.getInventory().addItems((this.database.getItemsForPlayer()));
 	}
 
 	/**
@@ -30,8 +32,8 @@ public class GameEngine {
 	 * Loads a demo room if no rooms are provided.
 	 * Sets the player's starting room to "0" if not already set.
 	 */
-	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
-		this();
+	public GameEngine() {
+		this(new DerbyDatabase());
 	}
 
 
@@ -58,6 +60,13 @@ public class GameEngine {
 		return player;
 	}
 
+	public ArrayList<String> getCommandHistory() {
+		return database.getCommandHistory();
+	}
+
+	public void addCommandToHistory(String command) {
+		database.addCommandToHistory(command);
+	}
 
 	// Input command
 
@@ -131,11 +140,12 @@ public class GameEngine {
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
 		if (!playerRoom.getNpcs().isEmpty()) {
-			output.append("\nYou see:\n");
+			if (!output.isEmpty()) output.append("\n");
+			output.append("You see:\n");
 		}
 		for (NPC npc : playerRoom.getNpcs().values()) {
 			output
-				.append("-  ")
+				.append("- ")
 				.append(npc.getName())
 				.append("\n");
 		}
@@ -157,7 +167,6 @@ public class GameEngine {
 	 * Checks if the item exists in the inventory and returns inspection details.
 	 */
 	public String inspectItem(ArrayList<String> arguments) {
-		InventoryController inventoryController = new InventoryController();
 		PlayerController playerController = new PlayerController(player, new BattleEntityController());
 
 		String itemName = arguments.get(0);
@@ -167,103 +176,121 @@ public class GameEngine {
 		return playerController.inspectItem(item) + "\n";
 	}
 
-//	/**
-//	 * Handles the "search" command.
-//	 * Checks if the room has any items and returns them.
-//	 */
-//	public String search(ArrayList<String> arguments) {
-//		return getInventoryString(player.getRoom().getInventory(), "You found", "Nothing!");
-//	}
+	/**
+	 * Handles the "search" command.
+	 * Checks if the room has any items and returns them.
+	 */
+	public String search(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
 
-//	/**
-//	 * Handles the "pickup" command.
-//	 * Checks if the item is in the room and adds it to the player's inventory.
-//	 */
-//	public String pickupItem(ArrayList<String> arguments) {
-//		Room playerRoom = player.getRoom();
-//
-//		String itemName = arguments.get(0).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(playerRoom.getInventory(), itemName);
-//		if (item == null) return "This room does not have a " + itemName + ".\n";
-//
-//		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
-//		inventoryController.addItem(player.getInventory(), item, item.getAmount());
-//
-//		return "You picked up "
-//			+ getItemFormat(item)
-//			+ ".\n";
-//	}
+		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
-//	public String pickupAllItems(ArrayList<String> arguments) {
-//		Room playerRoom = player.getRoom();
-//
-//		if (playerRoom.getInventory().getItems().isEmpty()) {
-//			return "You did not pick anything up from this room.\n";
-//		}
-//
-//		StringBuilder output = new StringBuilder("You picked up:\n");
-//
-//		Iterator<Item> itemIterator = playerRoom.getInventory().getItems().values().iterator();
-//
-//		while (itemIterator.hasNext()) {
-//			Item item = itemIterator.next();
-//
-//			//inventoryController.removeItem(playerRoom.getInventory(), item.getId(), item.getAmount());
-//			itemIterator.remove();
-//			inventoryController.addItem(player.getInventory(), item, item.getAmount());
-//
-//			output
-//				.append(item.getAmount())
-//				.append(" x ")
-//				.append(item.getName())
-//				.append("\n");
-//		}
-//
-//		return output.toString();
-//	}
+		return getInventoryString(playerRoom.getInventory(), "You found", "Nothing!");
+	}
 
-//	/**
-//	 * Handles the 'drop' command.
-//	 * Checks if the player has the item and drops it in the current room.
-//	 */
-//	public String dropItem(ArrayList<String> arguments) {
-//		String itemName = arguments.get(0).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have a " + itemName + ".\n";
-//
-//		inventoryController.removeItem(player.getInventory(), item, item.getAmount());
-//		inventoryController.addItem(player.getRoom().getInventory(), item, item.getAmount());
-//
-//		return "You dropped "
-//			+ getItemFormat(item)
-//			+ ".\n";
-//	}
+	/**
+	 * Handles the "pickup" command.
+	 * Checks if the item is in the room and adds it to the player's inventory.
+	 */
+	public String pickupItem(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
+		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
-//	public String dropAllItems(ArrayList<String> arguments) {
-//		if (player.getInventory().getItems().isEmpty()) {
-//			return "You do not have anything to drop.\n";
-//		}
-//
-//		Room playerRoom = player.getRoom();
-//		StringBuilder output = new StringBuilder("You dropped:\n");
-//
-//		Iterator<Item> itemIterator = player.getInventory().getItems().values().iterator();
-//
-//		while (itemIterator.hasNext()) {
-//			Item item = itemIterator.next();
-//
-//			itemIterator.remove();
-//			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
-//
-//			output
-//				.append(item.getAmount())
-//				.append(" x ")
-//				.append(item.getName())
-//				.append("\n");
-//		}
-//
-//		return output.toString();
-//	}
+		String itemName = arguments.get(0).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(playerRoom.getInventory(), itemName);
+		if (item == null) return "This room does not have a " + itemName + ".\n";
+
+		database.removeItemFromRoom(playerRoom, item);
+		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
+		database.addItemToPlayer(item);
+		inventoryController.addItem(player.getInventory(), item, item.getAmount());
+
+		return "You picked up "
+			+ getItemFormat(item)
+			+ ".\n";
+	}
+
+	public String pickupAllItems(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
+		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
+
+		if (playerRoom.getInventory().getItems().isEmpty()) {
+			return "You did not pick anything up from this room.\n";
+		}
+
+		StringBuilder output = new StringBuilder("You picked up:\n");
+
+		Iterator<Item> itemIterator = playerRoom.getInventory().getItems().values().iterator();
+
+		while (itemIterator.hasNext()) {
+			Item item = itemIterator.next();
+
+			database.removeItemFromRoom(playerRoom, item);
+			itemIterator.remove();
+			database.addItemToPlayer(item);
+			inventoryController.addItem(player.getInventory(), item, item.getAmount());
+
+			output
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append("\n");
+		}
+
+		return output.toString();
+	}
+
+	/**
+	 * Handles the 'drop' command.
+	 * Checks if the player has the item and drops it in the current room.
+	 */
+	public String dropItem(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
+		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
+
+		String itemName = arguments.get(0).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have a " + itemName + ".\n";
+
+		database.removeItemFromPlayer(item);
+		inventoryController.removeItem(player.getInventory(), item, item.getAmount());
+		database.addItemToRoom(playerRoom, item);
+		inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+
+		return "You dropped "
+			+ getItemFormat(item)
+			+ ".\n";
+	}
+
+	public String dropAllItems(ArrayList<String> arguments) {
+		if (player.getInventory().getItems().isEmpty()) {
+			return "You do not have anything to drop.\n";
+		}
+
+		Room playerRoom = player.getRoom();
+		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
+
+		StringBuilder output = new StringBuilder("You dropped:\n");
+
+		Iterator<Item> itemIterator = player.getInventory().getItems().values().iterator();
+
+		while (itemIterator.hasNext()) {
+			Item item = itemIterator.next();
+
+			database.removeItemFromPlayer(item);
+			itemIterator.remove();
+			database.addItemToRoom(playerRoom, item);
+			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+
+			output
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append("\n");
+		}
+
+		return output.toString();
+	}
 
 	public String wallet(ArrayList<String> arguments) {
 		String output = "You have " + player.getCoins() + " coin";

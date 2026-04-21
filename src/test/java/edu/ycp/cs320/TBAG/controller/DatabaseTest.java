@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class DatabaseTest {
 	private final String databasePath = "test-database.db";
@@ -57,7 +57,7 @@ public class DatabaseTest {
 	}
 
 	private void dialogTest() {
-		HashMap<Integer, String> dialog = database.getDialog();
+		ArrayList<String> dialog = database.getDialog();
 		Assertions.assertTrue(dialog.isEmpty());
 
 		database.addDialog("a");
