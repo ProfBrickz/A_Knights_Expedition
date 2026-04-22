@@ -4,3 +4,40 @@ Hotel,Hotel,Your hotel room.,NewBrambleton.gif
 South_Street_NB,South Street,Your in South Street. Its where most people live.,NewBrambleton.gif
 Center_NB,Town Center,Your at the center of New Bramblton. There's a nice fountain nearby.,NewBrambleton.gif
 North_Street_NB,North Street,Your in North Street. It's where most shops are.,NewBrambleton.gif
+Blacksmith_NB,Northwest Lane,"Your at Northwest Lane, the smithy is nearby.",NewBrambleton.gif
+Robert_NB,Northeast Lane,"Your at Northeast Lane, nearby is a startup resturant.",NewBrambleton.gif
+Arcadia_NB,West  Road,"Your on West Road. A small building nearby has a sign, ""Arcadia's Cauldron"".",NewBrambleton.gif
+Shop_NB,East Road,Your on East Road. You know a good thrift shop nearby.,NewBrambleton.gif
+Fred_NB,Southwest Avenue,"Your walking on Southwest Avenue. An orange haired man is nearby, looking morose.",NewBrambleton.gif
+God_NB,Southeast Avenue,"Your walking on Southeast Avenue. Theres a strange man in an alley, chuckling maniaclly.",NewBrambleton.gif
+Gate_NB,New Brambleton Gate,"Your at the gate to New Brambleton, ahead is the Crossroads.",NewBrambleton.gif
+South_CR,Southern Bridge,Your walking on the southern bridge. Below you is the abyss.,Crossroads.gif
+North_CR,Northern Bridge,Your walking on the northern bridge. Below you is the abyss.,Crossroads.gif
+West_CR,Western Bridge,Your walking on the western bridge. Below you is the abyss.,Crossroads.gif
+East_CR,Eastern Bridge,Your walking on the eastern bridge. Below you is the abyss.,Crossroads.gif
+Center_CR,The Crossroads,Your standing on the the crossroads. Below you is the abyss.,Crossroads.gif
+1_FR,North West Corner,Towering pines loom overhead.,Forest.gif
+2_FR,Twisted Oak,Twisted oak trees stretch overhead.,Forest.gif
+3_FR,Ferns-a-plenty,Ferns blanket the ground.,Forest.gif
+4_FR,Vines and branches,Vines hang low from branches.,Forest.gif
+5_FR,North East Corner,The trees give way to a steep slop down to the abyss.,Forest.gif
+6_FR,Crunchy Leaves,A carpet of fallen leaves crunches loudly beneath your feet.,Forest.gif
+7_FR,Roots Split,The path splits between two massive roots.,Forest.gif
+8_FR,Animals Haven,Small animals dart between bushes.,Forest.gif
+9_FR,Shallow Stream,Sunlight dances across a shallow stream cutting through the woods.,Forest.gif
+10_FR,Shrooms of moons,Mushrooms grow faintly at the base of trees.,Forest.gif
+11_FR,"Quiet, introspection",The forest grows unnaturally quiet.,Forest.gif
+12_FR,Chilly Winds,The air grows colder the deeper you go.,Forest.gif
+13_FR,Peckers Paradise,A distant rhythmic tapping echoes through the woods.,Forest.gif
+14_FR,Critters Crevice,Small critters dart into holes deep underground.,Forest.gif
+15_FR,Forest Entrance,"Before you is the forest of Rick, a sign leads back to the crossroads.",Forest.gif
+16_FR,South West Corner,The ground becomes uneven and tangled with roots.,Forest.gif
+17_FR,Damp Ramp,The air here is damp and heavy,Forest.gif
+18_FR,Burnt Path,The scent of smoke lingers faintly. You can make out some sort of village to the south.,Forest.gif
+19_FR,Sunshine Clearing,"A clearing opens ahead, flowers are scattered throughout.",Forest.gif
+20_FR,South East Corner,The ground dips into a shallow basin where fog clings stubbornly.,Forest.gif
+NW_FR,Fog Entrance,A thick fog coils between the trunks. You get an ominous feeling.,Forest.gif
+NE_FR,What the trees say,"Leaves rustle violently overhead yet when you look up, nothing is there.",Forest.gif
+SW_FR,Turn Back,A dense thicket of tangled roots and low-hanging branches blocks your path,Forest.gif
+SE_FR,Good Traps,"Crude traps are everywhere, yet none of them are hidden.",Forest.gif
+Rick_FR,Forest Throne,A small tent is nearby. You hear angry muttering from within.,Forest.gif

@@ -5,16 +5,14 @@ import edu.ycp.cs320.TBAG.model.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FakeDatabase implements Database {
 	// Dialog
-	private final HashMap<Integer, String> dialog = new HashMap<>();
-	private ArrayList<String> commandHistory = new ArrayList<>();
-
-
+	private final ArrayList<String> dialog = new ArrayList<>();
+	private final ArrayList<String> commandHistory = new ArrayList<>();
+	
 	// Items
 	private final HashMap<Integer, Item> items = new HashMap<>();
 	private final HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
@@ -31,13 +29,24 @@ public class FakeDatabase implements Database {
 	// Player
 	private Player player = null;
 
+	public FakeDatabase() {
+	}
+
+	public FakeDatabase(Player player, HashMap<Integer, Room> rooms) {
+		this.player = player;
+
+		if (rooms != null) {
+			this.rooms.putAll(rooms);
+		}
+	}
+
 
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
 		try {
 			// Dialog
-			dialog.putAll(InitialData.getDialog());
+			dialog.addAll(InitialData.getDialog());
 
 			// Items
 			items.putAll(InitialData.getItems());
@@ -102,20 +111,12 @@ public class FakeDatabase implements Database {
 	// Dialog methods
 	@Override
 	public ArrayList<String> getDialog() {
-		ArrayList<Integer> keys = new ArrayList<>(dialog.keySet());
-		Collections.sort(keys);
-
-		ArrayList<String> values = new ArrayList<>();
-		for (Integer key : keys) {
-			values.add(dialog.get(key));
-		}
-
-		return values;
+		return dialog;
 	}
 
 	@Override
 	public void addDialog(String text) {
-		dialog.put(dialog.size(), text);
+		dialog.add(text);
 	}
 
 	@Override
