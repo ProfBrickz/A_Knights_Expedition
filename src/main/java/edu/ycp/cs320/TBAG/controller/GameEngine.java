@@ -364,6 +364,7 @@ public String buyItem(ArrayList<String> arguments) {
 			}
 
 			database.setPlayerCoins(player.getCoins()-(item.getPrice()*amount));
+			database.addItemToPlayer(item);
 			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
 		}
 	}
