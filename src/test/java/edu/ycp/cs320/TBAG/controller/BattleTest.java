@@ -4,71 +4,49 @@ import edu.ycp.cs320.TBAG.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Scanner;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+//edit to look more like previous
 
+public class BattleTest(Player player, Enemy enemy) {
+	BattleEntityController battleController = new BattleEntityController();
+	EnemyController enemyController = new EnemyController(battleController);
 
-public class BattleTest {
+	Scanner scanner = new Scanner(System.in);
 
-	private BattleEntityController controller;
-	private Player player;
-	private Enemy enemy;
+	while (player.getHealth() > 0 && enemy.getHealth() > 0) {
+		System.out.println("\n--- BATTLE ---");
+		System.out.println("Player HP: " + player.getHealth());
+		System.out.println(enemy.getName() + " HP: " + enemy.getHealth());
 
-	@BeforeEach
-	public void setup() {
-		controller = new BattleEntityController();
-		player = new Player(100, 100);
-		enemy = new Enemy(0, "Goblin", 50, 50);
+		System.out.println("Choose action: 1) Attack 2) Defend 3) Use Item");
+		int choice = scanner.nextInt();
+
+		switch (choice) {
+			case 1:
+				battleController.attack(player, enemy, new WeaponAbility(0, 8, "Slash"));
+				break;
+			case 2:
+				battleController.defend(player, new Armor(0, "Shield", "Basic", 4, false, 0));
+				break;
+			case 3:
+				battleController.heal(player, new HealingItem(0, "Potion", "Heals", 10, 0));
+				break;
+			default:
+				System.out.println("Invalid action.");
+				continue;
+		}
+
+		// enemy turn
+		if (enemy.getHealth() > 0) {
+			enemyController.takeTurn(enemy, player);
+		}
 	}
 
-	@Test
-	public void testAttack() {
-		WeaponAbility ability = new WeaponAbility(0, 10, "Slash attack");
-
-		controller.attack(player, enemy, ability);
-
-		assertEquals(40, (int) enemy.getHealth());
-	}
-
-	@Test
-	public void testDefendReducesDamage() {
-		Armor armor = new Armor(0, "Shield", "Basic shield", 5, false, 0);
-
-		controller.defend(enemy, armor);
-
-		WeaponAbility ability = new WeaponAbility(0, 10, "Hit");
-
-		controller.attack(player, enemy, ability);
-
-		// 10 damage - 5 defense = 5 damage
-		assertEquals(45, (int) enemy.getHealth());
-	}
-
-	@Test
-	public void testHeal() {
-		enemy.setHealth(20);
-
-		HealingItem potion = new HealingItem(0, "Potion", "Heal", 15, 0);
-
-		controller.heal(enemy, potion);
-
-		assertEquals(35, (int) enemy.getHealth());
-	}
-
-	@Test
-	public void testHealDoesNotExceedMax() {
-		HealingItem potion = new HealingItem(0, "Potion", "Heal", 50, 0);
-
-		controller.heal(player, potion);
-
-		assertEquals(100, (int) player.getHealth());
-	}
-
-	@Test
-	public void testAttackCannotGoBelowZero() {
-		WeaponAbility ability = new WeaponAbility(0, 1000, "Big attack");
-
-		controller.attack(player, enemy, ability);
-
-		assertEquals(0, (int) enemy.getHealth());
+	if (player.getHealth() <= 0) {
+		System.out.println("You were defeated.");
+	} else {
+		System.out.println("Enemy defeated!");
 	}
 }

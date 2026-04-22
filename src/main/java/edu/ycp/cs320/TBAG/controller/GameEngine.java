@@ -120,6 +120,7 @@ public class GameEngine {
 		if (!roomController.isValidDirection(player.getRoom(), direction)) {
 			return "Invalid direction for this room\n";
 		}
+		//database.getEnemiesForRoom
 
 		Boolean successfulMove = playerController.move(direction);
 		if (!successfulMove) {
