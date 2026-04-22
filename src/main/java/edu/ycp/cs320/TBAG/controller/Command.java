@@ -94,38 +94,38 @@ public enum Command {
 		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC),
 		List.of()
 	),
-	//	TALK_TO(
-//		"talk-to",
-//		GameEngine::talkToNPC,
-//		"Initiates a conversation with a specified NPC in the current room",
-//		List.of("NPC name"),
-//		List.of(PlayerState.EXPLORING),
-//		List.of("talk-to blacksmith", "talk-to brewer", "talk-to \"Dr. Babock\"")
-//	),
-//	LEAVE(
-//		"leave",
-//		GameEngine::leaveNPC,
-//		"Ends the current conversation with an NPC and returns to exploring state",
-//		List.of(),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of()
-//	),
-//	SEARCH_SHOP(
-//		"search-shop",
-//		GameEngine::searchShop,
-//		"Displays the items available for purchase from the current NPC",
-//		List.of(),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of()
-//	),
-//	BUY(
-//		"buy",
-//		GameEngine::buyItem,
-//		"Purchase an item from the current NPC's shop",
-//		List.of("Amount", "Item name"),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of("buy 1 sword", "buy 3 potion", "buy 5 \"Diamond pickaxe\"")
-//	),
+		TALK_TO(
+		"talk-to",
+		GameEngine::talkToNPC,
+		"Initiates a conversation with a specified NPC in the current room",
+		List.of("NPC name"),
+		List.of(PlayerState.EXPLORING),
+		List.of("talk-to blacksmith", "talk-to brewer", "talk-to \"Dr. Babock\"")
+	),
+	LEAVE(
+		"leave",
+		GameEngine::leaveNPC,
+		"Ends the current conversation with an NPC and returns to exploring state",
+		List.of(),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of()
+	),
+	SEARCH_SHOP(
+		"search-shop",
+		GameEngine::searchShop,
+		"Displays the items available for purchase from the current NPC",
+		List.of(),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of()
+	),
+	BUY(
+		"buy",
+		GameEngine::buyItem,
+		"Purchase an item from the current NPC's shop",
+		List.of("Amount", "Item name"),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of("buy 1 sword", "buy 3 potion", "buy 5 \"Diamond pickaxe\"")
+	),
 //	SELL(
 //		"sell",
 //		GameEngine::sellItem,

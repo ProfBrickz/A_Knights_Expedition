@@ -40,9 +40,9 @@ public class GameEngine {
 	 * Test-friendly constructor that keeps the provided player/rooms while still
 	 * exercising the database-backed command flow through FakeDatabase.
 	 */
-	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
-		this(seedFakeDatabase(player, rooms));
-	}
+//	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
+//		this(seedFakeDatabase(player, rooms));
+//	}
 
 
 	// Getters and setters
@@ -166,9 +166,9 @@ public class GameEngine {
 	 * Handles the "inventory" command.
 	 * Lists all items in the player's inventory with quantities.
 	 */
-//	public String inventory(ArrayList<String> arguments) {
-//
-//	}
+	public String inventory(ArrayList<String> arguments) {
+		return getInventoryString(player.getInventory(), "Your Inventory", "Empty");
+	}
 
 	/**
 	 * Handles the "inspect-item" command.
@@ -512,19 +512,19 @@ public String buyItem(ArrayList<String> arguments) {
 		return database instanceof FakeDatabase;
 	}
 
-	private static Database seedFakeDatabase(Player player, HashMap<Integer, Room> rooms) {
-		HashMap<Integer, Room> roomMap = rooms == null ? new HashMap<>() : rooms;
-
-		if (roomMap.isEmpty()) {
-			new RoomController(roomMap).loadDemo();
-		}
-
-		if (player != null && player.getRoom() == null && roomMap.containsKey(0)) {
-			player.setRoom(roomMap.get(0));
-		}
-
-		return new FakeDatabase(player, roomMap);
-	}
+//	private static Database seedFakeDatabase(Player player, HashMap<Integer, Room> rooms) {
+//		HashMap<Integer, Room> roomMap = rooms == null ? new HashMap<>() : rooms;
+//
+//		if (roomMap.isEmpty()) {
+//			new RoomController(roomMap).loadDemo();
+//		}
+//
+//		if (player != null && player.getRoom() == null && roomMap.containsKey(0)) {
+//			player.setRoom(roomMap.get(0));
+//		}
+//
+//		return new FakeDatabase(player, roomMap);
+//	}
 
 	/**
 	 * Makes a string list of items in an inventory.
