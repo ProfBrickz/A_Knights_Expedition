@@ -4,10 +4,10 @@ import edu.ycp.cs320.TBAG.model.*;
 import edu.ycp.cs320.TBAG.persist.Database;
 import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
+import edu.ycp.cs320.TBAG.persist.FakeDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 
 /**
@@ -34,6 +34,14 @@ public class GameEngine {
 	 */
 	public GameEngine() {
 		this(new DerbyDatabase());
+	}
+
+	/**
+	 * Test-friendly constructor that keeps the provided player/rooms while still
+	 * exercising the database-backed command flow through FakeDatabase.
+	 */
+	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
+		this(seedFakeDatabase(player, rooms));
 	}
 
 
@@ -201,9 +209,12 @@ public class GameEngine {
 		if (item == null) return "This room does not have a " + itemName + ".\n";
 
 		database.removeItemFromRoom(playerRoom, item);
-		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
 		database.addItemToPlayer(item);
-		inventoryController.addItem(player.getInventory(), item, item.getAmount());
+
+		if (!hasSharedInventoryState()) {
+			inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
+			inventoryController.addItem(player.getInventory(), item, item.getAmount());
+		}
 
 		return "You picked up "
 			+ getItemFormat(item)
@@ -219,16 +230,20 @@ public class GameEngine {
 		}
 
 		StringBuilder output = new StringBuilder("You picked up:\n");
+		ArrayList<Item> itemsToPickup = new ArrayList<>(playerRoom.getInventory().getItems().values());
 
-		Iterator<Item> itemIterator = playerRoom.getInventory().getItems().values().iterator();
-
-		while (itemIterator.hasNext()) {
-			Item item = itemIterator.next();
+		for (Item item : itemsToPickup) {
+			if (!playerRoom.getInventory().getItems().containsKey(item.getId())) {
+				continue;
+			}
 
 			database.removeItemFromRoom(playerRoom, item);
-			itemIterator.remove();
 			database.addItemToPlayer(item);
-			inventoryController.addItem(player.getInventory(), item, item.getAmount());
+
+			if (!hasSharedInventoryState()) {
+				inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
+				inventoryController.addItem(player.getInventory(), item, item.getAmount());
+			}
 
 			output
 				.append(item.getAmount())
@@ -253,9 +268,12 @@ public class GameEngine {
 		if (item == null) return "You do not have a " + itemName + ".\n";
 
 		database.removeItemFromPlayer(item);
-		inventoryController.removeItem(player.getInventory(), item, item.getAmount());
 		database.addItemToRoom(playerRoom, item);
-		inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+
+		if (!hasSharedInventoryState()) {
+			inventoryController.removeItem(player.getInventory(), item, item.getAmount());
+			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+		}
 
 		return "You dropped "
 			+ getItemFormat(item)
@@ -271,16 +289,20 @@ public class GameEngine {
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
 		StringBuilder output = new StringBuilder("You dropped:\n");
+		ArrayList<Item> itemsToDrop = new ArrayList<>(player.getInventory().getItems().values());
 
-		Iterator<Item> itemIterator = player.getInventory().getItems().values().iterator();
-
-		while (itemIterator.hasNext()) {
-			Item item = itemIterator.next();
+		for (Item item : itemsToDrop) {
+			if (!player.getInventory().getItems().containsKey(item.getId())) {
+				continue;
+			}
 
 			database.removeItemFromPlayer(item);
-			itemIterator.remove();
 			database.addItemToRoom(playerRoom, item);
-			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+
+			if (!hasSharedInventoryState()) {
+				inventoryController.removeItem(player.getInventory(), item, item.getAmount());
+				inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+			}
 
 			output
 				.append(item.getAmount())
@@ -466,6 +488,24 @@ public class GameEngine {
 		if (item.getAmount() > 1) output += "s";
 
 		return output;
+	}
+
+	private boolean hasSharedInventoryState() {
+		return database instanceof FakeDatabase;
+	}
+
+	private static Database seedFakeDatabase(Player player, HashMap<Integer, Room> rooms) {
+		HashMap<Integer, Room> roomMap = rooms == null ? new HashMap<>() : rooms;
+
+		if (roomMap.isEmpty()) {
+			new RoomController(roomMap).loadDemo();
+		}
+
+		if (player != null && player.getRoom() == null && roomMap.containsKey(0)) {
+			player.setRoom(roomMap.get(0));
+		}
+
+		return new FakeDatabase(player, roomMap);
 	}
 
 	/**

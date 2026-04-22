@@ -29,6 +29,17 @@ public class FakeDatabase implements Database {
 	// Player
 	private Player player = null;
 
+	public FakeDatabase() {
+	}
+
+	public FakeDatabase(Player player, HashMap<Integer, Room> rooms) {
+		this.player = player;
+
+		if (rooms != null) {
+			this.rooms.putAll(rooms);
+		}
+	}
+
 
 	// General purpose methods
 	@Override
