@@ -12,7 +12,7 @@ public class FakeDatabase implements Database {
 	// Dialog
 	private final ArrayList<String> dialog = new ArrayList<>();
 	private final ArrayList<String> commandHistory = new ArrayList<>();
-	
+
 	// Items
 	private final HashMap<Integer, Item> items = new HashMap<>();
 	private final HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
@@ -29,55 +29,121 @@ public class FakeDatabase implements Database {
 	// Player
 	private Player player = null;
 
+	public void setDialog(ArrayList<String> dialog) {
+		this.dialog.clear();
+		this.dialog.addAll(dialog);
+	}
+
+	public void setItems(
+		HashMap<Integer, Item> items,
+		HashMap<Integer, WeaponAbility> weaponAbilities,
+		ArrayList<Pair<Integer, Integer>> weaponAbilitiesJunction
+	) {
+		this.items.clear();
+		this.items.putAll(items);
+		this.weaponAbilities.clear();
+		this.weaponAbilities.putAll(weaponAbilities);
+		for (Pair<Integer, Integer> abilityJunction : weaponAbilitiesJunction) {
+			Item item = this.items.get(abilityJunction.getLeft());
+			if (!(item instanceof Weapon weapon)) continue;
+
+			weapon.addAbility(this.weaponAbilities.get(abilityJunction.getRight()));
+		}
+	}
+
+	public void setNPCs(
+		HashMap<Integer, NPC> npcs,
+		HashMap<Integer, ArrayList<Item>> npcItems
+	) {
+		this.npcs.clear();
+		this.npcs.putAll(npcs);
+		for (Map.Entry<Integer, ArrayList<Item>> entry : npcItems.entrySet()) {
+			this.npcs.get(entry.getKey()).getInventory().addItems(entry.getValue());
+		}
+	}
+
+	public void setEnemies(
+		HashMap<Integer, Enemy> enemies,
+		HashMap<Integer, ArrayList<Item>> enemyItems
+	) {
+		this.enemies.clear();
+		this.enemies.putAll(enemies);
+		for (Map.Entry<Integer, ArrayList<Item>> entry : enemyItems.entrySet()) {
+			this.enemies.get(entry.getKey()).getInventory().addItems(entry.getValue());
+		}
+	}
+
+	public void setRooms(
+		HashMap<Integer, Room> rooms,
+		HashMap<Integer, HashMap<String, RoomConnection>> roomConnections,
+		HashMap<Integer, ArrayList<Item>> roomItems,
+		HashMap<Integer, ArrayList<NPC>> roomNPCs,
+		HashMap<Integer, ArrayList<Enemy>> roomEnemies
+	) {
+		this.rooms.putAll(rooms);
+		for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : roomConnections.entrySet()) {
+			this.rooms.get(entry.getKey()).getRoomConnections().putAll(entry.getValue());
+		}
+		for (Map.Entry<Integer, ArrayList<Item>> entry : roomItems.entrySet()) {
+			this.rooms.get(entry.getKey()).getInventory().addItems(entry.getValue());
+		}
+		for (Map.Entry<Integer, ArrayList<NPC>> entry : roomNPCs.entrySet()) {
+			this.rooms.get(entry.getKey()).addNPCs(entry.getValue());
+		}
+		for (Map.Entry<Integer, ArrayList<Enemy>> entry : roomEnemies.entrySet()) {
+			this.rooms.get(entry.getKey()).addEnemies(entry.getValue());
+		}
+	}
+
+	public void setPlayer(
+		Player player,
+		HashMap<Integer, Item> playerItems
+	) {
+		this.player = player;
+		player.getInventory().addItems(playerItems);
+	}
 
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
 		try {
 			// Dialog
-			dialog.addAll(InitialData.getDialog());
+			setDialog(InitialData.getDialog());
 
 			// Items
-			items.putAll(InitialData.getItems());
-			weaponAbilities.putAll(InitialData.getWeaponAbilities());
-			for (Pair<Integer, Integer> abilityJunction : InitialData.getWeaponAbilitiesJunction()) {
-				Item item = items.get(abilityJunction.getLeft());
-				if (!(item instanceof Weapon weapon)) continue;
-
-				weapon.addAbility(weaponAbilities.get(abilityJunction.getRight()));
-			}
+			setItems(
+				InitialData.getItems(),
+				InitialData.getWeaponAbilities(),
+				InitialData.getWeaponAbilitiesJunction()
+			);
 
 			// NPCs
-			npcs.putAll(InitialData.getNPCs());
-			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getNPCItems().entrySet()) {
-				npcs.get(entry.getKey()).getInventory().addItems(entry.getValue());
-			}
+			setNPCs(
+				InitialData.getNPCs(),
+				InitialData.getNPCItems()
+			);
 
 
 			// Enemies
-			enemies.putAll(InitialData.getEnemies());
-			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getEnemyItems().entrySet()) {
-				enemies.get(entry.getKey()).getInventory().addItems(entry.getValue());
-			}
+			setEnemies(
+				InitialData.getEnemies(),
+				InitialData.getEnemyItems()
+			);
 
 			// Rooms
-			rooms.putAll(InitialData.getRooms());
-			for (Map.Entry<Integer, HashMap<String, RoomConnection>> entry : InitialData.getRoomConnections().entrySet()) {
-				rooms.get(entry.getKey()).getRoomConnections().putAll(entry.getValue());
-			}
-			for (Map.Entry<Integer, ArrayList<Item>> entry : InitialData.getRoomItems().entrySet()) {
-				rooms.get(entry.getKey()).getInventory().addItems(entry.getValue());
-			}
-			for (Map.Entry<Integer, ArrayList<NPC>> entry : InitialData.getRoomNPCs().entrySet()) {
-				rooms.get(entry.getKey()).addNPCs(entry.getValue());
-			}
-			for (Map.Entry<Integer, ArrayList<Enemy>> entry : InitialData.getRoomEnemies().entrySet()) {
-				rooms.get(entry.getKey()).addEnemies(entry.getValue());
-			}
+			setRooms(
+				InitialData.getRooms(),
+				InitialData.getRoomConnections(),
+				InitialData.getRoomItems(),
+				InitialData.getRoomNPCs(),
+				InitialData.getRoomEnemies()
+			);
 
 			// Player
-			player = InitialData.getPlayer();
-			player.getInventory().addItems(new ArrayList<>(InitialData.getPlayerItems().values()));
+			setPlayer(
+				InitialData.getPlayer(),
+				InitialData.getPlayerItems()
+			);
 		} catch (IllegalStateException exception) {
 			throw new IllegalStateException("Initial data is incorrect", exception);
 		} catch (IOException exception) {

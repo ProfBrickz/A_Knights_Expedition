@@ -9,7 +9,7 @@ public class DatabaseProvider {
 
 	public static Database getInstance() {
 		if (databaseInstance == null) {
-			throw new IllegalStateException("IDatabase instance has not been set!");
+			throw new IllegalStateException("Database instance has not been set!");
 		}
 		return databaseInstance;
 	}

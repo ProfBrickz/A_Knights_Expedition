@@ -46,7 +46,7 @@ public class GameEngine {
 		for (String text : dialog) {
 			output
 				.append(text)
-				.append("\n");
+				.append("\n\n");
 		}
 
 		return output.toString();
@@ -77,8 +77,6 @@ public class GameEngine {
 	public String inputCommand(String commandName, ArrayList<String> arguments) {
 		commandName = commandName.trim().toLowerCase();
 
-		String output = "";
-
 		for (Command command : Command.values()) {
 			if (command.getName().equals(commandName)) {
 				String error = validateCommand(command, arguments);
@@ -89,18 +87,14 @@ public class GameEngine {
 				if (!confirming) {
 					player.setLastCommand(command);
 				}
-				output = command.run(this, arguments);
-				if (confirming) {
-					player.setLastCommand(command);
-				}
-				database.setLastCommand(command);
 
-				break;
+				String output = command.run(this, arguments);
+
+				database.setLastCommand(command);
+				return output;
 			}
 		}
-		if (output != null && output.isEmpty()) output = "Sorry, command not recognized.\n";
-
-		return output;
+		return "Sorry, command not recognized.";
 	}
 
 
@@ -118,17 +112,17 @@ public class GameEngine {
 		PlayerController playerController = new PlayerController(player, new BattleEntityController());
 
 		if (!roomController.isValidDirection(player.getRoom(), direction)) {
-			return "Invalid direction for this room\n";
+			return "Invalid direction for this room";
 		}
 
 		Boolean successfulMove = playerController.move(direction);
 		if (!successfulMove) {
-			return "Move failed, either player, or the room does not exist\n";
+			return "Move failed, either player, or the room does not exist";
 		}
 
 		database.setPlayerRoom(player.getRoom().getID());
 
-		return player.getRoom().getDescription() + "\n";
+		return player.getRoom().getDescription();
 	}
 
 	/**
@@ -150,7 +144,7 @@ public class GameEngine {
 				.append("\n");
 		}
 
-		return output + "\n";
+		return output.toString();
 	}
 
 
@@ -171,9 +165,9 @@ public class GameEngine {
 
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
+		if (item == null) return "You do not have a " + itemName + " in your inventory.";
 
-		return playerController.inspectItem(item) + "\n";
+		return playerController.inspectItem(item);
 	}
 
 	/**
@@ -198,16 +192,14 @@ public class GameEngine {
 
 		String itemName = arguments.get(0).toLowerCase();
 		Item item = inventoryController.getItemByNameCaseInsensitive(playerRoom.getInventory(), itemName);
-		if (item == null) return "This room does not have a " + itemName + ".\n";
+		if (item == null) return "This room does not have a " + itemName + ".";
 
 		database.removeItemFromRoom(playerRoom, item);
 		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
 		database.addItemToPlayer(item);
 		inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
-		return "You picked up "
-			+ getItemFormat(item)
-			+ ".\n";
+		return "You picked up " + getItemFormat(item) + ".";
 	}
 
 	public String pickupAllItems(ArrayList<String> arguments) {
@@ -513,7 +505,10 @@ public class GameEngine {
 	 */
 	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
 		if (arguments.size() != command.getArguments().size()) {
-			return "Invalid " + command.getName() + " command. Must be in the format:\n" + command.getFormat() + "\n";
+			return "Invalid "
+				+ command.getName()
+				+ " command. Must be in the format:\n"
+				+ command.getFormat();
 		}
 
 		return null;
@@ -521,7 +516,11 @@ public class GameEngine {
 
 	private String validatePlayerState(Command command) {
 		if (!command.getAllowedPlayerStates().contains(player.getState())) {
-			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".\n";
+			return "You are not allowed to use "
+				+ command.getName()
+				+ " while "
+				+ player.getState().getName()
+				+ ".";
 		}
 
 		return null;
@@ -532,9 +531,9 @@ public class GameEngine {
 		Boolean isConfirmationCommand = command == Command.YES || command == Command.NO;
 
 		if (confirming && !isConfirmationCommand) {
-			return "You can not use " + command.getName() + " while confirming a command use yes or no.\n";
+			return "You can not use " + command.getName() + " while confirming a command use yes or no.";
 		} else if (!confirming && isConfirmationCommand) {
-			return "There is nothing to confirm.\n";
+			return "There is nothing to confirm.";
 		}
 
 		return null;
