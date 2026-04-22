@@ -4,10 +4,10 @@ import edu.ycp.cs320.TBAG.model.*;
 import edu.ycp.cs320.TBAG.persist.Database;
 import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
+import edu.ycp.cs320.TBAG.persist.FakeDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 
 /**
@@ -35,6 +35,14 @@ public class GameEngine {
 	public GameEngine() {
 		this(new DerbyDatabase());
 	}
+
+	/**
+	 * Test-friendly constructor that keeps the provided player/rooms while still
+	 * exercising the database-backed command flow through FakeDatabase.
+	 */
+//	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
+//		this(seedFakeDatabase(player, rooms));
+//	}
 
 
 	// Getters and setters
@@ -195,9 +203,12 @@ public class GameEngine {
 		if (item == null) return "This room does not have a " + itemName + ".";
 
 		database.removeItemFromRoom(playerRoom, item);
-		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
 		database.addItemToPlayer(item);
-		inventoryController.addItem(player.getInventory(), item, item.getAmount());
+
+		if (!hasSharedInventoryState()) {
+			inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
+			inventoryController.addItem(player.getInventory(), item, item.getAmount());
+		}
 
 		return "You picked up " + getItemFormat(item) + ".";
 	}
@@ -211,16 +222,20 @@ public class GameEngine {
 		}
 
 		StringBuilder output = new StringBuilder("You picked up:\n");
+		ArrayList<Item> itemsToPickup = new ArrayList<>(playerRoom.getInventory().getItems().values());
 
-		Iterator<Item> itemIterator = playerRoom.getInventory().getItems().values().iterator();
-
-		while (itemIterator.hasNext()) {
-			Item item = itemIterator.next();
+		for (Item item : itemsToPickup) {
+			if (!playerRoom.getInventory().getItems().containsKey(item.getId())) {
+				continue;
+			}
 
 			database.removeItemFromRoom(playerRoom, item);
-			itemIterator.remove();
 			database.addItemToPlayer(item);
-			inventoryController.addItem(player.getInventory(), item, item.getAmount());
+
+			if (!hasSharedInventoryState()) {
+				inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
+				inventoryController.addItem(player.getInventory(), item, item.getAmount());
+			}
 
 			output
 				.append(item.getAmount())
@@ -245,9 +260,12 @@ public class GameEngine {
 		if (item == null) return "You do not have a " + itemName + ".\n";
 
 		database.removeItemFromPlayer(item);
-		inventoryController.removeItem(player.getInventory(), item, item.getAmount());
 		database.addItemToRoom(playerRoom, item);
-		inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+
+		if (!hasSharedInventoryState()) {
+			inventoryController.removeItem(player.getInventory(), item, item.getAmount());
+			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+		}
 
 		return "You dropped "
 			+ getItemFormat(item)
@@ -263,16 +281,20 @@ public class GameEngine {
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
 		StringBuilder output = new StringBuilder("You dropped:\n");
+		ArrayList<Item> itemsToDrop = new ArrayList<>(player.getInventory().getItems().values());
 
-		Iterator<Item> itemIterator = player.getInventory().getItems().values().iterator();
-
-		while (itemIterator.hasNext()) {
-			Item item = itemIterator.next();
+		for (Item item : itemsToDrop) {
+			if (!player.getInventory().getItems().containsKey(item.getId())) {
+				continue;
+			}
 
 			database.removeItemFromPlayer(item);
-			itemIterator.remove();
 			database.addItemToRoom(playerRoom, item);
-			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+
+			if (!hasSharedInventoryState()) {
+				inventoryController.removeItem(player.getInventory(), item, item.getAmount());
+				inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
+			}
 
 			output
 				.append(item.getAmount())
@@ -291,74 +313,92 @@ public class GameEngine {
 		return output + ".\n";
 	}
 
-//	public String talkToNPC(ArrayList<String> arguments) {
-//		Room playerRoom = player.getRoom();
-//
-//		String npcName = arguments.get(0);
-//		NPC npc = roomController.getNPCByNameCaseInsensitive(playerRoom, npcName);
-//		if (npc == null) return npcName + " is not in this room.\n";
-//
-//		player.setCurrentNPC(npc);
-//		player.setState(PlayerState.TALKING_TO_NPC);
-//
-//		return npc.getGreeting() + "\n";
-//	}
+	public String talkToNPC(ArrayList<String> arguments) {
 
-//	public String leaveNPC(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String goodbye = npc.getGoodbye() + "\n";
-//
-//		player.setCurrentNPC(null);
-//		player.setState(PlayerState.EXPLORING);
-//
-//		return goodbye;
-//	}
+		HashMap<Integer, NPC> npcs = database.getNPCsForRoom(player.getRoom());
+		String npcName = arguments.get(0);
+		NPC currentNPC = null;
 
-//	public String searchShop(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//
-//		if (npc.getInventory().getItems().isEmpty()) return "I am not selling anything.\n";
-//
-//		StringBuilder output = new StringBuilder("I am selling:\n");
-//
-//		for (Item item : npc.getInventory().getItems().values()) {
-//			output
-//				.append("- ")
-//				.append(item.getAmount())
-//				.append(" x ")
-//				.append(item.getName())
-//				.append(" for ")
-//				.append(item.getPrice() * item.getAmount())
-//				.append(" coins\n");
-//		}
-//
-//		return output.toString();
-//	}
+		for (NPC npc : npcs.values()){
+			if (npc.getName().equalsIgnoreCase(npcName)){
+				currentNPC = npc;
+			}
+		}
 
-//	public String buyItem(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String itemName = arguments.get(1).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(npc.getInventory(), itemName);
-//		if (item == null) return "I am not selling any " + itemName + "s.\n";
-//
-//		Integer amount = null;
-//		try {
-//			amount = Integer.parseInt(arguments.get(0));
-//		} catch (NumberFormatException ignored) {
-//		}
-//		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
-//		if (player.getCoins() < item.getPrice() * amount) {
-//			return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
-//		}
-//
-//		npcController.buy(npc, player, item, amount);
-//
-//		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
-//	}
+		if (currentNPC == null) return npcName + " is not in this room.\n";
+
+		database.setPlayerNPC(currentNPC);
+		player.setCurrentNPC(currentNPC);
+		database.setPlayerState(PlayerState.TALKING_TO_NPC);
+		player.setState(PlayerState.TALKING_TO_NPC);
+
+		return currentNPC.getGreeting() + "\n";
+	}
+
+	public String leaveNPC(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String goodbye = npc.getGoodbye() + "\n";
+
+		database.setPlayerNPC(null);
+		player.setCurrentNPC(null);
+		database.setPlayerState(PlayerState.EXPLORING);
+		player.setState(PlayerState.EXPLORING);
+
+		return goodbye;
+	}
+
+	public String searchShop(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
+
+		if (npcItems == null) return "I am not selling anything.\n";
+
+		StringBuilder output = new StringBuilder("I am selling:\n");
+
+		for (Item item : npcItems.values()) {
+			output
+				.append("- ")
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append(" for ")
+				.append(item.getPrice() * item.getAmount())
+				.append(" coins\n");
+		}
+
+		return output.toString();
+	}
+
+public String buyItem(ArrayList<String> arguments) {
+	NPC npc = player.getCurrentNPC();
+	HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
+
+
+	if (npc == null) return "You are not currently talking to an NPC.\n";
+	if (npcItems == null) return "I am not selling anything.\n";
+
+	String itemName = arguments.get(1).toLowerCase();
+	for (Item item : npcItems.values()){
+		if (item.getName().equals(itemName)){
+			Integer amount = null;
+			try {
+				amount = Integer.parseInt(arguments.get(0));
+			} catch (NumberFormatException ignored) {
+			}
+			if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
+			if (player.getCoins() < item.getPrice() * amount) {
+				return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
+			}
+
+			database.setPlayerCoins(player.getCoins()-(item.getPrice()*amount));
+			database.addItemToPlayer(item);
+			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
+		}
+	}
+	return "I am not selling any " + itemName + "s.\n";
+}
 
 //	public String sellItem(ArrayList<String> arguments) {
 //		NPC npc = player.getCurrentNPC();
@@ -459,6 +499,24 @@ public class GameEngine {
 
 		return output;
 	}
+
+	private boolean hasSharedInventoryState() {
+		return database instanceof FakeDatabase;
+	}
+
+//	private static Database seedFakeDatabase(Player player, HashMap<Integer, Room> rooms) {
+//		HashMap<Integer, Room> roomMap = rooms == null ? new HashMap<>() : rooms;
+//
+//		if (roomMap.isEmpty()) {
+//			new RoomController(roomMap).loadDemo();
+//		}
+//
+//		if (player != null && player.getRoom() == null && roomMap.containsKey(0)) {
+//			player.setRoom(roomMap.get(0));
+//		}
+//
+//		return new FakeDatabase(player, roomMap);
+//	}
 
 	/**
 	 * Makes a string list of items in an inventory.
