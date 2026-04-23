@@ -79,4 +79,16 @@ public class Armor extends Item {
 	public void setActive(Boolean active) {
 		this.active = active;
 	}
+
+	public Armor copy() {
+		return new Armor(
+			getId(),
+			getName(),
+			getDescription(),
+			defense,
+			active,
+			getValue(),
+			getAssetName()
+		);
+	}
 }

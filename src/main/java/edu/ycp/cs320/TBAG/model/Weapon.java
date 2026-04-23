@@ -56,4 +56,15 @@ public class Weapon extends Item {
 	public WeaponAbility removeAbility(WeaponAbility ability) {
 		return abilities.remove(ability.getId());
 	}
+
+	public Weapon copy() {
+		return new Weapon(
+			getId(),
+			getName(),
+			getDescription(),
+			getValue(),
+			getAmount(),
+			getAssetName()
+		);
+	}
 }

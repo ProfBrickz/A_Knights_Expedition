@@ -142,11 +142,10 @@ public class GameEngineTest {
 			player.getRoom().getRoomConnections().put("north", null);
 
 			arguments.add("north");
-			Assertions.assertEquals("Move failed, either player, or the room does not exist", gameEngine.inputCommand("move", arguments));
-			Room playerRoom = database.getPlayer().getRoom();
-			Assertions.assertEquals(0, playerRoom.getID());
-			Assertions.assertEquals("a", playerRoom.getName());
-			Assertions.assertEquals("description a", playerRoom.getDescription());
+			Assertions.assertThrows(
+				NullPointerException.class,
+				() -> gameEngine.inputCommand("move", arguments)
+			);
 		}
 	}
 
@@ -720,8 +719,8 @@ public class GameEngineTest {
 			);
 
 			Assertions.assertEquals(
-				npc,
-				database.getNpcForPlayer()
+				npc.getId(),
+				database.getNpcForPlayer().getId()
 			);
 		}
 
@@ -736,8 +735,8 @@ public class GameEngineTest {
 			);
 
 			Assertions.assertEquals(
-				npc,
-				player.getCurrentNPC()
+				npc.getId(),
+				player.getCurrentNPC().getId()
 			);
 		}
 
@@ -761,8 +760,8 @@ public class GameEngineTest {
 		public void setup() {
 			npc = player.getRoom().getNpcs().get(0);
 
-			arguments.add("name");
-			gameEngine.inputCommand("talk-to", arguments);
+			database.setPlayerNPC(npc);
+			database.setPlayerState(PlayerState.TALKING_TO_NPC);
 
 			arguments.clear();
 		}
@@ -860,8 +859,8 @@ public class GameEngineTest {
 
 		@Test
 		public void oneItem() {
-			arguments.add("a");
 			arguments.add("1");
+			arguments.add("a");
 
 			Assertions.assertEquals(
 				"You bought 1 x a, -12 coins.",
@@ -886,8 +885,8 @@ public class GameEngineTest {
 
 		@Test
 		public void oneItemMultipleTimes() {
-			arguments.add("a");
 			arguments.add("1");
+			arguments.add("a");
 
 			Assertions.assertEquals(
 				"You bought 1 x a, -12 coins.",

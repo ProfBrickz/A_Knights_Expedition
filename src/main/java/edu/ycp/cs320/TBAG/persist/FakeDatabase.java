@@ -212,7 +212,7 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public NPC getNpcForPlayer() {
-		return player.getCurrentNPC();
+		return player.getCurrentNPC().copy();
 	}
 
 	@Override
@@ -323,7 +323,14 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
-		return rooms.get(room.getID()).getRoomConnections();
+		HashMap<String, RoomConnection> roomConnections = new HashMap<>();
+		room = rooms.get(room.getID());
+
+		for (Map.Entry<String, RoomConnection> entry : room.getRoomConnections().entrySet()) {
+			roomConnections.put(entry.getKey(), entry.getValue().copy());
+		}
+
+		return roomConnections;
 	}
 
 	@Override
@@ -386,13 +393,23 @@ public class FakeDatabase implements Database {
 
 
 	// Item-related methods
+	private HashMap<Integer, Item> copyItems(HashMap<Integer, Item> items) {
+		HashMap<Integer, Item> newItems = new HashMap<>();
+
+		for (Item item : items.values()) {
+			newItems.put(item.getId(), item.copy());
+		}
+
+		return newItems;
+	}
+
 	@Override
 	public HashMap<Integer, Item> getItemsForPlayer() {
 		if (player == null) {
 			return new HashMap<>();
 		}
 
-		return player.getInventory().getItems();
+		return copyItems(player.getInventory().getItems());
 	}
 
 	@Override
@@ -403,7 +420,7 @@ public class FakeDatabase implements Database {
 
 		room = rooms.get(room.getID());
 
-		return room.getInventory().getItems();
+		return copyItems(room.getInventory().getItems());
 	}
 
 	@Override
@@ -412,7 +429,9 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return npc.getInventory().getItems();
+		npc = npcs.get(npc.getId());
+
+		return copyItems(npc.getInventory().getItems());
 	}
 
 	@Override
@@ -421,7 +440,9 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return enemy.getInventory().getItems();
+		enemy = enemies.get(enemy.getId());
+
+		return copyItems(enemy.getInventory().getItems());
 	}
 
 
@@ -433,8 +454,13 @@ public class FakeDatabase implements Database {
 		}
 
 		room = rooms.get(room.getID());
+		HashMap<Integer, NPC> npcs = new HashMap<>();
 
-		return room.getNpcs();
+		for (NPC npc : room.getNpcs().values()) {
+			npcs.put(npc.getId(), npc.copy());
+		}
+
+		return npcs;
 	}
 
 
@@ -447,7 +473,13 @@ public class FakeDatabase implements Database {
 
 		room = rooms.get(room.getID());
 
-		return room.getEnemies();
+		HashMap<Integer, Enemy> enemies = new HashMap<>();
+
+		for (Enemy enemy : room.getEnemies().values()) {
+			enemies.put(enemy.getId(), enemy.copy());
+		}
+
+		return enemies;
 	}
 
 	@Override
@@ -514,50 +546,13 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return weapon.getAbilities();
-	}
+		weapon = (Weapon) items.get(weapon.getId());
+		HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
 
-	private Item cloneItem(Item item) {
-		Item newItem;
-
-		if (item instanceof Weapon weapon) {
-			newItem = new Weapon(
-				weapon.getId(),
-				weapon.getName(),
-				weapon.getDescription(),
-				weapon.getValue(),
-				weapon.getAssetName()
-			);
-		} else if (item instanceof Armor armor) {
-			newItem = new Armor(
-				armor.getId(),
-				armor.getName(),
-				armor.getDescription(),
-				armor.getDefense(),
-				armor.getActive(),
-				armor.getValue(),
-				armor.getAssetName()
-			);
-		} else if (item instanceof HealingItem healingItem) {
-			newItem = new HealingItem(
-				healingItem.getId(),
-				healingItem.getName(),
-				healingItem.getDescription(),
-				healingItem.getHealAmount(),
-				healingItem.getValue(),
-				healingItem.getAssetName()
-			);
-		} else {
-			newItem = new Item(
-				item.getId(),
-				item.getName(),
-				item.getDescription(),
-				item.getValue(),
-				item.getAmount(),
-				item.getAssetName()
-			);
+		for (WeaponAbility ability : weapon.getAbilities().values()) {
+			weaponAbilities.put(ability.getId(), ability.copy());
 		}
 
-		return newItem;
+		return weaponAbilities;
 	}
 }

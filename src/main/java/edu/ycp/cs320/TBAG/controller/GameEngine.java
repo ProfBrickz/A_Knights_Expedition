@@ -329,32 +329,34 @@ public class GameEngine {
 	}
 
 	public String buyItem(ArrayList<String> arguments) {
-		NPC npc = player.getCurrentNPC();
+		NPC npc = database.getNpcForPlayer();
 		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
 
 
-		if (npc == null) return "You are not currently talking to an NPC.\n";
-		if (npcItems == null) return "I am not selling anything.\n";
+		if (npc == null) return "You are not currently talking to an NPC.";
+		if (npcItems == null) return "I am not selling anything.";
 
 		String itemName = arguments.get(1).toLowerCase();
 		for (Item item : npcItems.values()) {
-			if (item.getName().equals(itemName)) {
-				Integer amount = null;
-				try {
-					amount = Integer.parseInt(arguments.get(0));
-				} catch (NumberFormatException ignored) {
-				}
-				if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
-				if (player.getCoins() < item.getPrice() * amount) {
-					return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
-				}
+			if (!item.getName().equals(itemName)) continue;
 
-				database.setPlayerCoins(player.getCoins() - (item.getPrice() * amount));
-				database.addItemToPlayer(item);
-				return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
+			Integer amount = null;
+			try {
+				amount = Integer.parseInt(arguments.get(0));
+			} catch (NumberFormatException ignored) {
 			}
+
+			if (amount == null) return arguments.get(0) + " is not a valid amount.";
+			if (player.getCoins() < item.getPrice() * amount) {
+				return "You are too poor to buy " + amount + " x " + item.getName() + ".";
+			}
+
+			database.setPlayerCoins(player.getCoins() - (item.getPrice() * amount));
+			database.addItemToPlayer(item);
+			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
 		}
-		return "I am not selling any " + itemName + "s.\n";
+
+		return "I am not selling any " + itemName + "s.";
 	}
 
 //	public String sellItem(ArrayList<String> arguments) {
