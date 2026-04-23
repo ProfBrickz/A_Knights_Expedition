@@ -206,7 +206,15 @@ public class FakeDatabase implements Database {
 			throw new IllegalStateException("No player exists");
 		}
 
-		return player;
+		return new Player(
+			player.getMaxHealth(),
+			player.getHealth(),
+			player.getState(),
+			getRoomById(player.getRoom().getID()),
+			player.getCoins(),
+			player.getLastCommand(),
+			player.getConfirming()
+		);
 	}
 
 	@Override
@@ -310,7 +318,14 @@ public class FakeDatabase implements Database {
 	// Room-related methods
 	@Override
 	public Room getRoomById(Integer id) {
-		return rooms.get(id);
+		Room room = rooms.get(id);
+
+		return new Room(
+			room.getID(),
+			room.getName(),
+			room.getDescription(),
+			room.getAssetName()
+		);
 	}
 
 	@Override
@@ -328,6 +343,8 @@ public class FakeDatabase implements Database {
 		if (itemId == null) {
 			return;
 		}
+
+		room = rooms.get(room.getID());
 
 		Item existing = room.getInventory().getItems().get(itemId);
 		int delta = item.getAmount() == null ? 1 : item.getAmount();
@@ -353,6 +370,8 @@ public class FakeDatabase implements Database {
 		if (itemId == null) {
 			return;
 		}
+
+		room = rooms.get(room.getID());
 
 		Item existing = room.getInventory().getItems().get(itemId);
 		if (existing == null) {
@@ -389,7 +408,13 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return new HashMap<>(room.getInventory().getItems());
+		Room thisRoom = rooms.get(room.getID());
+		HashMap<Integer, Item> roomItems = new HashMap<>();
+		for (Item item : thisRoom.getInventory().getItems().values()) {
+			roomItems.put(item.getId(), cloneItem(item));
+		}
+
+		return roomItems;
 	}
 
 	@Override
@@ -494,5 +519,49 @@ public class FakeDatabase implements Database {
 		}
 
 		return new HashMap<>(weapon.getAbilities());
+	}
+
+	private Item cloneItem(Item item) {
+		Item newItem;
+
+		if (item instanceof Weapon weapon) {
+			newItem = new Weapon(
+				weapon.getId(),
+				weapon.getName(),
+				weapon.getDescription(),
+				weapon.getValue(),
+				weapon.getAssetName()
+			);
+		} else if (item instanceof Armor armor) {
+			newItem = new Armor(
+				armor.getId(),
+				armor.getName(),
+				armor.getDescription(),
+				armor.getDefense(),
+				armor.getActive(),
+				armor.getValue(),
+				armor.getAssetName()
+			);
+		} else if (item instanceof HealingItem healingItem) {
+			newItem = new HealingItem(
+				healingItem.getId(),
+				healingItem.getName(),
+				healingItem.getDescription(),
+				healingItem.getHealAmount(),
+				healingItem.getValue(),
+				healingItem.getAssetName()
+			);
+		} else {
+			newItem = new Item(
+				item.getId(),
+				item.getName(),
+				item.getDescription(),
+				item.getValue(),
+				item.getAmount(),
+				item.getAssetName()
+			);
+		}
+
+		return newItem;
 	}
 }

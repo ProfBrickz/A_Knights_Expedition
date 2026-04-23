@@ -4,7 +4,6 @@ import edu.ycp.cs320.TBAG.model.*;
 import edu.ycp.cs320.TBAG.persist.Database;
 import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
-import edu.ycp.cs320.TBAG.persist.FakeDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +14,7 @@ import java.util.HashMap;
  */
 public class GameEngine {
 	private final Database database;
-	private final Player player;
+	private Player player;
 	private final InventoryController inventoryController = new InventoryController();
 
 	// Constructor
@@ -35,14 +34,6 @@ public class GameEngine {
 	public GameEngine() {
 		this(new DerbyDatabase());
 	}
-
-	/**
-	 * Test-friendly constructor that keeps the provided player/rooms while still
-	 * exercising the database-backed command flow through FakeDatabase.
-	 */
-//	public GameEngine(Player player, HashMap<Integer, Room> rooms) {
-//		this(seedFakeDatabase(player, rooms));
-//	}
 
 
 	// Getters and setters
@@ -85,22 +76,25 @@ public class GameEngine {
 	public String inputCommand(String commandName, ArrayList<String> arguments) {
 		commandName = commandName.trim().toLowerCase();
 
+		player = this.database.getPlayer();
+		player.getInventory().addItems((this.database.getItemsForPlayer()));
+
 		for (Command command : Command.values()) {
-			if (command.getName().equals(commandName)) {
-				String error = validateCommand(command, arguments);
-				if (error != null) return error;
+			if (!command.getName().equals(commandName)) continue;
 
-				Boolean confirming = player.getConfirming();
+			String error = validateCommand(command, arguments);
+			if (error != null) return error;
+			
+			Boolean confirming = player.getConfirming();
 
-				if (!confirming) {
-					player.setLastCommand(command);
-				}
-
-				String output = command.run(this, arguments);
-
-				database.setLastCommand(command);
-				return output;
+			if (!confirming) {
+				player.setLastCommand(command);
 			}
+
+			String output = command.run(this, arguments);
+
+			database.setLastCommand(command);
+			return output;
 		}
 		return "Sorry, command not recognized.";
 	}
@@ -205,11 +199,6 @@ public class GameEngine {
 		database.removeItemFromRoom(playerRoom, item);
 		database.addItemToPlayer(item);
 
-		if (!hasSharedInventoryState()) {
-			inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
-			inventoryController.addItem(player.getInventory(), item, item.getAmount());
-		}
-
 		return "You picked up " + getItemFormat(item) + ".";
 	}
 
@@ -218,24 +207,14 @@ public class GameEngine {
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
 		if (playerRoom.getInventory().getItems().isEmpty()) {
-			return "You did not pick anything up from this room.\n";
+			return "You did not pick anything up from this room.";
 		}
 
 		StringBuilder output = new StringBuilder("You picked up:\n");
-		ArrayList<Item> itemsToPickup = new ArrayList<>(playerRoom.getInventory().getItems().values());
 
-		for (Item item : itemsToPickup) {
-			if (!playerRoom.getInventory().getItems().containsKey(item.getId())) {
-				continue;
-			}
-
+		for (Item item : playerRoom.getInventory().getItems().values()) {
 			database.removeItemFromRoom(playerRoom, item);
 			database.addItemToPlayer(item);
-
-			if (!hasSharedInventoryState()) {
-				inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
-				inventoryController.addItem(player.getInventory(), item, item.getAmount());
-			}
 
 			output
 				.append(item.getAmount())
@@ -257,44 +236,27 @@ public class GameEngine {
 
 		String itemName = arguments.get(0).toLowerCase();
 		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-		if (item == null) return "You do not have a " + itemName + ".\n";
+		if (item == null) return "You do not have a " + itemName + ".";
 
 		database.removeItemFromPlayer(item);
 		database.addItemToRoom(playerRoom, item);
 
-		if (!hasSharedInventoryState()) {
-			inventoryController.removeItem(player.getInventory(), item, item.getAmount());
-			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
-		}
-
-		return "You dropped "
-			+ getItemFormat(item)
-			+ ".\n";
+		return "You dropped " + getItemFormat(item) + ".";
 	}
 
 	public String dropAllItems(ArrayList<String> arguments) {
 		if (player.getInventory().getItems().isEmpty()) {
-			return "You do not have anything to drop.\n";
+			return "You do not have anything to drop.";
 		}
 
 		Room playerRoom = player.getRoom();
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
 		StringBuilder output = new StringBuilder("You dropped:\n");
-		ArrayList<Item> itemsToDrop = new ArrayList<>(player.getInventory().getItems().values());
 
-		for (Item item : itemsToDrop) {
-			if (!player.getInventory().getItems().containsKey(item.getId())) {
-				continue;
-			}
-
+		for (Item item : player.getInventory().getItems().values()) {
 			database.removeItemFromPlayer(item);
 			database.addItemToRoom(playerRoom, item);
-
-			if (!hasSharedInventoryState()) {
-				inventoryController.removeItem(player.getInventory(), item, item.getAmount());
-				inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
-			}
 
 			output
 				.append(item.getAmount())
@@ -310,7 +272,7 @@ public class GameEngine {
 		String output = "You have " + player.getCoins() + " coin";
 		if (player.getCoins() != 1) output += "s";
 
-		return output + ".\n";
+		return output + ".";
 	}
 
 	public String talkToNPC(ArrayList<String> arguments) {
@@ -319,8 +281,8 @@ public class GameEngine {
 		String npcName = arguments.get(0);
 		NPC currentNPC = null;
 
-		for (NPC npc : npcs.values()){
-			if (npc.getName().equalsIgnoreCase(npcName)){
+		for (NPC npc : npcs.values()) {
+			if (npc.getName().equalsIgnoreCase(npcName)) {
 				currentNPC = npc;
 			}
 		}
@@ -328,9 +290,7 @@ public class GameEngine {
 		if (currentNPC == null) return npcName + " is not in this room.\n";
 
 		database.setPlayerNPC(currentNPC);
-		player.setCurrentNPC(currentNPC);
 		database.setPlayerState(PlayerState.TALKING_TO_NPC);
-		player.setState(PlayerState.TALKING_TO_NPC);
 
 		return currentNPC.getGreeting() + "\n";
 	}
@@ -371,34 +331,34 @@ public class GameEngine {
 		return output.toString();
 	}
 
-public String buyItem(ArrayList<String> arguments) {
-	NPC npc = player.getCurrentNPC();
-	HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
+	public String buyItem(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
 
 
-	if (npc == null) return "You are not currently talking to an NPC.\n";
-	if (npcItems == null) return "I am not selling anything.\n";
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+		if (npcItems == null) return "I am not selling anything.\n";
 
-	String itemName = arguments.get(1).toLowerCase();
-	for (Item item : npcItems.values()){
-		if (item.getName().equals(itemName)){
-			Integer amount = null;
-			try {
-				amount = Integer.parseInt(arguments.get(0));
-			} catch (NumberFormatException ignored) {
+		String itemName = arguments.get(1).toLowerCase();
+		for (Item item : npcItems.values()) {
+			if (item.getName().equals(itemName)) {
+				Integer amount = null;
+				try {
+					amount = Integer.parseInt(arguments.get(0));
+				} catch (NumberFormatException ignored) {
+				}
+				if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
+				if (player.getCoins() < item.getPrice() * amount) {
+					return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
+				}
+
+				database.setPlayerCoins(player.getCoins() - (item.getPrice() * amount));
+				database.addItemToPlayer(item);
+				return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
 			}
-			if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
-			if (player.getCoins() < item.getPrice() * amount) {
-				return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
-			}
-
-			database.setPlayerCoins(player.getCoins()-(item.getPrice()*amount));
-			database.addItemToPlayer(item);
-			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
 		}
+		return "I am not selling any " + itemName + "s.\n";
 	}
-	return "I am not selling any " + itemName + "s.\n";
-}
 
 //	public String sellItem(ArrayList<String> arguments) {
 //		NPC npc = player.getCurrentNPC();
@@ -499,24 +459,6 @@ public String buyItem(ArrayList<String> arguments) {
 
 		return output;
 	}
-
-	private boolean hasSharedInventoryState() {
-		return database instanceof FakeDatabase;
-	}
-
-//	private static Database seedFakeDatabase(Player player, HashMap<Integer, Room> rooms) {
-//		HashMap<Integer, Room> roomMap = rooms == null ? new HashMap<>() : rooms;
-//
-//		if (roomMap.isEmpty()) {
-//			new RoomController(roomMap).loadDemo();
-//		}
-//
-//		if (player != null && player.getRoom() == null && roomMap.containsKey(0)) {
-//			player.setRoom(roomMap.get(0));
-//		}
-//
-//		return new FakeDatabase(player, roomMap);
-//	}
 
 	/**
 	 * Makes a string list of items in an inventory.

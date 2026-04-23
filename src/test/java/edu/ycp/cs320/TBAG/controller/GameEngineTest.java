@@ -45,7 +45,9 @@ public class GameEngineTest {
 		roomConnections.put(roomB.getID(), bConnections);
 
 		roomNPCs = new HashMap<>();
-
+		ArrayList<NPC> aNPCs = new ArrayList<>();
+		aNPCs.add(new NPC(0, "name"));
+		roomNPCs.put(roomA.getID(), aNPCs);
 
 		// Setup player
 		player = new Player(100, 100);
@@ -179,7 +181,8 @@ public class GameEngineTest {
 
 		@Test
 		public void nullRoom() {
-			database.getPlayer().setRoom(null);
+			player.setRoom(null);
+			
 			Assertions.assertThrows(
 				NullPointerException.class,
 				() -> gameEngine.inputCommand("look", arguments)
@@ -342,7 +345,6 @@ public class GameEngineTest {
 		public void valid() {
 			Room playerRoom = player.getRoom();
 
-
 			Item item1 = new Item(0, "sword", "A sharp sword", 1);
 			playerRoom.getInventory().addItem(item1);
 
@@ -351,8 +353,8 @@ public class GameEngineTest {
 				"You picked up 1 sword.",
 				gameEngine.inputCommand("pickup", arguments)
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey(item1.getId()));
-			Assertions.assertFalse(playerRoom.getInventory().getItems().containsKey(item1.getId()));
+			Assertions.assertTrue(database.getItemsForPlayer().containsKey(item1.getId()));
+			Assertions.assertFalse(database.getItemsForRoom(playerRoom).containsKey(item1.getId()));
 		}
 
 		@Test
@@ -487,7 +489,11 @@ public class GameEngineTest {
 			player.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
 
 			Assertions.assertEquals(
-				"You picked up:\n1 x sword\n3 x potion",
+				"""
+					You picked up:
+					1 x sword
+					3 x potion
+					""",
 				gameEngine.inputCommand("pickup-all", arguments)
 			);
 
@@ -509,461 +515,469 @@ public class GameEngineTest {
 		}
 	}
 
-//	@Nested
-//	class DropTests {
-//		@Test
-//		public void valid() {
-//			Room playerRoom = player.getRoom();
-//
-//			Item item = new Item(0, "sword", "A sharp sword", 1);
-//			player.getInventory().addItem(item);
-//
-//			arguments.add("sword");
-//			Assertions.assertEquals(
-//				"You dropped 1 sword.",
-//				gameEngine.inputCommand("drop", arguments)
-//			);
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
-//		}
-//
-//		@Test
-//		public void notInInventory() {
-//			arguments.add("sword");
-//			Assertions.assertEquals(
-//				"You do not have a sword.",
-//				gameEngine.inputCommand("drop", arguments)
-//			);
-//		}
-//
-//		@Test
-//		public void alreadyHasItem() {
-//			Room playerRoom = player.getRoom();
-//
-//			Item item = new Item(0, "sword", "A sharp sword", 1);
-//			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
-//			player.getInventory().addItem(item);
-//
-//			arguments.add("sword");
-//			Assertions.assertEquals(
-//				"You dropped 1 sword.",
-//				gameEngine.inputCommand("drop", arguments)
-//			);
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
-//			Assertions.assertEquals(
-//				2,
-//				playerRoom.getInventory().getItems().get(item.getId()).getAmount()
-//			);
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
-//		}
-//
-//		@Test
-//		public void alreadyHasItemIntegerLimit() {
-//			Room playerRoom = player.getRoom();
-//
-//			Item item = new Item(0, "sword", "A sharp sword", 1);
-//			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1, Integer.MAX_VALUE));
-//			player.getInventory().addItem(item);
-//
-//			arguments.add("sword");
-//			Assertions.assertEquals(
-//				"You dropped 1 sword.",
-//				gameEngine.inputCommand("drop", arguments)
-//			);
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
-//			Assertions.assertEquals(
-//				Integer.MIN_VALUE,
-//				playerRoom.getInventory().getItems().get(item.getId()).getAmount()
-//			);
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
-//		}
-//
-//		@Test
-//		public void multipleItems() {
-//			Room playerRoom = player.getRoom();
-//
-//			Item item1 = new Item(0, "sword", "A sharp sword", 1);
-//			player.getInventory().addItem(item1);
-//
-//			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
-//			player.getInventory().addItem(item2);
-//
-//			arguments.clear();
-//			arguments.add("potion");
-//
-//			Assertions.assertEquals(
-//				"You dropped 3 potions.",
-//				gameEngine.inputCommand("drop", arguments)
-//			);
-//
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item2.getId()));
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item2.getId()));
-//			Assertions.assertEquals(
-//				3,
-//				playerRoom.getInventory().getItems().get(item2.getId()).getAmount()
-//			);
-//
-//			Assertions.assertTrue(player.getInventory().getItems().containsKey(item1.getId()));
-//			Assertions.assertFalse(playerRoom.getInventory().getItems().containsKey(item1.getId()));
-//		}
-//	}
-//
-//	@Nested
-//	class DropAllTests {
-//		@Test
-//		public void valid() {
-//			Room playerRoom = player.getRoom();
-//
-//			Item item1 = new Item(0, "sword", "A sharp sword", 1);
-//			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
-//
-//			player.getInventory().addItem(item1);
-//			player.getInventory().addItem(item2);
-//
-//			Assertions.assertEquals(
-//				"You dropped:\n1 x sword\n3 x potion",
-//				gameEngine.inputCommand("drop-all", arguments)
-//			);
-//
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item1.getId()));
-//			Assertions.assertEquals(1, playerRoom.getInventory().getItems().get(item1.getId()).getAmount());
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item1.getId()));
-//
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item2.getId()));
-//			Assertions.assertEquals(3, playerRoom.getInventory().getItems().get(item2.getId()).getAmount());
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item2.getId()));
-//		}
-//
-//		@Test
-//		public void haveOneItem() {
-//			Room playerRoom = player.getRoom();
-//
-//			Item item1 = new Item(0, "sword", "A sharp sword", 1);
-//			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
-//
-//			player.getInventory().addItem(item1);
-//			player.getInventory().addItem(item2);
-//			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
-//
-//			Assertions.assertEquals(
-//				"You dropped:\n1 x sword\n3 x potion",
-//				gameEngine.inputCommand("drop-all", arguments)
-//			);
-//
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item1.getId()));
-//			Assertions.assertEquals(2, playerRoom.getInventory().getItems().get(item1.getId()).getAmount());
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item1.getId()));
-//
-//			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item2.getId()));
-//			Assertions.assertEquals(3, playerRoom.getInventory().getItems().get(item2.getId()).getAmount());
-//			Assertions.assertFalse(player.getInventory().getItems().containsKey(item2.getId()));
-//		}
-//
-//		@Test
-//		public void empty() {
-//			Assertions.assertEquals(
-//				"You do not have anything to drop.",
-//				gameEngine.inputCommand("drop-all", arguments)
-//			);
-//		}
-//	}
+	@Nested
+	class DropTests {
+		@Test
+		public void valid() {
+			Room playerRoom = player.getRoom();
 
-//	@Test
-//	public void testWallet() {
-//		Assertions.assertEquals(
-//			"You have 0 coins.",
-//			gameEngine.inputCommand("wallet", arguments)
-//		);
-//
-//		database.setPlayerCoins(1);
-//		Assertions.assertEquals(
-//			"You have 1 coin.",
-//			gameEngine.inputCommand("wallet", arguments)
-//		);
-//
-//		player.setCoins(10);
-//		Assertions.assertEquals(
-//			"You have 10 coins.",
-//			gameEngine.inputCommand("wallet", arguments)
-//		);
-//	}
+			Item item = new Item(0, "sword", "A sharp sword", 1);
+			player.getInventory().addItem(item);
 
-//	@Nested
-//	class TalkToTests {
-//		private NPC npc;
-//
-//		@BeforeEach
-//		public void setup() {
-//			npc = player.getRoom().getNpcs().get(0);
-//		}
-//
-//		@Test
-//		public void defaultGreeting() {
-//			arguments.add("name");
-//			Assertions.assertEquals(
-//				"Hello adventurer, I am name.",
-//				gameEngine.inputCommand("talk-to", arguments)
-//			);
-//
-//			Assertions.assertEquals(
-//				npc,
-//				player.getCurrentNPC()
-//			);
-//		}
-//
-//		@Test
-//		public void customGreeting() {
-//			npc.setGreeting("Hi");
-//
-//			arguments.add("name");
-//			Assertions.assertEquals(
-//				"Hi",
-//				gameEngine.inputCommand("talk-to", arguments)
-//			);
-//
-//			Assertions.assertEquals(
-//				npc,
-//				player.getCurrentNPC()
-//			);
-//		}
-//
-//		@Test
-//		public void noNPC() {
-//			arguments.add("abc");
-//			Assertions.assertEquals(
-//				"abc is not in this room.",
-//				gameEngine.inputCommand("talk-to", arguments)
-//			);
-//
-//			Assertions.assertNull(player.getCurrentNPC());
-//		}
-//	}
-//
-//	@Nested
-//	class LeaveTests {
-//		private NPC npc;
-//
-//		@BeforeEach
-//		public void setup() {
-//			npc = player.getRoom().getNpcs().get(0);
-//
-//			arguments.add("name");
-//			gameEngine.inputCommand("talk-to", arguments);
-//
-//			arguments.clear();
-//		}
-//
-//		@Test
-//		public void defaultBye() {
-//			Assertions.assertEquals(
-//				"Goodbye adventurer.",
-//				gameEngine.inputCommand("leave", arguments)
-//			);
-//
-//			Assertions.assertNull(player.getCurrentNPC());
-//		}
-//
-//		@Test
-//		public void customGreeting() {
-//			npc.setGoodbye("Bye");
-//
-//			Assertions.assertEquals(
-//				"Bye",
-//				gameEngine.inputCommand("leave", arguments)
-//			);
-//
-//			Assertions.assertNull(player.getCurrentNPC());
-//		}
-//	}
-//
-//	@Nested
-//	class SearchShopTests {
-//		private NPC npc;
-//
-//		@BeforeEach
-//		public void setup() {
-//			npc = player.getRoom().getNpcs().get(0);
-//
-//			arguments.add("name");
-//			gameEngine.inputCommand("talk-to", arguments);
-//
-//			arguments.clear();
-//		}
-//
-//		@Test
-//		public void oneItem() {
-//			npc.getInventory().addItem(new Item(0, "a", "", 1));
-//
-//			Assertions.assertEquals(
-//				"""
-//					I am selling:
-//					- 1 x a for 4 coins
-//
-//					""",
-//				gameEngine.inputCommand("search-shop", arguments)
-//			);
-//		}
-//
-//		@Test
-//		public void multipleItems() {
-//			npc.getInventory().addItem(new Item(0, "a", "", 1, 2));
-//			npc.getInventory().addItem(new Item(1, "b", "", 7));
-//
-//			Assertions.assertEquals(
-//				"""
-//					I am selling:
-//					- 2 x a for 8 coins
-//					- 1 x b for 28 coins
-//
-//					""",
-//				gameEngine.inputCommand("search-shop", arguments)
-//			);
-//		}
-//
-//		@Test
-//		public void empty() {
-//			Assertions.assertEquals(
-//				"I am not selling anything.",
-//				gameEngine.inputCommand("search-shop", arguments)
-//			);
-//		}
-//	}
-//
-//	@Nested
-//	class buyItemTests {
-//		private NPC npc;
-//
-//		@BeforeEach
-//		public void setup() {
-//			npc = player.getRoom().getNpcs().get(0);
-//			npc.getInventory().addItem(new Item(0, "a", "", 3));
-//			npc.getInventory().addItem(new Item(1, "b", "", 2, 2));
-//			player.setCoins(100);
-//
-//			arguments.add("name");
-//			gameEngine.inputCommand("talk-to", arguments);
-//
-//			arguments.clear();
-//		}
-//
-//		@Test
-//		public void oneItem() {
-//			arguments.add("a");
-//			arguments.add("1");
-//
-//			Assertions.assertEquals(
-//				"You bought 1 x a, -12 coins.",
-//				gameEngine.inputCommand("buy", arguments)
-//			);
-//
-//			Assertions.assertEquals(
-//				100 - 12,
-//				player.getCoins()
-//			);
-//			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
-//			Assertions.assertEquals(
-//				1,
-//				player.getInventory().getItems().get(0).getAmount()
-//			);
-//			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
-//			Assertions.assertEquals(
-//				1,
-//				npc.getInventory().getItems().get(0).getAmount()
-//			);
-//		}
-//
-//		@Test
-//		public void oneItemMultipleTimes() {
-//			arguments.add("a");
-//			arguments.add("1");
-//
-//			Assertions.assertEquals(
-//				"You bought 1 x a, -12 coins.",
-//				gameEngine.inputCommand("buy", arguments)
-//			);
-//
-//			Assertions.assertEquals(
-//				100 - 12,
-//				player.getCoins()
-//			);
-//			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
-//			Assertions.assertEquals(
-//				1,
-//				player.getInventory().getItems().get(0).getAmount()
-//			);
-//			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
-//			Assertions.assertEquals(
-//				1,
-//				npc.getInventory().getItems().get(0).getAmount()
-//			);
-//
-//			Assertions.assertEquals(
-//				"You bought 1 x a, -12 coins.",
-//				gameEngine.inputCommand("buy", arguments)
-//			);
-//
-//			Assertions.assertEquals(
-//				100 - 24,
-//				player.getCoins()
-//			);
-//			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
-//			Assertions.assertEquals(
-//				2,
-//				player.getInventory().getItems().get(0).getAmount()
-//			);
-//			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
-//			Assertions.assertEquals(
-//				1,
-//				npc.getInventory().getItems().get(0).getAmount()
-//			);
-//		}
-//
-//		@Test
-//		public void multipleItems() {
-//			arguments.add("b");
-//			arguments.add("2");
-//
-//			Assertions.assertEquals(
-//				"You bought 2 x b, -16 coins.",
-//				gameEngine.inputCommand("buy", arguments)
-//			);
-//
-//			Assertions.assertEquals(
-//				100 - 16,
-//				player.getCoins()
-//			);
-//		}
-//
-//		@Test
-//		public void notEnoughCoins() {
-//			player.setCoins(100);
-//
-//			arguments.add("a");
-//			arguments.add("10");
-//
-//			Assertions.assertEquals(
-//				"You are too poor to buy 10 x a.",
-//				gameEngine.inputCommand("buy", arguments)
-//			);
-//
-//			Assertions.assertEquals(
-//				100,
-//				player.getCoins()
-//			);
-//		}
-//
-//		@Test
-//		public void notSelling() {
-//			arguments.add("abc");
-//			arguments.add("1");
-//
-//			Assertions.assertEquals(
-//				"I am not selling any abcs.",
-//				gameEngine.inputCommand("buy", arguments)
-//			);
-//		}
-//	}
-//
+			arguments.add("sword");
+			Assertions.assertEquals(
+				"You dropped 1 sword.",
+				gameEngine.inputCommand("drop", arguments)
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
+		}
+
+		@Test
+		public void notInInventory() {
+			arguments.add("sword");
+			Assertions.assertEquals(
+				"You do not have a sword.",
+				gameEngine.inputCommand("drop", arguments)
+			);
+		}
+
+		@Test
+		public void alreadyHasItem() {
+			Room playerRoom = player.getRoom();
+
+			Item item = new Item(0, "sword", "A sharp sword", 1);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
+			player.getInventory().addItem(item);
+
+			arguments.add("sword");
+			Assertions.assertEquals(
+				"You dropped 1 sword.",
+				gameEngine.inputCommand("drop", arguments)
+			);
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
+			Assertions.assertEquals(
+				2,
+				playerRoom.getInventory().getItems().get(item.getId()).getAmount()
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
+		}
+
+		@Test
+		public void alreadyHasItemIntegerLimit() {
+			Room playerRoom = player.getRoom();
+
+			Item item = new Item(0, "sword", "A sharp sword", 1);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1, Integer.MAX_VALUE));
+			player.getInventory().addItem(item);
+
+			arguments.add("sword");
+			Assertions.assertEquals(
+				"You dropped 1 sword.",
+				gameEngine.inputCommand("drop", arguments)
+			);
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
+			Assertions.assertEquals(
+				Integer.MIN_VALUE,
+				playerRoom.getInventory().getItems().get(item.getId()).getAmount()
+			);
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
+		}
+
+		@Test
+		public void multipleItems() {
+			Room playerRoom = player.getRoom();
+
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
+			player.getInventory().addItem(item1);
+
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
+			player.getInventory().addItem(item2);
+
+			arguments.clear();
+			arguments.add("potion");
+
+			Assertions.assertEquals(
+				"You dropped 3 potions.",
+				gameEngine.inputCommand("drop", arguments)
+			);
+
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item2.getId()));
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item2.getId()));
+			Assertions.assertEquals(
+				3,
+				playerRoom.getInventory().getItems().get(item2.getId()).getAmount()
+			);
+
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(item1.getId()));
+			Assertions.assertFalse(playerRoom.getInventory().getItems().containsKey(item1.getId()));
+		}
+	}
+
+	@Nested
+	class DropAllTests {
+		@Test
+		public void valid() {
+			Room playerRoom = player.getRoom();
+
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
+
+			player.getInventory().addItem(item1);
+			player.getInventory().addItem(item2);
+
+			Assertions.assertEquals(
+				"""
+					You dropped:
+					1 x sword
+					3 x potion
+					""",
+				gameEngine.inputCommand("drop-all", arguments)
+			);
+
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item1.getId()));
+			Assertions.assertEquals(1, playerRoom.getInventory().getItems().get(item1.getId()).getAmount());
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item1.getId()));
+
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item2.getId()));
+			Assertions.assertEquals(3, playerRoom.getInventory().getItems().get(item2.getId()).getAmount());
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item2.getId()));
+		}
+
+		@Test
+		public void haveOneItem() {
+			Room playerRoom = player.getRoom();
+
+			Item item1 = new Item(0, "sword", "A sharp sword", 1);
+			Item item2 = new Item(1, "potion", "A healing potion", 1, 3);
+
+			player.getInventory().addItem(item1);
+			player.getInventory().addItem(item2);
+			playerRoom.getInventory().addItem(new Item(0, "sword", "A sharp sword", 1));
+
+			Assertions.assertEquals(
+				"""
+					You dropped:
+					1 x sword
+					3 x potion
+					""",
+				gameEngine.inputCommand("drop-all", arguments)
+			);
+
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item1.getId()));
+			Assertions.assertEquals(2, playerRoom.getInventory().getItems().get(item1.getId()).getAmount());
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item1.getId()));
+
+			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item2.getId()));
+			Assertions.assertEquals(3, playerRoom.getInventory().getItems().get(item2.getId()).getAmount());
+			Assertions.assertFalse(player.getInventory().getItems().containsKey(item2.getId()));
+		}
+
+		@Test
+		public void empty() {
+			Assertions.assertEquals(
+				"You do not have anything to drop.",
+				gameEngine.inputCommand("drop-all", arguments)
+			);
+		}
+	}
+
+	@Test
+	public void testWallet() {
+		Assertions.assertEquals(
+			"You have 0 coins.",
+			gameEngine.inputCommand("wallet", arguments)
+		);
+
+		database.setPlayerCoins(1);
+		Assertions.assertEquals(
+			"You have 1 coin.",
+			gameEngine.inputCommand("wallet", arguments)
+		);
+
+		player.setCoins(10);
+		Assertions.assertEquals(
+			"You have 10 coins.",
+			gameEngine.inputCommand("wallet", arguments)
+		);
+	}
+
+	@Nested
+	class TalkToTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get(0);
+		}
+
+		@Test
+		public void defaultGreeting() {
+			arguments.add("name");
+			Assertions.assertEquals(
+				"Hello adventurer, I am name.",
+				gameEngine.inputCommand("talk-to", arguments)
+			);
+
+			Assertions.assertEquals(
+				npc,
+				player.getCurrentNPC()
+			);
+		}
+
+		@Test
+		public void customGreeting() {
+			npc.setGreeting("Hi");
+
+			arguments.add("name");
+			Assertions.assertEquals(
+				"Hi",
+				gameEngine.inputCommand("talk-to", arguments)
+			);
+
+			Assertions.assertEquals(
+				npc,
+				player.getCurrentNPC()
+			);
+		}
+
+		@Test
+		public void noNPC() {
+			arguments.add("abc");
+			Assertions.assertEquals(
+				"abc is not in this room.",
+				gameEngine.inputCommand("talk-to", arguments)
+			);
+
+			Assertions.assertNull(player.getCurrentNPC());
+		}
+	}
+
+	@Nested
+	class LeaveTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get(0);
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void defaultBye() {
+			Assertions.assertEquals(
+				"Goodbye adventurer.",
+				gameEngine.inputCommand("leave", arguments)
+			);
+
+			Assertions.assertNull(player.getCurrentNPC());
+		}
+
+		@Test
+		public void customGreeting() {
+			npc.setGoodbye("Bye");
+
+			Assertions.assertEquals(
+				"Bye",
+				gameEngine.inputCommand("leave", arguments)
+			);
+
+			Assertions.assertNull(player.getCurrentNPC());
+		}
+	}
+
+	@Nested
+	class SearchShopTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get(0);
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void oneItem() {
+			npc.getInventory().addItem(new Item(0, "a", "", 1));
+
+			Assertions.assertEquals(
+				"""
+					I am selling:
+					- 1 x a for 4 coins
+					
+					""",
+				gameEngine.inputCommand("search-shop", arguments)
+			);
+		}
+
+		@Test
+		public void multipleItems() {
+			npc.getInventory().addItem(new Item(0, "a", "", 1, 2));
+			npc.getInventory().addItem(new Item(1, "b", "", 7));
+
+			Assertions.assertEquals(
+				"""
+					I am selling:
+					- 2 x a for 8 coins
+					- 1 x b for 28 coins
+					
+					""",
+				gameEngine.inputCommand("search-shop", arguments)
+			);
+		}
+
+		@Test
+		public void empty() {
+			Assertions.assertEquals(
+				"I am not selling anything.",
+				gameEngine.inputCommand("search-shop", arguments)
+			);
+		}
+	}
+
+	@Nested
+	class buyItemTests {
+		private NPC npc;
+
+		@BeforeEach
+		public void setup() {
+			npc = player.getRoom().getNpcs().get(0);
+			npc.getInventory().addItem(new Item(0, "a", "", 3));
+			npc.getInventory().addItem(new Item(1, "b", "", 2, 2));
+			player.setCoins(100);
+
+			arguments.add("name");
+			gameEngine.inputCommand("talk-to", arguments);
+
+			arguments.clear();
+		}
+
+		@Test
+		public void oneItem() {
+			arguments.add("a");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"You bought 1 x a, -12 coins.",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 12,
+				player.getCoins()
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
+			Assertions.assertEquals(
+				1,
+				player.getInventory().getItems().get(0).getAmount()
+			);
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
+			Assertions.assertEquals(
+				1,
+				npc.getInventory().getItems().get(0).getAmount()
+			);
+		}
+
+		@Test
+		public void oneItemMultipleTimes() {
+			arguments.add("a");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"You bought 1 x a, -12 coins.",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 12,
+				player.getCoins()
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
+			Assertions.assertEquals(
+				1,
+				player.getInventory().getItems().get(0).getAmount()
+			);
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
+			Assertions.assertEquals(
+				1,
+				npc.getInventory().getItems().get(0).getAmount()
+			);
+
+			Assertions.assertEquals(
+				"You bought 1 x a, -12 coins.",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 24,
+				player.getCoins()
+			);
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
+			Assertions.assertEquals(
+				2,
+				player.getInventory().getItems().get(0).getAmount()
+			);
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
+			Assertions.assertEquals(
+				1,
+				npc.getInventory().getItems().get(0).getAmount()
+			);
+		}
+
+		@Test
+		public void multipleItems() {
+			arguments.add("b");
+			arguments.add("2");
+
+			Assertions.assertEquals(
+				"You bought 2 x b, -16 coins.",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100 - 16,
+				player.getCoins()
+			);
+		}
+
+		@Test
+		public void notEnoughCoins() {
+			player.setCoins(100);
+
+			arguments.add("a");
+			arguments.add("10");
+
+			Assertions.assertEquals(
+				"You are too poor to buy 10 x a.",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertEquals(
+				100,
+				player.getCoins()
+			);
+		}
+
+		@Test
+		public void notSelling() {
+			arguments.add("abc");
+			arguments.add("1");
+
+			Assertions.assertEquals(
+				"I am not selling any abcs.",
+				gameEngine.inputCommand("buy", arguments)
+			);
+		}
+	}
+
 //	@Nested
 //	class SellItemTests {
 //
