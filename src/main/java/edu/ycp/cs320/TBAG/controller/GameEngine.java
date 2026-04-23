@@ -84,7 +84,7 @@ public class GameEngine {
 
 			String error = validateCommand(command, arguments);
 			if (error != null) return error;
-			
+
 			Boolean confirming = player.getConfirming();
 
 			if (!confirming) {
@@ -276,7 +276,6 @@ public class GameEngine {
 	}
 
 	public String talkToNPC(ArrayList<String> arguments) {
-
 		HashMap<Integer, NPC> npcs = database.getNPCsForRoom(player.getRoom());
 		String npcName = arguments.get(0);
 		NPC currentNPC = null;
@@ -287,24 +286,22 @@ public class GameEngine {
 			}
 		}
 
-		if (currentNPC == null) return npcName + " is not in this room.\n";
+		if (currentNPC == null) return npcName + " is not in this room.";
 
 		database.setPlayerNPC(currentNPC);
 		database.setPlayerState(PlayerState.TALKING_TO_NPC);
 
-		return currentNPC.getGreeting() + "\n";
+		return currentNPC.getGreeting();
 	}
 
 	public String leaveNPC(ArrayList<String> arguments) {
-		NPC npc = player.getCurrentNPC();
-		if (npc == null) return "You are not currently talking to an NPC.\n";
+		NPC npc = database.getNpcForPlayer();
+		if (npc == null) return "You are not currently talking to an NPC.";
 
-		String goodbye = npc.getGoodbye() + "\n";
+		String goodbye = npc.getGoodbye();
 
 		database.setPlayerNPC(null);
-		player.setCurrentNPC(null);
 		database.setPlayerState(PlayerState.EXPLORING);
-		player.setState(PlayerState.EXPLORING);
 
 		return goodbye;
 	}

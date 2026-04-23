@@ -15,16 +15,16 @@ public class GameEngineTest {
 	private GameEngine gameEngine;
 	private ArrayList<String> arguments;
 
-	HashMap<Integer, Room> rooms;
-	HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
-	HashMap<Integer, ArrayList<NPC>> roomNPCs;
-	Player player;
-
+	private HashMap<Integer, Room> rooms;
+	private HashMap<Integer, HashMap<String, RoomConnection>> roomConnections;
+	private HashMap<Integer, ArrayList<NPC>> roomNPCs;
+	private Player player;
 
 	@BeforeEach
 	public void setUp() {
 		// Setup NPCs
 		HashMap<Integer, NPC> npcs = new HashMap<>();
+		npcs.put(0, new NPC(0, "name"));
 		HashMap<Integer, ArrayList<Item>> npcItems = new HashMap<>();
 
 
@@ -46,7 +46,7 @@ public class GameEngineTest {
 
 		roomNPCs = new HashMap<>();
 		ArrayList<NPC> aNPCs = new ArrayList<>();
-		aNPCs.add(new NPC(0, "name"));
+		aNPCs.add(npcs.get(0));
 		roomNPCs.put(roomA.getID(), aNPCs);
 
 		// Setup player
@@ -82,7 +82,7 @@ public class GameEngineTest {
 
 
 	@Nested
-	class MoveTests {
+	public class MoveTests {
 		@Test
 		public void valid() {
 			arguments.add("north");
@@ -151,7 +151,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class LookTests {
+	public class LookTests {
 		@Test
 		public void valid() {
 			Assertions.assertEquals(
@@ -182,7 +182,7 @@ public class GameEngineTest {
 		@Test
 		public void nullRoom() {
 			player.setRoom(null);
-			
+
 			Assertions.assertThrows(
 				NullPointerException.class,
 				() -> gameEngine.inputCommand("look", arguments)
@@ -191,7 +191,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class InventoryTests {
+	public class InventoryTests {
 		@Test
 		public void empty() {
 			Assertions.assertEquals(
@@ -237,7 +237,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class InspectItemTests {
+	public class InspectItemTests {
 		@Test
 		public void valid() {
 			Item item = new Item(0, "sword", "A sharp sword", 1);
@@ -285,7 +285,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class SearchTests {
+	public class SearchTests {
 		@Test
 		public void emptyRoom() {
 			Assertions.assertEquals(
@@ -331,7 +331,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class PickupTests {
+	public class PickupTests {
 		@Test
 		public void itemNotInRoom() {
 			arguments.add("sword");
@@ -448,7 +448,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class PickupAllTests {
+	public class PickupAllTests {
 		@Test
 		public void valid() {
 			Room playerRoom = player.getRoom();
@@ -516,7 +516,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class DropTests {
+	public class DropTests {
 		@Test
 		public void valid() {
 			Room playerRoom = player.getRoom();
@@ -615,7 +615,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class DropAllTests {
+	public class DropAllTests {
 		@Test
 		public void valid() {
 			Room playerRoom = player.getRoom();
@@ -703,7 +703,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class TalkToTests {
+	public class TalkToTests {
 		private NPC npc;
 
 		@BeforeEach
@@ -721,7 +721,7 @@ public class GameEngineTest {
 
 			Assertions.assertEquals(
 				npc,
-				player.getCurrentNPC()
+				database.getNpcForPlayer()
 			);
 		}
 
@@ -754,7 +754,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class LeaveTests {
+	public class LeaveTests {
 		private NPC npc;
 
 		@BeforeEach
@@ -774,7 +774,7 @@ public class GameEngineTest {
 				gameEngine.inputCommand("leave", arguments)
 			);
 
-			Assertions.assertNull(player.getCurrentNPC());
+			Assertions.assertNull(database.getPlayer().getCurrentNPC());
 		}
 
 		@Test
@@ -791,7 +791,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class SearchShopTests {
+	public class SearchShopTests {
 		private NPC npc;
 
 		@BeforeEach
@@ -844,7 +844,7 @@ public class GameEngineTest {
 	}
 
 	@Nested
-	class buyItemTests {
+	public class buyItemTests {
 		private NPC npc;
 
 		@BeforeEach

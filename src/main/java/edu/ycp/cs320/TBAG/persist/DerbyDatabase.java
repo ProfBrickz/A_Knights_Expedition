@@ -898,6 +898,50 @@ public class DerbyDatabase implements Database {
 	}
 
 	@Override
+	public NPC getNpcForPlayer() {
+		return executeTransaction(new Transaction<NPC>() {
+			@Override
+			public NPC execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"""
+								SELECT
+									npcs.id,
+									npcs.name,
+									npcs.max_health,
+									npcs.health,
+									npcs.greeting,
+									npcs.goodbye
+								FROM npcs
+								WHERE npcs.id = player.current_npc
+							""");
+
+					resultSet = statement.executeQuery();
+
+					if (!resultSet.next()) {
+						return null;
+					}
+
+					return new NPC(
+						resultSet.getInt(1),
+						resultSet.getString(2),
+						resultSet.getInt(3),
+						resultSet.getInt(4),
+						resultSet.getString(5),
+						resultSet.getString(6)
+					);
+				} finally {
+					DBUtil.closeQuietly(statement);
+					DBUtil.closeQuietly(resultSet);
+				}
+			}
+		});
+	}
+
+	@Override
 	public void setPlayerRoom(Integer roomId) {
 		executeTransaction(new Transaction<Void>() {
 			@Override

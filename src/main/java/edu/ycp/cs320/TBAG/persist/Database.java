@@ -34,6 +34,8 @@ public interface Database {
 	 */
 	Player getPlayer();
 
+	NPC getNpcForPlayer();
+
 	void setPlayerRoom(Integer roomId);
 
 	void setPlayerCoins(Integer coins);

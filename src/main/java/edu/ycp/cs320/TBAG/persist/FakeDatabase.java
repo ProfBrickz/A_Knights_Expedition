@@ -6,6 +6,7 @@ import edu.ycp.cs320.TBAG.model.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FakeDatabase implements Database {
@@ -166,7 +167,7 @@ public class FakeDatabase implements Database {
 	// Dialog methods
 	@Override
 	public ArrayList<String> getDialog() {
-		return dialog;
+		return (ArrayList<String>) List.copyOf(dialog);
 	}
 
 	@Override
@@ -181,7 +182,7 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public ArrayList<String> getCommandHistory() {
-		return commandHistory;
+		return (ArrayList<String>) List.copyOf(commandHistory);
 	}
 
 	@Override
@@ -206,15 +207,12 @@ public class FakeDatabase implements Database {
 			throw new IllegalStateException("No player exists");
 		}
 
-		return new Player(
-			player.getMaxHealth(),
-			player.getHealth(),
-			player.getState(),
-			getRoomById(player.getRoom().getID()),
-			player.getCoins(),
-			player.getLastCommand(),
-			player.getConfirming()
-		);
+		return player.copy();
+	}
+
+	@Override
+	public NPC getNpcForPlayer() {
+		return player.getCurrentNPC();
 	}
 
 	@Override
@@ -320,12 +318,7 @@ public class FakeDatabase implements Database {
 	public Room getRoomById(Integer id) {
 		Room room = rooms.get(id);
 
-		return new Room(
-			room.getID(),
-			room.getName(),
-			room.getDescription(),
-			room.getAssetName()
-		);
+		return room.copy();
 	}
 
 	@Override
@@ -399,7 +392,7 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return new HashMap<>(player.getInventory().getItems());
+		return player.getInventory().getItems();
 	}
 
 	@Override
@@ -408,13 +401,9 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		Room thisRoom = rooms.get(room.getID());
-		HashMap<Integer, Item> roomItems = new HashMap<>();
-		for (Item item : thisRoom.getInventory().getItems().values()) {
-			roomItems.put(item.getId(), cloneItem(item));
-		}
+		room = rooms.get(room.getID());
 
-		return roomItems;
+		return room.getInventory().getItems();
 	}
 
 	@Override
@@ -423,7 +412,7 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return new HashMap<>(npc.getInventory().getItems());
+		return npc.getInventory().getItems();
 	}
 
 	@Override
@@ -432,7 +421,7 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return new HashMap<>(enemy.getInventory().getItems());
+		return enemy.getInventory().getItems();
 	}
 
 
@@ -442,7 +431,10 @@ public class FakeDatabase implements Database {
 		if (room == null) {
 			return new HashMap<>();
 		}
-		return new HashMap<>(room.getNpcs());
+
+		room = rooms.get(room.getID());
+
+		return room.getNpcs();
 	}
 
 
@@ -453,7 +445,9 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return new HashMap<>(room.getEnemies());
+		room = rooms.get(room.getID());
+
+		return room.getEnemies();
 	}
 
 	@Override
@@ -466,6 +460,8 @@ public class FakeDatabase implements Database {
 		if (itemId == null) {
 			return;
 		}
+
+		enemy = enemies.get(enemy.getId());
 
 		Item existing = enemy.getInventory().getItems().get(itemId);
 		int delta = item.getAmount() == null ? 1 : item.getAmount();
@@ -518,7 +514,7 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		return new HashMap<>(weapon.getAbilities());
+		return weapon.getAbilities();
 	}
 
 	private Item cloneItem(Item item) {
