@@ -22,8 +22,7 @@ public class GameEngine {
 		DatabaseProvider.setInstance(database);
 		this.database = DatabaseProvider.getInstance();
 
-		player = this.database.getPlayer();
-		player.getInventory().addItems((this.database.getItemsForPlayer()));
+		getPlayer();
 	}
 
 	/**
@@ -56,6 +55,9 @@ public class GameEngine {
 	}
 
 	public Player getPlayer() {
+		player = database.getPlayer();
+		player.getInventory().addItems((database.getItemsForPlayer()));
+
 		return player;
 	}
 
