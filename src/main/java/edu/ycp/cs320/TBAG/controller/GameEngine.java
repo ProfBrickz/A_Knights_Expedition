@@ -307,10 +307,10 @@ public class GameEngine {
 	}
 
 	public String searchShop(ArrayList<String> arguments) {
-		NPC npc = player.getCurrentNPC();
+		NPC npc = database.getNpcForPlayer();
 		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
 
-		if (npcItems == null) return "I am not selling anything.\n";
+		if (npcItems == null || npcItems.isEmpty()) return "I am not selling anything.";
 
 		StringBuilder output = new StringBuilder("I am selling:\n");
 

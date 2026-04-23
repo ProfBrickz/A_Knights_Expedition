@@ -812,7 +812,6 @@ public class GameEngineTest {
 				"""
 					I am selling:
 					- 1 x a for 4 coins
-					
 					""",
 				gameEngine.inputCommand("search-shop", arguments)
 			);
@@ -828,7 +827,6 @@ public class GameEngineTest {
 					I am selling:
 					- 2 x a for 8 coins
 					- 1 x b for 28 coins
-					
 					""",
 				gameEngine.inputCommand("search-shop", arguments)
 			);
