@@ -931,8 +931,8 @@ public class GameEngineTest {
 
 		@Test
 		public void multipleItems() {
-			arguments.add("b");
 			arguments.add("2");
+			arguments.add("b");
 
 			Assertions.assertEquals(
 				"You bought 2 x b, -16 coins.",
@@ -949,8 +949,8 @@ public class GameEngineTest {
 		public void notEnoughCoins() {
 			player.setCoins(100);
 
-			arguments.add("a");
 			arguments.add("10");
+			arguments.add("a");
 
 			Assertions.assertEquals(
 				"You are too poor to buy 10 x a.",
@@ -965,8 +965,8 @@ public class GameEngineTest {
 
 		@Test
 		public void notSelling() {
-			arguments.add("abc");
 			arguments.add("1");
+			arguments.add("abc");
 
 			Assertions.assertEquals(
 				"I am not selling any abcs.",
