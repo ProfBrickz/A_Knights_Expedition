@@ -16,6 +16,7 @@ public class GameEngine {
 	private final Database database;
 	private Player player;
 	private final InventoryController inventoryController = new InventoryController();
+	private final NPCController npcController = new NPCController(inventoryController);
 
 	// Constructor
 	public GameEngine(Database database) {
@@ -379,11 +380,9 @@ public class GameEngine {
 			return "You do not have " + amount + " of " + item.getName() + ".\n";
 		}
 
-
-		for (int i = 1; i<= amount; i++){
-			database.removeItemFromPlayer(item);
-			database.setPlayerCoins(player.getCoins()+(item.getValue()));
-		}
+		npcController.sell(player, item, amount);
+		database.removeItemFromPlayer(item);
+		database.setPlayerCoins(player.getCoins()+(item.getValue()*amount));
 
 		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
