@@ -362,7 +362,7 @@ public class GameEngine {
 	}
 
 	public String sellItem(ArrayList<String> arguments) {
-		NPC npc = player.getCurrentNPC();
+		NPC npc = database.getNpcForPlayer();
 		if (npc == null) return "You are not currently talking to an NPC.\n";
 
 		String itemName = arguments.get(1).toLowerCase();
