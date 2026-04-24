@@ -946,6 +946,23 @@ public class GameEngineTest {
 		}
 
 		@Test
+		public void multipleItemsAddsRequestedAmountToInventory() {
+			arguments.add("2");
+			arguments.add("b");
+
+			Assertions.assertEquals(
+				"You bought 2 x b, -16 coins.",
+				gameEngine.inputCommand("buy", arguments)
+			);
+
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(1));
+			Assertions.assertEquals(
+				2,
+				player.getInventory().getItems().get(1).getAmount()
+			);
+		}
+
+		@Test
 		public void notEnoughCoins() {
 			player.setCoins(100);
 
@@ -1173,32 +1190,39 @@ public class GameEngineTest {
 //		Assertions.assertEquals(PlayerState.EXPLORING, player.getState());
 //	}
 
-//	@Test
-//	public void testHelp() {
-//		String output = gameEngine.inputCommand("help", arguments);
-//
-//		Assertions.assertTrue(
-//			output.contains(Command.MOVE.getFormat())
-//		);
-//
-//		StringBuilder examples = new StringBuilder("Examples:");
-//		for (String example : Command.MOVE.getExamples()) {
-//			examples
-//				.append("\n  - \"")
-//				.append(example)
-//				.append("\"");
-//		}
-//		Assertions.assertTrue(
-//			output.contains(examples.toString())
-//		);
-//
-//		Assertions.assertTrue(
-//			output.contains(Command.DROP_ALL.getFormat())
-//		);
-//		Assertions.assertTrue(
-//			output.contains(Command.HELP.getFormat())
-//		);
-//	}
+	@Test
+	public void testHelp() {
+		String output = gameEngine.inputCommand("help", arguments);
+
+		Assertions.assertTrue(output.contains(Command.MOVE.getFormat()));
+		Assertions.assertTrue(output.contains(Command.DROP_ALL.getFormat()));
+		Assertions.assertTrue(output.contains(Command.HELP.getFormat()));
+	}
+
+	@Test
+	public void testRestartRequiresConfirmation() {
+		Assertions.assertEquals(
+			"Are you sure (yes or no)?\n",
+			gameEngine.inputCommand("restart", arguments)
+		);
+
+		Assertions.assertTrue(database.getPlayer().getConfirming());
+	}
+
+	@Test
+	public void testRestartCanBeCanceled() {
+		Assertions.assertEquals(
+			"Are you sure (yes or no)?\n",
+			gameEngine.inputCommand("restart", arguments)
+		);
+
+		Assertions.assertEquals(
+			"restart command canceled.\n",
+			gameEngine.inputCommand("no", arguments)
+		);
+
+		Assertions.assertFalse(database.getPlayer().getConfirming());
+	}
 
 	@Test
 	public void testInvalidCommandFormat() {
@@ -1222,23 +1246,16 @@ public class GameEngineTest {
 		);
 	}
 
-//	@Test
-//	public void testDisallowedPlayerState() {
-//		Assertions.assertEquals(
-//			"You are not allowed to use sell while "
-//				+ database.getPlayer().getState().getName()
-//				+ ".",
-//			gameEngine.inputCommand("sell", arguments)
-//		);
-//
-//		database.setPlayerState(PlayerState.TALKING_TO_NPC);
-//		Assertions.assertEquals(
-//			"You are not allowed to use move while "
-//				+ database.getPlayer().getState().getName()
-//				+ ".",
-//			gameEngine.inputCommand("move", arguments)
-//		);
-//	}
+	@Test
+	public void testDisallowedPlayerState() {
+		database.setPlayerState(PlayerState.TALKING_TO_NPC);
+
+		arguments.add("north");
+		Assertions.assertEquals(
+			"You are not allowed to use move while talking to an NPC.",
+			gameEngine.inputCommand("move", arguments)
+		);
+	}
 
 	@Test
 	public void testInvalidCommand() {
