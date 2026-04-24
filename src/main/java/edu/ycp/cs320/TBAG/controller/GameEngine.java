@@ -124,7 +124,7 @@ public class GameEngine {
 			return "Move failed, either player, or the room does not exist";
 		}
 
-		database.setPlayerRoom(player.getRoom().getID());
+		database.setPlayerRoom(player.getRoom().getId());
 
 		return player.getRoom().getDescription();
 	}

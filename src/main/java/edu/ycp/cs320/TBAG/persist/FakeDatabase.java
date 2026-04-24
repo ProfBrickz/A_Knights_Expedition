@@ -323,7 +323,7 @@ public class FakeDatabase implements Database {
 	@Override
 	public HashMap<String, RoomConnection> getConnectionsForRoom(Room room) {
 		HashMap<String, RoomConnection> roomConnections = new HashMap<>();
-		room = rooms.get(room.getID());
+		room = rooms.get(room.getId());
 
 		for (Map.Entry<String, RoomConnection> entry : room.getRoomConnections().entrySet()) {
 			roomConnections.put(entry.getKey(), entry.getValue().copy());
@@ -343,7 +343,7 @@ public class FakeDatabase implements Database {
 			return;
 		}
 
-		room = rooms.get(room.getID());
+		room = rooms.get(room.getId());
 
 		Item existing = room.getInventory().getItems().get(itemId);
 		int delta = item.getAmount() == null ? 1 : item.getAmount();
@@ -370,7 +370,7 @@ public class FakeDatabase implements Database {
 			return;
 		}
 
-		room = rooms.get(room.getID());
+		room = rooms.get(room.getId());
 
 		Item existing = room.getInventory().getItems().get(itemId);
 		if (existing == null) {
@@ -417,7 +417,7 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		room = rooms.get(room.getID());
+		room = rooms.get(room.getId());
 
 		return copyItems(room.getInventory().getItems());
 	}
@@ -452,7 +452,7 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		room = rooms.get(room.getID());
+		room = rooms.get(room.getId());
 		HashMap<Integer, NPC> npcs = new HashMap<>();
 
 		for (NPC npc : room.getNpcs().values()) {
@@ -470,7 +470,7 @@ public class FakeDatabase implements Database {
 			return new HashMap<>();
 		}
 
-		room = rooms.get(room.getID());
+		room = rooms.get(room.getId());
 
 		HashMap<Integer, Enemy> enemies = new HashMap<>();
 

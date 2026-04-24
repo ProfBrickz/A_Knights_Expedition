@@ -50,7 +50,7 @@ public class Room {
 	}
 
 
-	public Integer getID() {
+	public Integer getId() {
 		return id;
 	}
 

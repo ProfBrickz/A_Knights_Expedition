@@ -1,0 +1,3 @@
+id,room_id,name,max_health,greeting,goodbye
+String,String,String,Integer,String,String
+1,2,Test NPC,50,Hello traveler!,Goodbye!

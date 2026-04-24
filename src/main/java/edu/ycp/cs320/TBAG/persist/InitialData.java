@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class InitialData {
+	private static String csvFolder = "src/resources";
+
 	private static final HashMap<Integer, Room> rooms = new HashMap<>();
 	private static final HashMap<Integer, Item> items = new HashMap<>();
 	private static final HashMap<Integer, NPC> npcs = new HashMap<>();
@@ -19,12 +21,32 @@ public class InitialData {
 	private static final HashMap<String, Integer> npcIds = new HashMap<>();
 	private static final HashMap<String, Integer> enemyIds = new HashMap<>();
 
+	public static void setCsvFolder(String folder) {
+		csvFolder = folder;
+		clearCache();
+	}
+
+	public static void clearCache() {
+		rooms.clear();
+		items.clear();
+		npcs.clear();
+		enemies.clear();
+		roomIds.clear();
+		itemIds.clear();
+		npcIds.clear();
+		enemyIds.clear();
+	}
+
+	private static ReadCSV openCSV(String fileName) throws IOException {
+		return new ReadCSV(csvFolder, fileName);
+	}
+
 	private static void ensureItemsLoaded() throws IOException {
 		if (!items.isEmpty()) {
 			return;
 		}
 
-		ReadCSV itemsFile = new ReadCSV("items.csv");
+		ReadCSV itemsFile = openCSV("items.csv");
 
 		try {
 			while (true) {
@@ -111,7 +133,7 @@ public class InitialData {
 
 	public static ArrayList<String> getDialog() throws IOException {
 		ArrayList<String> dialog = new ArrayList<>();
-		ReadCSV dialogFile = new ReadCSV("dialog.csv");
+		ReadCSV dialogFile = openCSV("dialog.csv");
 
 		try {
 			while (true) {
@@ -133,7 +155,7 @@ public class InitialData {
 
 	public static Player getPlayer() throws IOException, IllegalStateException {
 		ArrayList<Player> players = new ArrayList<>();
-		ReadCSV playersFile = new ReadCSV("player.csv");
+		ReadCSV playersFile = openCSV("player.csv");
 
 		try {
 			while (true) {
@@ -195,7 +217,7 @@ public class InitialData {
 		ensureItemsLoaded();
 
 		HashMap<Integer, Item> result = new HashMap<>();
-		ReadCSV playerItemsFile = new ReadCSV("player_items.csv");
+		ReadCSV playerItemsFile = openCSV("player_items.csv");
 
 		try {
 			while (true) {
@@ -236,7 +258,7 @@ public class InitialData {
 	 * Rooms do not have items, npcs, or enemies
 	 */
 	public static HashMap<Integer, Room> getRooms() throws IOException {
-		ReadCSV roomsFile = new ReadCSV("rooms.csv");
+		ReadCSV roomsFile = openCSV("rooms.csv");
 		rooms.clear();
 		roomIds.clear();
 
@@ -271,7 +293,7 @@ public class InitialData {
 	 */
 	public static HashMap<Integer, HashMap<String, RoomConnection>> getRoomConnections() throws IOException, IllegalStateException {
 		HashMap<Integer, HashMap<String, RoomConnection>> result = new HashMap<>();
-		ReadCSV connFile = new ReadCSV("room_connections.csv");
+		ReadCSV connFile = openCSV("room_connections.csv");
 
 		try {
 			while (true) {
@@ -319,7 +341,7 @@ public class InitialData {
 		ensureItemsLoaded();
 
 		HashMap<Integer, ArrayList<Item>> result = new HashMap<>();
-		ReadCSV roomItemsFile = new ReadCSV("room_items.csv");
+		ReadCSV roomItemsFile = openCSV("room_items.csv");
 
 		try {
 			while (true) {
@@ -389,7 +411,7 @@ public class InitialData {
 	 * Returns a list of all items without amounts
 	 */
 	public static HashMap<Integer, Item> getItems() throws IOException, IllegalStateException {
-		ReadCSV itemsFile = new ReadCSV("items.csv");
+		ReadCSV itemsFile = openCSV("items.csv");
 		items.clear();
 		itemIds.clear();
 

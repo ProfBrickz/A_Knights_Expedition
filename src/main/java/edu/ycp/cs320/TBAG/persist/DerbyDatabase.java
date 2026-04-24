@@ -365,7 +365,7 @@ public class DerbyDatabase implements Database {
 							RoomConnection roomConnection = entry1.getValue();
 
 							statement.setInt(1, roomId);
-							statement.setInt(2, roomConnection.getRoom().getID());
+							statement.setInt(2, roomConnection.getRoom().getId());
 							statement.setString(3, direction);
 							statement.setString(4, roomConnection.getDescription());
 							statement.addBatch();
@@ -424,7 +424,7 @@ public class DerbyDatabase implements Database {
 							INSERT INTO player (room_id, state, coins, max_health, health)
 							VALUES (?, ?, ?, ?, ?)
 						""");
-					statement.setInt(1, player.getRoom().getID());
+					statement.setInt(1, player.getRoom().getId());
 					statement.setInt(2, player.getState().ordinal());
 					statement.setInt(3, player.getCoins());
 					statement.setInt(4, player.getMaxHealth());
@@ -1289,7 +1289,7 @@ public class DerbyDatabase implements Database {
 							FROM room_connections, rooms
 							WHERE rooms.id = room_connections.destination_id AND room_connections.source_id = ?
 						""");
-					statement.setInt(1, room.getID());
+					statement.setInt(1, room.getId());
 					resultSet = statement.executeQuery();
 
 					HashMap<String, RoomConnection> result = new HashMap<>();
@@ -1337,7 +1337,7 @@ public class DerbyDatabase implements Database {
 							FROM room_items
 							WHERE room_id = ? AND item_id = ?
 						""");
-					selectStatement.setInt(1, room.getID());
+					selectStatement.setInt(1, room.getId());
 					selectStatement.setInt(2, item.getId());
 					resultSet = selectStatement.executeQuery();
 
@@ -1356,7 +1356,7 @@ public class DerbyDatabase implements Database {
 								WHERE room_id = ? AND item_id = ?
 							""");
 						updateStatement.setInt(1, newAmount);
-						updateStatement.setInt(2, room.getID());
+						updateStatement.setInt(2, room.getId());
 						updateStatement.setInt(3, item.getId());
 						updateStatement.executeUpdate();
 					} else {
@@ -1364,7 +1364,7 @@ public class DerbyDatabase implements Database {
 								INSERT INTO room_items (room_id, item_id, amount)
 								VALUES (?, ?, ?)
 							""");
-						insertStatement.setInt(1, room.getID());
+						insertStatement.setInt(1, room.getId());
 						insertStatement.setInt(2, item.getId());
 						insertStatement.setInt(3, delta);
 						insertStatement.executeUpdate();
@@ -1401,7 +1401,7 @@ public class DerbyDatabase implements Database {
 							FROM room_items
 							WHERE room_id = ? AND item_id = ?
 						""");
-					selectStatement.setInt(1, room.getID());
+					selectStatement.setInt(1, room.getId());
 					selectStatement.setInt(2, item.getId());
 					resultSet = selectStatement.executeQuery();
 
@@ -1424,7 +1424,7 @@ public class DerbyDatabase implements Database {
 								WHERE room_id = ? AND item_id = ?
 							""");
 						updateStatement.setInt(1, newAmount);
-						updateStatement.setInt(2, room.getID());
+						updateStatement.setInt(2, room.getId());
 						updateStatement.setInt(3, item.getId());
 						updateStatement.executeUpdate();
 					} else {
@@ -1432,7 +1432,7 @@ public class DerbyDatabase implements Database {
 								DELETE FROM room_items
 								WHERE room_id = ? AND item_id = ?
 							""");
-						deleteStatement.setInt(1, room.getID());
+						deleteStatement.setInt(1, room.getId());
 						deleteStatement.setInt(2, item.getId());
 						deleteStatement.executeUpdate();
 					}
@@ -1555,7 +1555,7 @@ public class DerbyDatabase implements Database {
 							FROM room_items, items
 							WHERE items.id = room_items.item_id AND room_items.room_id = ?
 						""");
-					statement.setInt(1, room.getID());
+					statement.setInt(1, room.getId());
 					resultSet = statement.executeQuery();
 
 					return getItemsFromResultSet(resultSet);
@@ -1673,7 +1673,7 @@ public class DerbyDatabase implements Database {
 							FROM room_npcs, npcs
 							WHERE npcs.id = room_npcs.npc_id AND room_npcs.room_id = ?
 						""");
-					statement.setInt(1, room.getID());
+					statement.setInt(1, room.getId());
 					resultSet = statement.executeQuery();
 
 					HashMap<Integer, NPC> result = new HashMap<>();
@@ -1719,7 +1719,7 @@ public class DerbyDatabase implements Database {
 							FROM room_enemies, enemies
 							WHERE enemies.id = room_enemies.enemy_id AND room_enemies.room_id = ?
 						""");
-					statement.setInt(1, room.getID());
+					statement.setInt(1, room.getId());
 					resultSet = statement.executeQuery();
 
 					HashMap<Integer, Enemy> result = new HashMap<>();

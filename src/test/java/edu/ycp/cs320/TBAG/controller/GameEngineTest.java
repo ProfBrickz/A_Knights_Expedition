@@ -32,22 +32,22 @@ public class GameEngineTest {
 		rooms = new HashMap<>();
 		Room roomA = new Room(0, "a", "description a");
 		Room roomB = new Room(1, "b", "description b");
-		rooms.put(roomA.getID(), roomA);
-		rooms.put(roomB.getID(), roomB);
+		rooms.put(roomA.getId(), roomA);
+		rooms.put(roomB.getId(), roomB);
 
 		roomConnections = new HashMap<>();
 		HashMap<String, RoomConnection> aConnections = new HashMap<>();
 		aConnections.put("north", new RoomConnection(roomB));
-		roomConnections.put(roomA.getID(), aConnections);
+		roomConnections.put(roomA.getId(), aConnections);
 
 		HashMap<String, RoomConnection> bConnections = new HashMap<>();
 		bConnections.put("south", new RoomConnection(roomA));
-		roomConnections.put(roomB.getID(), bConnections);
+		roomConnections.put(roomB.getId(), bConnections);
 
 		roomNPCs = new HashMap<>();
 		ArrayList<NPC> aNPCs = new ArrayList<>();
 		aNPCs.add(npcs.get(0));
-		roomNPCs.put(roomA.getID(), aNPCs);
+		roomNPCs.put(roomA.getId(), aNPCs);
 
 		// Setup player
 		player = new Player(100, 100);
@@ -88,7 +88,7 @@ public class GameEngineTest {
 			arguments.add("north");
 			Assertions.assertEquals("description b", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = database.getPlayer().getRoom();
-			Assertions.assertEquals(1, playerRoom.getID());
+			Assertions.assertEquals(1, playerRoom.getId());
 			Assertions.assertEquals("b", playerRoom.getName());
 			Assertions.assertEquals("description b", playerRoom.getDescription());
 
@@ -96,7 +96,7 @@ public class GameEngineTest {
 			arguments.add("south");
 			Assertions.assertEquals("description a", gameEngine.inputCommand("move", arguments));
 			playerRoom = database.getPlayer().getRoom();
-			Assertions.assertEquals(0, playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getId());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -109,7 +109,7 @@ public class GameEngineTest {
 				gameEngine.inputCommand("move", arguments)
 			);
 			Room playerRoom = database.getPlayer().getRoom();
-			Assertions.assertEquals(0, playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getId());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -122,7 +122,7 @@ public class GameEngineTest {
 				gameEngine.inputCommand("move", arguments)
 			);
 			Room playerRoom = database.getPlayer().getRoom();
-			Assertions.assertEquals(0, playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getId());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -132,7 +132,7 @@ public class GameEngineTest {
 			arguments.add(" ");
 			Assertions.assertEquals("Invalid direction for this room", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = database.getPlayer().getRoom();
-			Assertions.assertEquals(0, playerRoom.getID());
+			Assertions.assertEquals(0, playerRoom.getId());
 			Assertions.assertEquals("a", playerRoom.getName());
 			Assertions.assertEquals("description a", playerRoom.getDescription());
 		}
@@ -1164,7 +1164,7 @@ public class GameEngineTest {
 //		);
 //
 //		// Verify restart worked
-//		Assertions.assertEquals(0, playerRoom.getID());
+//		Assertions.assertEquals(0, playerRoom.getId());
 //		Assertions.assertEquals("a", playerRoom.getName());
 //		Assertions.assertEquals("description a", playerRoom.getDescription());
 //		Assertions.assertTrue(player.getInventory().getItems().isEmpty());

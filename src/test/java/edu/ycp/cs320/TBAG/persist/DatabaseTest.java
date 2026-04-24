@@ -18,9 +18,11 @@ public class DatabaseTest {
 	class DerbyTests {
 		@BeforeEach
 		public void setUp() {
+			InitialData.setCsvFolder("src/test/fixtures/database");
 			DatabaseProvider.setInstance(new DerbyDatabase(databasePath));
 			database = DatabaseProvider.getInstance();
 			((DerbyDatabase) database).createTables();
+			database.loadInitialData();
 		}
 
 		@AfterEach
@@ -29,8 +31,10 @@ public class DatabaseTest {
 			Utils.deleteDirectory(new File(databasePath));
 
 			Assertions.assertFalse(Files.exists(Path.of(databasePath)));
+			InitialData.setCsvFolder("src/resources");
 		}
 
+		// Dialog
 		@Test
 		public void getDialog() {
 			getDialogTest();
@@ -46,6 +50,7 @@ public class DatabaseTest {
 			clearDialogTest();
 		}
 
+		// Command history
 		@Test
 		public void getCommandHistory() {
 			getCommandHistoryTest();
@@ -62,10 +67,18 @@ public class DatabaseTest {
 	class FakeTests {
 		@BeforeEach
 		public void setUp() {
+			InitialData.setCsvFolder("src/test/fixtures/database");
 			DatabaseProvider.setInstance(new FakeDatabase());
 			database = DatabaseProvider.getInstance();
+			database.loadInitialData();
 		}
 
+		@AfterEach
+		public void tearDown() {
+			InitialData.setCsvFolder("src/resources");
+		}
+
+		// Dialog
 		@Test
 		public void getDialog() {
 			getDialogTest();
@@ -81,6 +94,7 @@ public class DatabaseTest {
 			clearDialogTest();
 		}
 
+		// Command history
 		@Test
 		public void getCommandHistory() {
 			getCommandHistoryTest();
@@ -90,12 +104,47 @@ public class DatabaseTest {
 		public void addCommandToHistory() {
 			addCommandToHistoryTest();
 		}
+
+		@Test
+		public void getPlayer() {
+			getPlayerTest();
+		}
+
+		@Test
+		public void getRoomById() {
+			getRoomByIdTest();
+		}
+
+		@Test
+		public void getNPCsForRoom() {
+			getNPCsForRoomTest();
+		}
+
+		@Test
+		public void getEnemiesForRoom() {
+			getEnemiesForRoomTest();
+		}
+
+		@Test
+		public void getItemsForPlayer() {
+			getItemsForPlayerTest();
+		}
+
+		@Test
+		public void getItemsForRoom() {
+			getItemsForRoomTest();
+		}
 	}
 
 
 	// Dialog
 	private void getDialogTest() {
 		ArrayList<String> dialog = database.getDialog();
+		Assertions.assertEquals(1, dialog.size());
+		Assertions.assertEquals("Welcome to the test!", dialog.get(0));
+
+		database.clearDialog();
+		dialog = database.getDialog();
 		Assertions.assertTrue(dialog.isEmpty());
 
 		database.addDialog("a");
@@ -111,6 +160,8 @@ public class DatabaseTest {
 	}
 
 	private void addDialogTest() {
+		database.clearDialog();
+
 		database.addDialog("a");
 		ArrayList<String> dialog = database.getDialog();
 		Assertions.assertEquals(1, dialog.size());
@@ -124,6 +175,8 @@ public class DatabaseTest {
 	}
 
 	private void clearDialogTest() {
+		database.clearDialog();
+
 		database.addDialog("a");
 		database.addDialog("b");
 		database.addDialog("c");
