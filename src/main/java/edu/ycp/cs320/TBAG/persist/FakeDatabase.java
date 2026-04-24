@@ -6,7 +6,6 @@ import edu.ycp.cs320.TBAG.model.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class FakeDatabase implements Database {
@@ -167,7 +166,7 @@ public class FakeDatabase implements Database {
 	// Dialog methods
 	@Override
 	public ArrayList<String> getDialog() {
-		return (ArrayList<String>) List.copyOf(dialog);
+		return new ArrayList<>(dialog);
 	}
 
 	@Override
@@ -182,7 +181,7 @@ public class FakeDatabase implements Database {
 
 	@Override
 	public ArrayList<String> getCommandHistory() {
-		return (ArrayList<String>) List.copyOf(commandHistory);
+		return new ArrayList<>(commandHistory);
 	}
 
 	@Override

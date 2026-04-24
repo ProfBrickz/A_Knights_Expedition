@@ -30,7 +30,7 @@ public interface Database {
 	// Player-related methods
 
 	/**
-	 * Returns the player, without items or a room
+	 * Returns the player, without items
 	 */
 	Player getPlayer();
 
@@ -54,6 +54,8 @@ public interface Database {
 
 
 	// Room-related methods
+
+	/// Gets a room without npcs, enemies, or items
 	Room getRoomById(Integer id);
 
 	/**

@@ -32,8 +32,18 @@ public class DatabaseTest {
 		}
 
 		@Test
-		public void dialog() {
-			dialogTest();
+		public void getDialog() {
+			getDialogTest();
+		}
+
+		@Test
+		public void addDialog() {
+			addDialogTest();
+		}
+
+		@Test
+		public void clearDialog() {
+			clearDialogTest();
 		}
 	}
 
@@ -47,12 +57,23 @@ public class DatabaseTest {
 		}
 
 		@Test
-		public void dialog() {
-			dialogTest();
+		public void getDialog() {
+			getDialogTest();
+		}
+
+		@Test
+		public void addDialog() {
+			addDialogTest();
+		}
+
+		@Test
+		public void clearDialog() {
+			clearDialogTest();
 		}
 	}
 
-	private void dialogTest() {
+
+	private void getDialogTest() {
 		ArrayList<String> dialog = database.getDialog();
 		Assertions.assertTrue(dialog.isEmpty());
 
@@ -66,5 +87,31 @@ public class DatabaseTest {
 		Assertions.assertEquals(2, dialog.size());
 		Assertions.assertEquals("a", dialog.get(0));
 		Assertions.assertEquals("b", dialog.get(1));
+	}
+
+	private void addDialogTest() {
+		database.addDialog("a");
+		ArrayList<String> dialog = database.getDialog();
+		Assertions.assertEquals(1, dialog.size());
+		Assertions.assertEquals("a", dialog.get(0));
+
+		database.addDialog("b");
+		dialog = database.getDialog();
+		Assertions.assertEquals(2, dialog.size());
+		Assertions.assertEquals("a", dialog.get(0));
+		Assertions.assertEquals("b", dialog.get(1));
+	}
+
+	private void clearDialogTest() {
+		database.addDialog("a");
+		database.addDialog("b");
+		database.addDialog("c");
+
+		ArrayList<String> dialog = database.getDialog();
+		Assertions.assertEquals(3, dialog.size());
+
+		database.clearDialog();
+		dialog = database.getDialog();
+		Assertions.assertTrue(dialog.isEmpty());
 	}
 }
