@@ -1,5 +1,5 @@
 id,name,description,asset_name,value,type,heal_amount,defense,active_armor
 String,String,String,String,Integer,item or healing or weapon or armor,Integer,Integer,Boolean (false or true)
-1,Test Sword,A test sword.,sword.png,10,Weapon,0,0,FALSE
-2,Test Potion,A test potion.,potion.png,5,Healing,10,0,FALSE
-3,Test Armor,Test armor.,armor.png,15,Armor,0,5,FALSE
+0,Test Sword,A test sword.,sword.png,10,Weapon,0,0,FALSE
+1,Test Potion,A test potion.,potion.png,5,Healing,10,0,FALSE
+2,Test Armor,Test armor.,armor.png,15,Armor,0,5,FALSE

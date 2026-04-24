@@ -1,5 +1,5 @@
 id,name,description,asset_name
 String,String,String,String
-1,Test Room,A test room.,test.gif
-2,NPC Room,A room with an npc.,test.gif
-3,Enemy Room,A room with an enemy.,test.gif
+0,Test Room,A test room.,
+1,NPC Room,A room with an npc.,
+2,Enemy Room,A room with an enemy.,

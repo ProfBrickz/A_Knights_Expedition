@@ -1,6 +1,6 @@
 source_id,direction,destination_id,description,locked,locked_message,unlock_item_id
 String,String,String,String,Boolean (false or true),String,Integer
-1,North,2,temp,FALSE,,
-2,South,1,temp,FALSE,,
-2,East,3,temp,FALSE,,
-3,West,2,temp,FALSE,,
+0,North,1,temp,FALSE,,
+1,South,0,temp,FALSE,,
+1,East,2,temp,FALSE,,
+2,West,1,temp,FALSE,,
