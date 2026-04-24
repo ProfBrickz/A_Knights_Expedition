@@ -21,7 +21,7 @@ public interface Database {
 
 	void clearDialog();
 
-	/// Up to 15 commands long
+	// Command History methods
 	ArrayList<String> getCommandHistory();
 
 	// Will also remove the oldest command

@@ -788,6 +788,7 @@ public class DerbyDatabase implements Database {
 		});
 	}
 
+	// Command history methods
 	@Override
 	public ArrayList<String> getCommandHistory() {
 		return executeTransaction(new Transaction<ArrayList<String>>() {

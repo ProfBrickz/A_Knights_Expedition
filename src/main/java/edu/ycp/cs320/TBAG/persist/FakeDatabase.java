@@ -179,6 +179,7 @@ public class FakeDatabase implements Database {
 		dialog.clear();
 	}
 
+	// Command history methods
 	@Override
 	public ArrayList<String> getCommandHistory() {
 		return new ArrayList<>(commandHistory);

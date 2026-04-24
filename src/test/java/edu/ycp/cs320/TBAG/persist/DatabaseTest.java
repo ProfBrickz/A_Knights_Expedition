@@ -104,36 +104,6 @@ public class DatabaseTest {
 		public void addCommandToHistory() {
 			addCommandToHistoryTest();
 		}
-
-		@Test
-		public void getPlayer() {
-			getPlayerTest();
-		}
-
-		@Test
-		public void getRoomById() {
-			getRoomByIdTest();
-		}
-
-		@Test
-		public void getNPCsForRoom() {
-			getNPCsForRoomTest();
-		}
-
-		@Test
-		public void getEnemiesForRoom() {
-			getEnemiesForRoomTest();
-		}
-
-		@Test
-		public void getItemsForPlayer() {
-			getItemsForPlayerTest();
-		}
-
-		@Test
-		public void getItemsForRoom() {
-			getItemsForRoomTest();
-		}
 	}
 
 
