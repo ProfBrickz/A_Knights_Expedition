@@ -50,7 +50,7 @@ public class Room {
 	}
 
 
-	public Integer getID() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -136,6 +136,15 @@ public class Room {
 
 	public NPC removeNPC(NPC npc) {
 		return npcs.remove(npc.getId());
+	}
+
+	public Room copy() {
+		return new Room(
+			id,
+			roomName,
+			roomDescription,
+			assetName
+		);
 	}
 }
 

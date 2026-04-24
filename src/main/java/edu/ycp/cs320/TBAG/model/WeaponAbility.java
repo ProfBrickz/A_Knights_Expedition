@@ -30,4 +30,12 @@ public class WeaponAbility {
 	public void setAttackDescription(String attackDescription) {
 		this.attackDescription = attackDescription;
 	}
+
+	public WeaponAbility copy() {
+		return new WeaponAbility(
+			id,
+			damage,
+			attackDescription
+		);
+	}
 }

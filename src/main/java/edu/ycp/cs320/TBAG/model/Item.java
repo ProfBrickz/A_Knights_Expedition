@@ -76,4 +76,15 @@ public class Item {
 	public void setAssetName(String assetName) {
 		this.assetName = assetName;
 	}
+
+	public Item copy() {
+		return new Item(
+			id,
+			name,
+			description,
+			value,
+			amount,
+			assetName
+		);
+	}
 }

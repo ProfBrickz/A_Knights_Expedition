@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class BattleTest {
-
 	private BattleEntityController controller;
 	private Player player;
 	private Enemy enemy;

@@ -4,7 +4,7 @@ import edu.ycp.cs320.TBAG.controller.Command;
 
 import java.util.ArrayList;
 
-public class Player extends BattleEntity {
+public class Player extends BattleEntity implements Cloneable {
 	private Room room;
 	private final ArrayList<Armor> armor;
 	private PlayerState playerState;
@@ -109,5 +109,17 @@ public class Player extends BattleEntity {
 
 	public void setConfirming(Boolean confirming) {
 		this.confirming = confirming;
+	}
+
+	public Player copy() {
+		return new Player(
+			getMaxHealth(),
+			getHealth(),
+			playerState,
+			room.copy(),
+			coins,
+			lastCommand,
+			confirming
+		);
 	}
 }

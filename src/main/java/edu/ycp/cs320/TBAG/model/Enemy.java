@@ -22,4 +22,13 @@ public class Enemy extends BattleEntity {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public Enemy copy() {
+		return new Enemy(
+			id,
+			name,
+			getMaxHealth(),
+			getHealth()
+		);
+	}
 }

@@ -9,22 +9,50 @@ import java.util.Iterator;
 import java.util.List;
 
 public class InitialData {
+	// Settings
+	private static String csvFolder = "src/resources";
+
+
+	// Cached data
 	private static final HashMap<Integer, Room> rooms = new HashMap<>();
 	private static final HashMap<Integer, Item> items = new HashMap<>();
 	private static final HashMap<Integer, NPC> npcs = new HashMap<>();
 	private static final HashMap<Integer, Enemy> enemies = new HashMap<>();
-	// Might not need maps for all of these, or might need maps for other things but this is what they would look like
 	private static final HashMap<String, Integer> roomIds = new HashMap<>();
 	private static final HashMap<String, Integer> itemIds = new HashMap<>();
 	private static final HashMap<String, Integer> npcIds = new HashMap<>();
 	private static final HashMap<String, Integer> enemyIds = new HashMap<>();
 
+
+	// Settings
+	public static void setCsvFolder(String folder) {
+		csvFolder = folder;
+		clearCache();
+	}
+
+	public static void clearCache() {
+		rooms.clear();
+		items.clear();
+		npcs.clear();
+		enemies.clear();
+		roomIds.clear();
+		itemIds.clear();
+		npcIds.clear();
+		enemyIds.clear();
+	}
+
+	private static ReadCSV openCSV(String fileName) throws IOException {
+		return new ReadCSV(csvFolder, fileName);
+	}
+
+
+	// Utility methods
 	private static void ensureItemsLoaded() throws IOException {
 		if (!items.isEmpty()) {
 			return;
 		}
 
-		ReadCSV itemsFile = new ReadCSV("items.csv");
+		ReadCSV itemsFile = openCSV("items.csv");
 
 		try {
 			while (true) {
@@ -109,9 +137,31 @@ public class InitialData {
 		return copy;
 	}
 
+	private static Integer parseIntegerOrNull(String text) {
+		Integer integer = null;
+
+		try {
+			integer = Integer.parseInt(text);
+		} catch (NumberFormatException ignored) {
+		}
+
+		return integer;
+	}
+
+	private static Boolean parseBooleanOrNull(String text) {
+		Boolean bool = null;
+
+		if (text.equals("true")) bool = true;
+		else if (text.equals("false")) bool = false;
+
+		return bool;
+	}
+
+
+	// Dialog
 	public static ArrayList<String> getDialog() throws IOException {
 		ArrayList<String> dialog = new ArrayList<>();
-		ReadCSV dialogFile = new ReadCSV("dialog.csv");
+		ReadCSV dialogFile = openCSV("dialog.csv");
 
 		try {
 			while (true) {
@@ -131,265 +181,10 @@ public class InitialData {
 		}
 	}
 
-	public static Player getPlayer() throws IOException, IllegalStateException {
-		ArrayList<Player> players = new ArrayList<>();
-		ReadCSV playersFile = new ReadCSV("player.csv");
 
-		try {
-			while (true) {
-				List<String> tuple = playersFile.next();
-				if (tuple == null) break;
-
-				Iterator<String> iterator = tuple.iterator();
-
-				String roomId = iterator.next();
-				if (!roomIds.containsKey(roomId)) {
-					throw new IllegalStateException(
-						"The room the player is in with the id \""
-							+ roomId
-							+ "\" does not exist in the initial CSV data."
-					);
-				}
-				Integer roomIdA = roomIds.get(roomId);
-				Room playerRoom = rooms.get(roomIdA);
-				if (playerRoom == null) {
-					throw new IllegalStateException(
-						"The room the player is in with the id \""
-							+ roomId
-							+ "\" does not exist in the initial CSV data."
-					);
-				}
-
-				String stateString = iterator.next();
-				PlayerState state = PlayerState.getByName(stateString);
-				if (state == null) {
-					throw new IllegalStateException(
-						"Invalid player state: \"" + stateString + "\""
-					);
-				}
-
-				Integer coins = Integer.parseInt(iterator.next());
-				Integer health = Integer.parseInt(iterator.next());
-				Integer maxHealth = Integer.parseInt(iterator.next());
-
-				Player player = new Player(maxHealth, health, state, playerRoom, coins);
-				players.add(player);
-			}
-
-			if (players.size() > 1) {
-				throw new IllegalStateException("There can not be more than one player in the initial CSV data.");
-			} else if (players.isEmpty()) {
-				throw new IllegalStateException("No player exists in the initial CSV data.");
-			}
-
-			return players.get(0);
-		} finally {
-			playersFile.close();
-		}
-	}
-
-	/**
-	 * Returns a list of the players items
-	 */
-	public static HashMap<Integer, Item> getPlayerItems() throws IOException {
-		ensureItemsLoaded();
-
-		HashMap<Integer, Item> result = new HashMap<>();
-		ReadCSV playerItemsFile = new ReadCSV("player_items.csv");
-
-		try {
-			while (true) {
-				List<String> tuple = playerItemsFile.next();
-				if (tuple == null) break;
-
-				Iterator<String> iterator = tuple.iterator();
-				String itemKey = iterator.next();
-				Integer amount = Integer.parseInt(iterator.next());
-
-				if (!itemIds.containsKey(itemKey)) {
-					throw new IllegalStateException(
-						"Player item \"" + itemKey + "\" does not exist in the items CSV."
-					);
-				}
-
-				Integer itemId = itemIds.get(itemKey);
-				Item baseItem = items.get(itemId);
-				if (baseItem == null) {
-					throw new IllegalStateException(
-						"Player item \"" + itemKey + "\" does not exist in the items CSV."
-					);
-				}
-
-				Item item = copyItemWithAmount(baseItem, amount);
-				if (item != null) {
-					result.put(item.getId(), item);
-				}
-			}
-
-			return result;
-		} finally {
-			playerItemsFile.close();
-		}
-	}
-
-	/**
-	 * Rooms do not have items, npcs, or enemies
-	 */
-	public static HashMap<Integer, Room> getRooms() throws IOException {
-		ReadCSV roomsFile = new ReadCSV("rooms.csv");
-		rooms.clear();
-		roomIds.clear();
-
-		try {
-			while (true) {
-				List<String> tuple = roomsFile.next();
-				if (tuple == null) break;
-
-				Iterator<String> it = tuple.iterator();
-
-				String roomKey = it.next();   // CSV string ID
-				String name = it.next();
-				String description = it.next();
-				String assetName = it.next();
-
-				// Map CSV string ID → integer ID
-				Integer id = roomIds.size();
-				roomIds.put(roomKey, id);
-
-				Room room = new Room(id, name, description, assetName);
-				rooms.put(id, room);
-			}
-
-			return rooms;
-		} finally {
-			roomsFile.close();
-		}
-	}
-
-	/**
-	 * Returns a list of maps between room ids and a hashmap of (directions and room connection)
-	 */
-	public static HashMap<Integer, HashMap<String, RoomConnection>> getRoomConnections() throws IOException, IllegalStateException {
-		HashMap<Integer, HashMap<String, RoomConnection>> result = new HashMap<>();
-		ReadCSV connFile = new ReadCSV("room_connections.csv");
-
-		try {
-			while (true) {
-				List<String> tuple = connFile.next();
-				if (tuple == null) break;
-
-				Iterator<String> it = tuple.iterator();
-
-				String fromKey = it.next();
-				String direction = it.next();
-				String toKey = it.next();
-				String description = it.next();
-
-				Integer fromId = roomIds.get(fromKey);
-				Integer toId = roomIds.get(toKey);
-
-				if (fromId == null || toId == null) {
-					throw new IllegalStateException(
-						"Invalid room reference in connections CSV: " +
-							fromKey + " -> " + toKey
-					);
-				}
-
-				Room targetRoom = rooms.get(toId);
-
-				RoomConnection connection =
-					new RoomConnection(targetRoom, description);
-
-				result
-					.computeIfAbsent(fromId, k -> new HashMap<>())
-					.put(direction, connection);
-			}
-
-			return result;
-
-		} finally {
-			connFile.close();
-		}
-	}
-
-	/**
-	 * Returns a map between room ids and a list of items
-	 */
-	public static HashMap<Integer, ArrayList<Item>> getRoomItems() throws IOException {
-		ensureItemsLoaded();
-
-		HashMap<Integer, ArrayList<Item>> result = new HashMap<>();
-		ReadCSV roomItemsFile = new ReadCSV("room_items.csv");
-
-		try {
-			while (true) {
-				List<String> tuple = roomItemsFile.next();
-				if (tuple == null) break;
-
-				Iterator<String> iterator = tuple.iterator();
-
-				String roomKey = iterator.next();
-				String itemKey = iterator.next();
-				Integer amount = Integer.parseInt(iterator.next());
-
-				if (!roomIds.containsKey(roomKey)) {
-					throw new IllegalStateException(
-						"The room with the id \"" + roomKey + "\" does not exist in the rooms CSV."
-					);
-				}
-
-				if (!itemIds.containsKey(itemKey)) {
-					throw new IllegalStateException(
-						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
-					);
-				}
-
-				Integer roomId = roomIds.get(roomKey);
-				Integer itemId = itemIds.get(itemKey);
-				Item baseItem = items.get(itemId);
-				if (baseItem == null) {
-					throw new IllegalStateException(
-						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
-					);
-				}
-
-				ArrayList<Item> roomItems = result.get(roomId);
-				if (roomItems == null) {
-					roomItems = new ArrayList<>();
-					result.put(roomId, roomItems);
-				}
-
-				Item item = copyItemWithAmount(baseItem, amount);
-				if (item != null) {
-					roomItems.add(item);
-				}
-			}
-
-			return result;
-		} finally {
-			roomItemsFile.close();
-		}
-	}
-
-	/**
-	 * Returns a map between room ids and a list of npcs
-	 */
-	public static HashMap<Integer, ArrayList<NPC>> getRoomNPCs() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
-
-	/**
-	 * Returns a map between room ids and a list of enemies
-	 */
-	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
-
-	/**
-	 * Returns a list of all items without amounts
-	 */
+	// Items
 	public static HashMap<Integer, Item> getItems() throws IOException, IllegalStateException {
-		ReadCSV itemsFile = new ReadCSV("items.csv");
+		ReadCSV itemsFile = openCSV("items.csv");
 		items.clear();
 		itemIds.clear();
 
@@ -445,61 +240,269 @@ public class InitialData {
 		}
 	}
 
-	public static HashMap<Integer, NPC> getNPCs() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
-
-	/**
-	 * Returns a map between npc ids and a list of items
-	 */
-	public static HashMap<Integer, ArrayList<Item>> getNPCItems() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
-	}
-
 	public static HashMap<Integer, WeaponAbility> getWeaponAbilities() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	/// The left is the item id, the right is the weapon ability id
 	public static ArrayList<Pair<Integer, Integer>> getWeaponAbilitiesJunction() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
 
-	/**
-	 * Returns a list of enemies without items
-	 */
+	// NPCs
+	public static HashMap<Integer, NPC> getNPCs() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	public static HashMap<Integer, ArrayList<Item>> getNPCItems() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+
+	// Enemies
 	public static HashMap<Integer, Enemy> getEnemies() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
-	/**
-	 * Returns a map between enemy ids and a list of items
-	 */
 	public static HashMap<Integer, ArrayList<Item>> getEnemyItems() throws IOException {
 		throw new UnsupportedOperationException("TODO - implement");
 	}
 
 
-	// Utility methods
-
-	private static Integer parseIntegerOrNull(String text) {
-		Integer integer = null;
+	// Rooms
+	public static HashMap<Integer, Room> getRooms() throws IOException {
+		ReadCSV roomsFile = openCSV("rooms.csv");
+		rooms.clear();
+		roomIds.clear();
 
 		try {
-			integer = Integer.parseInt(text);
-		} catch (NumberFormatException ignored) {
-		}
+			while (true) {
+				List<String> tuple = roomsFile.next();
+				if (tuple == null) break;
 
-		return integer;
+				Iterator<String> it = tuple.iterator();
+
+				String roomKey = it.next();
+				String name = it.next();
+				String description = it.next();
+				String assetName = it.next();
+
+				Integer id = roomIds.size();
+				roomIds.put(roomKey, id);
+
+				Room room = new Room(id, name, description, assetName);
+				rooms.put(id, room);
+			}
+
+			return rooms;
+		} finally {
+			roomsFile.close();
+		}
 	}
 
-	private static Boolean parseBooleanOrNull(String text) {
-		Boolean bool = null;
+	public static HashMap<Integer, HashMap<String, RoomConnection>> getRoomConnections() throws IOException, IllegalStateException {
+		HashMap<Integer, HashMap<String, RoomConnection>> result = new HashMap<>();
+		ReadCSV connFile = openCSV("room_connections.csv");
 
-		if (text.equals("true")) bool = true;
-		else if (text.equals("false")) bool = false;
+		try {
+			while (true) {
+				List<String> tuple = connFile.next();
+				if (tuple == null) break;
 
-		return bool;
+				Iterator<String> it = tuple.iterator();
+
+				String fromKey = it.next();
+				String direction = it.next();
+				String toKey = it.next();
+				String description = it.next();
+
+				Integer fromId = roomIds.get(fromKey);
+				Integer toId = roomIds.get(toKey);
+
+				if (fromId == null || toId == null) {
+					throw new IllegalStateException(
+						"Invalid room reference in connections CSV: " +
+							fromKey + " -> " + toKey
+					);
+				}
+
+				Room targetRoom = rooms.get(toId);
+
+				RoomConnection connection = new RoomConnection(targetRoom, description);
+
+				result
+					.computeIfAbsent(fromId, k -> new HashMap<>())
+					.put(direction, connection);
+			}
+
+			return result;
+
+		} finally {
+			connFile.close();
+		}
+	}
+
+	public static HashMap<Integer, ArrayList<NPC>> getRoomNPCs() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
+		throw new UnsupportedOperationException("TODO - implement");
+	}
+
+	public static HashMap<Integer, ArrayList<Item>> getRoomItems() throws IOException {
+		ensureItemsLoaded();
+
+		HashMap<Integer, ArrayList<Item>> result = new HashMap<>();
+		ReadCSV roomItemsFile = openCSV("room_items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = roomItemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String roomKey = iterator.next();
+				String itemKey = iterator.next();
+				Integer amount = Integer.parseInt(iterator.next());
+
+				if (!roomIds.containsKey(roomKey)) {
+					throw new IllegalStateException(
+						"The room with the id \"" + roomKey + "\" does not exist in the rooms CSV."
+					);
+				}
+
+				if (!itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Integer roomId = roomIds.get(roomKey);
+				Integer itemId = itemIds.get(itemKey);
+				Item baseItem = items.get(itemId);
+				if (baseItem == null) {
+					throw new IllegalStateException(
+						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				ArrayList<Item> roomItems = result.get(roomId);
+				if (roomItems == null) {
+					roomItems = new ArrayList<>();
+					result.put(roomId, roomItems);
+				}
+
+				Item item = copyItemWithAmount(baseItem, amount);
+				if (item != null) {
+					roomItems.add(item);
+				}
+			}
+
+			return result;
+		} finally {
+			roomItemsFile.close();
+		}
+	}
+
+
+	// Player
+	public static Player getPlayer() throws IOException, IllegalStateException {
+		ArrayList<Player> players = new ArrayList<>();
+		ReadCSV playersFile = openCSV("player.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = playersFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String roomId = iterator.next();
+				if (!roomIds.containsKey(roomId)) {
+					throw new IllegalStateException(
+						"The room the player is in with the id \""
+							+ roomId
+							+ "\" does not exist in the initial CSV data."
+					);
+				}
+				Integer roomIdA = roomIds.get(roomId);
+				Room playerRoom = rooms.get(roomIdA);
+				if (playerRoom == null) {
+					throw new IllegalStateException(
+						"The room the player is in with the id \""
+							+ roomId
+							+ "\" does not exist in the initial CSV data."
+					);
+				}
+
+				String stateString = iterator.next();
+				PlayerState state = PlayerState.getByName(stateString);
+				if (state == null) {
+					throw new IllegalStateException(
+						"Invalid player state: \"" + stateString + "\""
+					);
+				}
+
+				Integer coins = Integer.parseInt(iterator.next());
+				Integer health = Integer.parseInt(iterator.next());
+				Integer maxHealth = Integer.parseInt(iterator.next());
+
+				Player player = new Player(maxHealth, health, state, playerRoom, coins);
+				players.add(player);
+			}
+
+			if (players.size() > 1) {
+				throw new IllegalStateException("There can not be more than one player in the initial CSV data.");
+			} else if (players.isEmpty()) {
+				throw new IllegalStateException("No player exists in the initial CSV data.");
+			}
+
+			return players.get(0);
+		} finally {
+			playersFile.close();
+		}
+	}
+
+	public static HashMap<Integer, Item> getPlayerItems() throws IOException {
+		ensureItemsLoaded();
+
+		HashMap<Integer, Item> result = new HashMap<>();
+		ReadCSV playerItemsFile = openCSV("player_items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = playerItemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String itemKey = iterator.next();
+				Integer amount = Integer.parseInt(iterator.next());
+
+				if (!itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"Player item \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Integer itemId = itemIds.get(itemKey);
+				Item baseItem = items.get(itemId);
+				if (baseItem == null) {
+					throw new IllegalStateException(
+						"Player item \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Item item = copyItemWithAmount(baseItem, amount);
+				if (item != null) {
+					result.put(item.getId(), item);
+				}
+			}
+
+			return result;
+		} finally {
+			playerItemsFile.close();
+		}
 	}
 }
