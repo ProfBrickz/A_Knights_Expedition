@@ -50,6 +50,7 @@ public class DatabaseTest {
 			clearDialogTest();
 		}
 
+
 		// Command history
 		@Test
 		public void getCommandHistory() {
@@ -60,6 +61,21 @@ public class DatabaseTest {
 		public void addCommandToHistory() {
 			addCommandToHistoryTest();
 		}
+
+
+		// Items
+
+
+		// NPCs
+
+
+		// Enemies
+
+
+		// Rooms
+
+
+		// Player
 	}
 
 
@@ -94,6 +110,7 @@ public class DatabaseTest {
 			clearDialogTest();
 		}
 
+
 		// Command history
 		@Test
 		public void getCommandHistory() {
@@ -104,6 +121,21 @@ public class DatabaseTest {
 		public void addCommandToHistory() {
 			addCommandToHistoryTest();
 		}
+
+
+		// Items
+
+
+		// NPCs
+
+
+		// Enemies
+
+
+		// Rooms
+
+
+		// Player
 	}
 
 
@@ -159,6 +191,7 @@ public class DatabaseTest {
 		Assertions.assertTrue(dialog.isEmpty());
 	}
 
+
 	// Command history
 	private void getCommandHistoryTest() {
 		ArrayList<String> history = database.getCommandHistory();
@@ -188,4 +221,19 @@ public class DatabaseTest {
 		Assertions.assertEquals("a", history.get(0));
 		Assertions.assertEquals("b", history.get(1));
 	}
+
+
+	// Items
+
+
+	// NPCs
+
+
+	// Enemies
+
+
+	// Rooms
+
+
+	// Player
 }

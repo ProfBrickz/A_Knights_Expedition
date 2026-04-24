@@ -22,6 +22,8 @@ public class InitialDataTest {
 		InitialData.setCsvFolder("src/resources");
 	}
 
+
+	// Dialog
 	@Test
 	public void testGetDialog() throws IOException {
 		ArrayList<String> dialog = InitialData.getDialog();
@@ -29,6 +31,20 @@ public class InitialDataTest {
 		Assertions.assertEquals("Welcome to the test!", dialog.get(0));
 	}
 
+
+	// Items
+
+
+	// NPCs
+
+
+	// Enemies
+
+
+	// Rooms
+
+	
+	// Player
 	@Test
 	public void testGetPlayer() throws IOException {
 		InitialData.getRooms();

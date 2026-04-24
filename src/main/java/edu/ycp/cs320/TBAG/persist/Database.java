@@ -7,34 +7,70 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface Database {
-	public static final Integer MAX_HISTORY_SIZE = 10;
+	Integer MAX_HISTORY_SIZE = 10;
 
 	// General purpose methods
 	void loadInitialData();
 
 	Boolean reset();
 
-	// Dialog methods
+
+	// Dialog
 	ArrayList<String> getDialog();
 
 	void addDialog(String text);
 
 	void clearDialog();
 
-	// Command History methods
+
+	// Command history
 	ArrayList<String> getCommandHistory();
 
-	// Will also remove the oldest command
 	void addCommandToHistory(String command);
 
-	// Player-related methods
 
-	/**
-	 * Returns the player, without items
-	 */
+	// Items
+	HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon);
+	
+
+	// NPCs
+	HashMap<Integer, Item> getItemsForNPC(NPC npc);
+
+
+	// Enemies
+	HashMap<Integer, Item> getItemsForEnemy(Enemy enemy);
+
+	void addItemToEnemy(Enemy enemy, Item item);
+
+	void removeItemFromEnemy(Enemy enemy, Item item);
+
+
+	// Rooms
+	Room getRoomById(Integer id);
+
+	HashMap<String, RoomConnection> getConnectionsForRoom(Room room);
+
+	HashMap<Integer, NPC> getNPCsForRoom(Room room);
+
+	HashMap<Integer, Enemy> getEnemiesForRoom(Room room);
+
+	HashMap<Integer, Item> getItemsForRoom(Room room);
+
+	void addItemToRoom(Room room, Item item);
+
+	void removeItemFromRoom(Room room, Item item);
+
+
+	// Player
 	Player getPlayer();
 
 	NPC getNpcForPlayer();
+
+	HashMap<Integer, Item> getItemsForPlayer();
+
+	void addItemToPlayer(Item item);
+
+	void removeItemFromPlayer(Item item);
 
 	void setPlayerRoom(Integer roomId);
 
@@ -47,49 +83,4 @@ public interface Database {
 	void setPlayerNPC(NPC npc);
 
 	void setLastCommand(Command command);
-
-	void addItemToPlayer(Item item);
-
-	void removeItemFromPlayer(Item item);
-
-
-	// Room-related methods
-
-	/// Gets a room without npcs, enemies, or items
-	Room getRoomById(Integer id);
-
-	/**
-	 * Returns a map between a room's directions and connections
-	 */
-	HashMap<String, RoomConnection> getConnectionsForRoom(Room room);
-
-	void addItemToRoom(Room room, Item item);
-
-	void removeItemFromRoom(Room room, Item item);
-
-
-	// Item-related methods
-	HashMap<Integer, Item> getItemsForPlayer();
-
-	HashMap<Integer, Item> getItemsForRoom(Room room);
-
-	HashMap<Integer, Item> getItemsForNPC(NPC npc);
-
-	HashMap<Integer, Item> getItemsForEnemy(Enemy enemy);
-
-
-	// NPC-related methods
-	HashMap<Integer, NPC> getNPCsForRoom(Room room);
-
-
-	// Enemy-related methods
-	HashMap<Integer, Enemy> getEnemiesForRoom(Room room);
-
-	void addItemToEnemy(Enemy enemy, Item item);
-
-	void removeItemFromEnemy(Enemy enemy, Item item);
-
-
-	// WeaponAbility-related methods
-	HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon);
 }

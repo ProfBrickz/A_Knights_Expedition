@@ -11,6 +11,8 @@ import java.util.Map;
 public class FakeDatabase implements Database {
 	// Dialog
 	private final ArrayList<String> dialog = new ArrayList<>();
+
+	// Command history
 	private final ArrayList<String> commandHistory = new ArrayList<>();
 
 	// Items
@@ -29,6 +31,8 @@ public class FakeDatabase implements Database {
 	// Player
 	private Player player = null;
 
+
+	// Setters
 	public void setDialog(ArrayList<String> dialog) {
 		this.dialog.clear();
 		this.dialog.addAll(dialog);
@@ -103,6 +107,7 @@ public class FakeDatabase implements Database {
 		player.getInventory().addItems(playerItems);
 	}
 
+
 	// General purpose methods
 	@Override
 	public void loadInitialData() {
@@ -163,7 +168,7 @@ public class FakeDatabase implements Database {
 	}
 
 
-	// Dialog methods
+	// Dialog
 	@Override
 	public ArrayList<String> getDialog() {
 		return new ArrayList<>(dialog);
@@ -179,7 +184,8 @@ public class FakeDatabase implements Database {
 		dialog.clear();
 	}
 
-	// Command history methods
+
+	// Command history
 	@Override
 	public ArrayList<String> getCommandHistory() {
 		return new ArrayList<>(commandHistory);
@@ -200,67 +206,62 @@ public class FakeDatabase implements Database {
 	}
 
 
-	// Player-related methods
-	@Override
-	public Player getPlayer() {
-		if (player == null) {
-			throw new IllegalStateException("No player exists");
+	// Items
+	private HashMap<Integer, Item> copyItems(HashMap<Integer, Item> items) {
+		HashMap<Integer, Item> newItems = new HashMap<>();
+
+		for (Item item : items.values()) {
+			newItems.put(item.getId(), item.copy());
 		}
 
-		return player.copy();
+		return newItems;
 	}
 
 	@Override
-	public NPC getNpcForPlayer() {
-		return player.getCurrentNPC().copy();
-	}
-
-	@Override
-	public void setPlayerRoom(Integer roomId) {
-		if (player == null) {
-			throw new IllegalStateException("No player exists");
+	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) { // Hamed
+		if (weapon == null) {
+			return new HashMap<>();
 		}
-		Room room = rooms.get(roomId);
-		player.setRoom(room);
-	}
 
-	@Override
-	public void setPlayerCoins(Integer coins) {
-		if (player == null) {
-			throw new IllegalStateException("No player exists");
+		weapon = (Weapon) items.get(weapon.getId());
+		HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
+
+		for (WeaponAbility ability : weapon.getAbilities().values()) {
+			weaponAbilities.put(ability.getId(), ability.copy());
 		}
-		player.setCoins(coins);
+
+		return weaponAbilities;
 	}
 
+
+	// NPC
 	@Override
-	public void setPlayerState(PlayerState playerState) {
-		if (player == null) {
-			throw new IllegalStateException("No player exists");
+	public HashMap<Integer, Item> getItemsForNPC(NPC npc) {
+		if (npc == null) {
+			return new HashMap<>();
 		}
-		player.setState(playerState);
+
+		npc = npcs.get(npc.getId());
+
+		return copyItems(npc.getInventory().getItems());
 	}
 
+
+	// Enemies
 	@Override
-	public void setPlayerNPC(NPC npc) {
-		if (player == null) {
-			throw new IllegalStateException("No player exists");
+	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) { // Hamed
+		if (enemy == null) {
+			return new HashMap<>();
 		}
-		player.setCurrentNPC(npc);
+
+		enemy = enemies.get(enemy.getId());
+
+		return copyItems(enemy.getInventory().getItems());
 	}
 
 	@Override
-	public void setLastCommand(Command command) {
-		player.setLastCommand(command);
-	}
-
-	@Override
-	public void setConfirming(Boolean confirming) {
-		player.setConfirming(confirming);
-	}
-
-	@Override
-	public void addItemToPlayer(Item item) {
-		if (item == null || player == null) {
+	public void addItemToEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
 			return;
 		}
 
@@ -269,7 +270,9 @@ public class FakeDatabase implements Database {
 			return;
 		}
 
-		Item existing = player.getInventory().getItems().get(itemId);
+		enemy = enemies.get(enemy.getId());
+
+		Item existing = enemy.getInventory().getItems().get(itemId);
 		int delta = item.getAmount() == null ? 1 : item.getAmount();
 
 		if (delta <= 0) {
@@ -277,15 +280,15 @@ public class FakeDatabase implements Database {
 		}
 
 		if (existing == null) {
-			player.getInventory().addItem(item);
+			enemy.getInventory().addItem(item);
 		} else {
 			existing.setAmount(existing.getAmount() + delta);
 		}
 	}
 
 	@Override
-	public void removeItemFromPlayer(Item item) {
-		if (item == null || player == null) {
+	public void removeItemFromEnemy(Enemy enemy, Item item) { // Hamed
+		if (enemy == null || item == null) {
 			return;
 		}
 
@@ -294,7 +297,7 @@ public class FakeDatabase implements Database {
 			return;
 		}
 
-		Item existing = player.getInventory().getItems().get(itemId);
+		Item existing = enemy.getInventory().getItems().get(itemId);
 		if (existing == null) {
 			return;
 		}
@@ -308,12 +311,12 @@ public class FakeDatabase implements Database {
 		if (newAmount > 0) {
 			existing.setAmount(newAmount);
 		} else {
-			player.getInventory().removeItem(existing);
+			enemy.getInventory().removeItem(existing);
 		}
 	}
 
 
-	// Room-related methods
+	// Room
 	@Override
 	public Room getRoomById(Integer id) {
 		Room room = rooms.get(id);
@@ -331,6 +334,50 @@ public class FakeDatabase implements Database {
 		}
 
 		return roomConnections;
+	}
+
+	@Override
+	public HashMap<Integer, NPC> getNPCsForRoom(Room room) {
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		room = rooms.get(room.getId());
+		HashMap<Integer, NPC> npcs = new HashMap<>();
+
+		for (NPC npc : room.getNpcs().values()) {
+			npcs.put(npc.getId(), npc.copy());
+		}
+
+		return npcs;
+	}
+
+	@Override
+	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) { // Hamed
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		room = rooms.get(room.getId());
+
+		HashMap<Integer, Enemy> enemies = new HashMap<>();
+
+		for (Enemy enemy : room.getEnemies().values()) {
+			enemies.put(enemy.getId(), enemy.copy());
+		}
+
+		return enemies;
+	}
+
+	@Override
+	public HashMap<Integer, Item> getItemsForRoom(Room room) {
+		if (room == null) {
+			return new HashMap<>();
+		}
+
+		room = rooms.get(room.getId());
+
+		return copyItems(room.getInventory().getItems());
 	}
 
 	@Override
@@ -392,15 +439,19 @@ public class FakeDatabase implements Database {
 	}
 
 
-	// Item-related methods
-	private HashMap<Integer, Item> copyItems(HashMap<Integer, Item> items) {
-		HashMap<Integer, Item> newItems = new HashMap<>();
-
-		for (Item item : items.values()) {
-			newItems.put(item.getId(), item.copy());
+	// Player
+	@Override
+	public Player getPlayer() {
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
 		}
 
-		return newItems;
+		return player.copy();
+	}
+
+	@Override
+	public NPC getNpcForPlayer() {
+		return player.getCurrentNPC().copy();
 	}
 
 	@Override
@@ -413,78 +464,8 @@ public class FakeDatabase implements Database {
 	}
 
 	@Override
-	public HashMap<Integer, Item> getItemsForRoom(Room room) {
-		if (room == null) {
-			return new HashMap<>();
-		}
-
-		room = rooms.get(room.getId());
-
-		return copyItems(room.getInventory().getItems());
-	}
-
-	@Override
-	public HashMap<Integer, Item> getItemsForNPC(NPC npc) {
-		if (npc == null) {
-			return new HashMap<>();
-		}
-
-		npc = npcs.get(npc.getId());
-
-		return copyItems(npc.getInventory().getItems());
-	}
-
-	@Override
-	public HashMap<Integer, Item> getItemsForEnemy(Enemy enemy) { // Hamed
-		if (enemy == null) {
-			return new HashMap<>();
-		}
-
-		enemy = enemies.get(enemy.getId());
-
-		return copyItems(enemy.getInventory().getItems());
-	}
-
-
-	// NPC-related methods
-	@Override
-	public HashMap<Integer, NPC> getNPCsForRoom(Room room) {
-		if (room == null) {
-			return new HashMap<>();
-		}
-
-		room = rooms.get(room.getId());
-		HashMap<Integer, NPC> npcs = new HashMap<>();
-
-		for (NPC npc : room.getNpcs().values()) {
-			npcs.put(npc.getId(), npc.copy());
-		}
-
-		return npcs;
-	}
-
-
-	// Enemy-related methods
-	@Override
-	public HashMap<Integer, Enemy> getEnemiesForRoom(Room room) { // Hamed
-		if (room == null) {
-			return new HashMap<>();
-		}
-
-		room = rooms.get(room.getId());
-
-		HashMap<Integer, Enemy> enemies = new HashMap<>();
-
-		for (Enemy enemy : room.getEnemies().values()) {
-			enemies.put(enemy.getId(), enemy.copy());
-		}
-
-		return enemies;
-	}
-
-	@Override
-	public void addItemToEnemy(Enemy enemy, Item item) { // Hamed
-		if (enemy == null || item == null) {
+	public void addItemToPlayer(Item item) {
+		if (item == null || player == null) {
 			return;
 		}
 
@@ -493,9 +474,7 @@ public class FakeDatabase implements Database {
 			return;
 		}
 
-		enemy = enemies.get(enemy.getId());
-
-		Item existing = enemy.getInventory().getItems().get(itemId);
+		Item existing = player.getInventory().getItems().get(itemId);
 		int delta = item.getAmount() == null ? 1 : item.getAmount();
 
 		if (delta <= 0) {
@@ -503,15 +482,15 @@ public class FakeDatabase implements Database {
 		}
 
 		if (existing == null) {
-			enemy.getInventory().addItem(item);
+			player.getInventory().addItem(item);
 		} else {
 			existing.setAmount(existing.getAmount() + delta);
 		}
 	}
 
 	@Override
-	public void removeItemFromEnemy(Enemy enemy, Item item) { // Hamed
-		if (enemy == null || item == null) {
+	public void removeItemFromPlayer(Item item) {
+		if (item == null || player == null) {
 			return;
 		}
 
@@ -520,7 +499,7 @@ public class FakeDatabase implements Database {
 			return;
 		}
 
-		Item existing = enemy.getInventory().getItems().get(itemId);
+		Item existing = player.getInventory().getItems().get(itemId);
 		if (existing == null) {
 			return;
 		}
@@ -534,25 +513,50 @@ public class FakeDatabase implements Database {
 		if (newAmount > 0) {
 			existing.setAmount(newAmount);
 		} else {
-			enemy.getInventory().removeItem(existing);
+			player.getInventory().removeItem(existing);
 		}
 	}
 
-
-	// WeaponAbility-related methods
 	@Override
-	public HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon) { // Hamed
-		if (weapon == null) {
-			return new HashMap<>();
+	public void setPlayerRoom(Integer roomId) {
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
 		}
+		Room room = rooms.get(roomId);
+		player.setRoom(room);
+	}
 
-		weapon = (Weapon) items.get(weapon.getId());
-		HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
-
-		for (WeaponAbility ability : weapon.getAbilities().values()) {
-			weaponAbilities.put(ability.getId(), ability.copy());
+	@Override
+	public void setPlayerCoins(Integer coins) {
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
 		}
+		player.setCoins(coins);
+	}
 
-		return weaponAbilities;
+	@Override
+	public void setPlayerState(PlayerState playerState) {
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+		player.setState(playerState);
+	}
+
+	@Override
+	public void setPlayerNPC(NPC npc) {
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+		player.setCurrentNPC(npc);
+	}
+
+	@Override
+	public void setLastCommand(Command command) {
+		player.setLastCommand(command);
+	}
+
+	@Override
+	public void setConfirming(Boolean confirming) {
+		player.setConfirming(confirming);
 	}
 }
