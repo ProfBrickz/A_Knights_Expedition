@@ -408,28 +408,32 @@ public String buyItem(ArrayList<String> arguments) {
 	return "I am not selling any " + itemName + "s.\n";
 }
 
-//	public String sellItem(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String itemName = arguments.get(1).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have any " + itemName + " to sell.\n";
-//
-//		Integer amount = null;
-//		try {
-//			amount = Integer.parseInt(arguments.get(0));
-//		} catch (NumberFormatException ignored) {
-//		}
-//		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
-//		if (item.getAmount() < amount) {
-//			return "You do not have " + amount + " of " + item.getName() + ".\n";
-//		}
-//
-//		npcController.sell(player, item, amount);
-//
-//		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
-//	}
+	public String sellItem(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String itemName = arguments.get(1).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have any " + itemName + " to sell.\n";
+
+		Integer amount = null;
+		try {
+			amount = Integer.parseInt(arguments.get(0));
+		} catch (NumberFormatException ignored) {
+		}
+		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
+		if (item.getAmount() < amount) {
+			return "You do not have " + amount + " of " + item.getName() + ".\n";
+		}
+
+
+		for (int i = 1; i<= amount; i++){
+			database.removeItemFromPlayer(item);
+			database.setPlayerCoins(player.getCoins()+(item.getValue()));
+		}
+
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
+	}
 
 //	public String sellAllItem(ArrayList<String> arguments) {
 //		NPC npc = player.getCurrentNPC();
