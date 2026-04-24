@@ -45,6 +45,16 @@ public class DatabaseTest {
 		public void clearDialog() {
 			clearDialogTest();
 		}
+
+		@Test
+		public void getCommandHistory() {
+			getCommandHistoryTest();
+		}
+
+		@Test
+		public void addCommandToHistory() {
+			addCommandToHistoryTest();
+		}
 	}
 
 
@@ -70,9 +80,20 @@ public class DatabaseTest {
 		public void clearDialog() {
 			clearDialogTest();
 		}
+
+		@Test
+		public void getCommandHistory() {
+			getCommandHistoryTest();
+		}
+
+		@Test
+		public void addCommandToHistory() {
+			addCommandToHistoryTest();
+		}
 	}
 
 
+	// Dialog
 	private void getDialogTest() {
 		ArrayList<String> dialog = database.getDialog();
 		Assertions.assertTrue(dialog.isEmpty());
@@ -113,5 +134,35 @@ public class DatabaseTest {
 		database.clearDialog();
 		dialog = database.getDialog();
 		Assertions.assertTrue(dialog.isEmpty());
+	}
+
+	// Command history
+	private void getCommandHistoryTest() {
+		ArrayList<String> history = database.getCommandHistory();
+		Assertions.assertTrue(history.isEmpty());
+
+		database.addCommandToHistory("cmd1");
+		history = database.getCommandHistory();
+		Assertions.assertEquals(1, history.size());
+		Assertions.assertEquals("cmd1", history.get(0));
+
+		database.addCommandToHistory("cmd2");
+		history = database.getCommandHistory();
+		Assertions.assertEquals(2, history.size());
+		Assertions.assertEquals("cmd1", history.get(0));
+		Assertions.assertEquals("cmd2", history.get(1));
+	}
+
+	private void addCommandToHistoryTest() {
+		database.addCommandToHistory("a");
+		ArrayList<String> history = database.getCommandHistory();
+		Assertions.assertEquals(1, history.size());
+		Assertions.assertEquals("a", history.get(0));
+
+		database.addCommandToHistory("b");
+		history = database.getCommandHistory();
+		Assertions.assertEquals(2, history.size());
+		Assertions.assertEquals("a", history.get(0));
+		Assertions.assertEquals("b", history.get(1));
 	}
 }
