@@ -353,8 +353,8 @@ public class GameEngine {
 			if (player.getCoins() < item.getPrice() * amount) {
 				return "You are too poor to buy " + amount + " x " + item.getName() + ".";
 			}
-
-			database.setPlayerCoins(player.getCoins() - (item.getPrice() * amount));
+			npcController.buy(npc, player, item, amount);
+			database.setPlayerCoins(player.getCoins());
 			database.addItemToPlayer(item);
 			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
 		}
@@ -382,7 +382,7 @@ public class GameEngine {
 
 		npcController.sell(player, item, amount);
 		database.removeItemFromPlayer(item);
-		database.setPlayerCoins(player.getCoins()+(item.getValue()*amount));
+		database.setPlayerCoins(player.getCoins());
 
 		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
