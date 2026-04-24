@@ -16,6 +16,7 @@ public class GameEngine {
 	private final Database database;
 	private Player player;
 	private final InventoryController inventoryController = new InventoryController();
+	private final NPCController npcController = new NPCController(inventoryController);
 
 	// Constructor
 	public GameEngine(Database database) {
@@ -352,8 +353,8 @@ public class GameEngine {
 			if (player.getCoins() < item.getPrice() * amount) {
 				return "You are too poor to buy " + amount + " x " + item.getName() + ".";
 			}
-
-			database.setPlayerCoins(player.getCoins() - (item.getPrice() * amount));
+			npcController.buy(npc, player, item, amount);
+			database.setPlayerCoins(player.getCoins());
 			database.addItemToPlayer(item);
 			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
 		}
@@ -361,28 +362,30 @@ public class GameEngine {
 		return "I am not selling any " + itemName + "s.";
 	}
 
-//	public String sellItem(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String itemName = arguments.get(1).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have any " + itemName + " to sell.\n";
-//
-//		Integer amount = null;
-//		try {
-//			amount = Integer.parseInt(arguments.get(0));
-//		} catch (NumberFormatException ignored) {
-//		}
-//		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
-//		if (item.getAmount() < amount) {
-//			return "You do not have " + amount + " of " + item.getName() + ".\n";
-//		}
-//
-//		npcController.sell(player, item, amount);
-//
-//		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
-//	}
+	public String sellItem(ArrayList<String> arguments) {
+		NPC npc = database.getNpcForPlayer();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String itemName = arguments.get(1).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have any " + itemName + " to sell.\n";
+
+		Integer amount = null;
+		try {
+			amount = Integer.parseInt(arguments.get(0));
+		} catch (NumberFormatException ignored) {
+		}
+		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
+		if (item.getAmount() < amount) {
+			return "You do not have " + amount + " of " + item.getName() + ".\n";
+		}
+
+		npcController.sell(player, item, amount);
+		database.removeItemFromPlayer(item);
+		database.setPlayerCoins(player.getCoins());
+
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
+	}
 
 //	public String sellAllItem(ArrayList<String> arguments) {
 //		NPC npc = player.getCurrentNPC();
