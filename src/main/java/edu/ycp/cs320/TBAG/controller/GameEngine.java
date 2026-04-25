@@ -405,14 +405,14 @@ public class GameEngine {
 	public String restart(ArrayList<String> arguments) {
 		if (!player.getConfirming()) {
 			database.setConfirming(true);
-			return "Are you sure (yes or no)?\n";
+			return "Are you sure (yes or no)?";
 		}
 
 		Boolean success = database.reset();
 
-		if (!success) return "Reset failed, try again.\n";
+		if (!success) return "Reset failed, try again.";
 
-		return "Restarted game.\n";
+		return "Restarted game.";
 	}
 
 	public String yes(ArrayList<String> arguments) {
@@ -430,7 +430,7 @@ public class GameEngine {
 
 		database.setConfirming(false);
 
-		return lastCommand.getName() + " command canceled.\n";
+		return lastCommand.getName() + " command canceled.";
 	}
 
 	public String help(ArrayList<String> arguments) {
@@ -493,7 +493,6 @@ public class GameEngine {
 	}
 
 	public String validateCommand(Command command, ArrayList<String> arguments) {
-		String error = validatePlayerState(command);
 		String error = validateConfirming(command);
 		if (error != null) return error;
 
