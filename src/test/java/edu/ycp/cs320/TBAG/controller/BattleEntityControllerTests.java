@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class BattleTest {
+public class BattleEntityControllerTests {
 	private BattleEntityController controller;
 	private Player player;
 	private Enemy enemy;

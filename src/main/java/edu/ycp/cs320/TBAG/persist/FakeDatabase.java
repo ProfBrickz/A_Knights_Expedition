@@ -118,30 +118,39 @@ public class FakeDatabase implements Database {
 			// Items
 			setItems(
 				InitialData.getItems(),
-				InitialData.getWeaponAbilities(),
-				InitialData.getWeaponAbilitiesJunction()
+//				InitialData.getWeaponAbilities(),
+				new HashMap<>(),
+//				InitialData.getWeaponAbilitiesJunction()
+				new ArrayList<>()
 			);
 
 			// NPCs
 			setNPCs(
-				InitialData.getNPCs(),
-				InitialData.getNPCItems()
+//				InitialData.getNPCs(),
+				new HashMap<>(),
+//				InitialData.getNPCItems()
+				new HashMap<>()
 			);
 
 
 			// Enemies
 			setEnemies(
-				InitialData.getEnemies(),
-				InitialData.getEnemyItems()
+//				InitialData.getEnemies(),
+				new HashMap<>(),
+//				InitialData.getEnemyItems()
+				new HashMap<>()
 			);
 
 			// Rooms
 			setRooms(
 				InitialData.getRooms(),
 				InitialData.getRoomConnections(),
-				InitialData.getRoomItems(),
-				InitialData.getRoomNPCs(),
-				InitialData.getRoomEnemies()
+//				InitialData.getRoomItems(),
+				new HashMap<>(),
+//				InitialData.getRoomNPCs(),
+				new HashMap<>(),
+//				InitialData.getRoomEnemies()
+				new HashMap<>()
 			);
 
 			// Player

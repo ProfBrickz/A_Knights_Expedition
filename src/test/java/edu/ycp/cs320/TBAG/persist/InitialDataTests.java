@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InitialDataTest {
+public class InitialDataTests {
 
 	@BeforeEach
 	public void setUp() {
@@ -167,7 +167,7 @@ public class InitialDataTest {
 		Assertions.assertEquals(1, roomItems.get(0).get(0).getAmount());
 	}
 
-	
+
 	// Player
 	@Test
 	public void testGetPlayer() throws IOException {

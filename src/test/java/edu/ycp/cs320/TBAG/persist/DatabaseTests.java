@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class DatabaseTest {
+public class DatabaseTests {
 	private final String databasePath = "test-database.db";
 	private Database database;
 

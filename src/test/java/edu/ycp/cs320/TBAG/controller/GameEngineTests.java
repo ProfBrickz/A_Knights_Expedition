@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GameEngineTest {
+public class GameEngineTests {
 	private FakeDatabase database;
 	private GameEngine gameEngine;
 	private ArrayList<String> arguments;
@@ -810,7 +810,7 @@ public class GameEngineTest {
 			Assertions.assertEquals(
 				"""
 					I am selling:
-					- 1 x a for 4 coins
+					- 1 x a for 2 coins
 					""",
 				gameEngine.inputCommand("search-shop", arguments)
 			);
@@ -824,8 +824,8 @@ public class GameEngineTest {
 			Assertions.assertEquals(
 				"""
 					I am selling:
-					- 2 x a for 8 coins
-					- 1 x b for 28 coins
+					- 2 x a for 4 coins
+					- 1 x b for 14 coins
 					""",
 				gameEngine.inputCommand("search-shop", arguments)
 			);
@@ -843,12 +843,16 @@ public class GameEngineTest {
 	@Nested
 	public class buyItemTests {
 		private NPC npc;
+		private Item itemA;
+		private Item itemB;
 
 		@BeforeEach
 		public void setup() {
 			npc = player.getRoom().getNpcs().get(0);
-			npc.getInventory().addItem(new Item(0, "a", "", 3));
-			npc.getInventory().addItem(new Item(1, "b", "", 2, 2));
+			itemA = new Item(0, "a", "", 3);
+			npc.getInventory().addItem(itemA);
+			itemB = new Item(1, "b", "", 2, 2);
+			npc.getInventory().addItem(itemB);
 			player.setCoins(100);
 
 			arguments.add("name");
@@ -862,24 +866,32 @@ public class GameEngineTest {
 			arguments.add("1");
 			arguments.add("a");
 
+			Integer totalCost = itemA.getPrice() * itemA.getAmount();
+
 			Assertions.assertEquals(
-				"You bought 1 x a, -12 coins.",
+				"You bought 1 x a, -" + totalCost + " coins.",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
 			Assertions.assertEquals(
-				100 - 12,
+				100 - totalCost,
 				player.getCoins()
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(itemA.getId()));
 			Assertions.assertEquals(
 				1,
-				player.getInventory().getItems().get(0).getAmount()
+				player.getInventory().getItems().get(itemA.getId()).getAmount()
 			);
-			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
+
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(itemA.getId()));
 			Assertions.assertEquals(
 				1,
-				npc.getInventory().getItems().get(0).getAmount()
+				npc.getInventory().getItems().get(itemA.getId()).getAmount()
+			);
+
+			Assertions.assertNotEquals(
+				player.getInventory().getItems().get(itemA.getId()),
+				npc.getInventory().getItems().get(itemA.getId())
 			);
 		}
 
@@ -888,44 +900,46 @@ public class GameEngineTest {
 			arguments.add("1");
 			arguments.add("a");
 
+			Integer totalCost = itemA.getPrice() * itemA.getAmount();
+
 			Assertions.assertEquals(
-				"You bought 1 x a, -12 coins.",
+				"You bought 1 x a, -" + totalCost + " coins.",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
 			Assertions.assertEquals(
-				100 - 12,
+				100 - totalCost,
 				player.getCoins()
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(itemA.getId()));
 			Assertions.assertEquals(
 				1,
-				player.getInventory().getItems().get(0).getAmount()
+				player.getInventory().getItems().get(itemA.getId()).getAmount()
 			);
-			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(itemA.getId()));
 			Assertions.assertEquals(
 				1,
-				npc.getInventory().getItems().get(0).getAmount()
+				npc.getInventory().getItems().get(itemA.getId()).getAmount()
 			);
 
 			Assertions.assertEquals(
-				"You bought 1 x a, -12 coins.",
+				"You bought 1 x a, -" + totalCost + " coins.",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
 			Assertions.assertEquals(
-				100 - 24,
+				100 - totalCost - totalCost,
 				player.getCoins()
 			);
-			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(itemA.getId()));
 			Assertions.assertEquals(
 				2,
-				player.getInventory().getItems().get(0).getAmount()
+				player.getInventory().getItems().get(itemA.getId()).getAmount()
 			);
-			Assertions.assertTrue(npc.getInventory().getItems().containsKey(0));
+			Assertions.assertTrue(npc.getInventory().getItems().containsKey(itemA.getId()));
 			Assertions.assertEquals(
 				1,
-				npc.getInventory().getItems().get(0).getAmount()
+				npc.getInventory().getItems().get(itemA.getId()).getAmount()
 			);
 		}
 
@@ -934,37 +948,27 @@ public class GameEngineTest {
 			arguments.add("2");
 			arguments.add("b");
 
+			Integer totalCost = itemB.getPrice() * itemB.getAmount();
+
 			Assertions.assertEquals(
-				"You bought 2 x b, -16 coins.",
+				"You bought 2 x b, -" + totalCost + " coins.",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
 			Assertions.assertEquals(
-				100 - 16,
+				100 - totalCost,
 				player.getCoins()
 			);
-		}
-
-		@Test
-		public void multipleItemsAddsRequestedAmountToInventory() {
-			arguments.add("2");
-			arguments.add("b");
-
-			Assertions.assertEquals(
-				"You bought 2 x b, -16 coins.",
-				gameEngine.inputCommand("buy", arguments)
-			);
-
-			Assertions.assertTrue(player.getInventory().getItems().containsKey(1));
+			Assertions.assertTrue(player.getInventory().getItems().containsKey(itemB.getId()));
 			Assertions.assertEquals(
 				2,
-				player.getInventory().getItems().get(1).getAmount()
+				player.getInventory().getItems().get(itemB.getId()).getAmount()
 			);
 		}
 
 		@Test
 		public void notEnoughCoins() {
-			player.setCoins(100);
+			player.setCoins(10);
 
 			arguments.add("10");
 			arguments.add("a");
@@ -975,7 +979,7 @@ public class GameEngineTest {
 			);
 
 			Assertions.assertEquals(
-				100,
+				10,
 				player.getCoins()
 			);
 		}
@@ -1199,35 +1203,142 @@ public class GameEngineTest {
 		Assertions.assertTrue(output.contains(Command.HELP.getFormat()));
 	}
 
-	@Test
-	public void testRestartRequiresConfirmation() {
-		Assertions.assertEquals(
-			"Are you sure (yes or no)?\n",
-			gameEngine.inputCommand("restart", arguments)
-		);
+	@Nested
+	class RestartTests {
+		@Test
+		public void valid() {
+			player.setState(PlayerState.BATTLE);
+			player.setCoins(100);
+			player.setCurrentNPC(new NPC(0, "abc"));
 
-		Assertions.assertTrue(database.getPlayer().getConfirming());
-	}
+			Assertions.assertEquals(
+				"Are you sure (yes or no)?",
+				gameEngine.inputCommand("restart", arguments)
+			);
 
-	@Test
-	public void testRestartCanBeCanceled() {
-		Assertions.assertEquals(
-			"Are you sure (yes or no)?\n",
-			gameEngine.inputCommand("restart", arguments)
-		);
+			Assertions.assertTrue(database.getPlayer().getConfirming());
 
-		Assertions.assertEquals(
-			"restart command canceled.\n",
-			gameEngine.inputCommand("no", arguments)
-		);
+			Assertions.assertEquals(
+				"Restarted game.",
+				gameEngine.inputCommand("yes", arguments)
+			);
 
-		Assertions.assertFalse(database.getPlayer().getConfirming());
+			player = database.getPlayer();
+
+			Assertions.assertEquals(
+				PlayerState.EXPLORING,
+				player.getState()
+			);
+			Assertions.assertEquals(
+				0,
+				player.getCoins()
+			);
+			Assertions.assertNull(player.getCurrentNPC());
+			Assertions.assertFalse(player.getConfirming());
+		}
+
+		@Test
+		public void cancel() {
+			player.setState(PlayerState.BATTLE);
+			player.setCoins(100);
+			player.setCurrentNPC(new NPC(0, "abc"));
+
+			Assertions.assertEquals(
+				"Are you sure (yes or no)?",
+				gameEngine.inputCommand("restart", arguments)
+			);
+
+			Assertions.assertTrue(database.getPlayer().getConfirming());
+
+			Assertions.assertEquals(
+				"restart command canceled.",
+				gameEngine.inputCommand("no", arguments)
+			);
+
+			player = database.getPlayer();
+			player.setCurrentNPC(database.getNpcForPlayer());
+
+			Assertions.assertEquals(
+				PlayerState.BATTLE,
+				player.getState()
+			);
+			Assertions.assertEquals(
+				100,
+				player.getCoins()
+			);
+			Assertions.assertNotNull(player.getCurrentNPC());
+			Assertions.assertFalse(player.getConfirming());
+		}
+
+		@Test
+		public void differentCommand() {
+			player.setState(PlayerState.BATTLE);
+			player.setCoins(100);
+			player.setCurrentNPC(new NPC(0, "abc"));
+
+			Assertions.assertEquals(
+				"Are you sure (yes or no)?",
+				gameEngine.inputCommand("restart", arguments)
+			);
+
+			Assertions.assertTrue(database.getPlayer().getConfirming());
+
+			Assertions.assertEquals(
+				"You can not use move while confirming a command use yes or no.",
+				gameEngine.inputCommand("move", arguments)
+			);
+
+			player = database.getPlayer();
+			player.setCurrentNPC(database.getNpcForPlayer());
+
+			Assertions.assertEquals(
+				PlayerState.BATTLE,
+				player.getState()
+			);
+			Assertions.assertEquals(
+				100,
+				player.getCoins()
+			);
+			Assertions.assertNotNull(player.getCurrentNPC());
+			Assertions.assertTrue(player.getConfirming());
+		}
+
+		@Test
+		public void nonExistentCommand() {
+			player.setState(PlayerState.BATTLE);
+			player.setCoins(100);
+			player.setCurrentNPC(new NPC(0, "abc"));
+
+			Assertions.assertEquals(
+				"Are you sure (yes or no)?",
+				gameEngine.inputCommand("restart", arguments)
+			);
+
+			Assertions.assertTrue(database.getPlayer().getConfirming());
+
+			Assertions.assertEquals(
+				"Sorry, command not recognized.",
+				gameEngine.inputCommand("a", arguments)
+			);
+
+			player = database.getPlayer();
+			player.setCurrentNPC(database.getNpcForPlayer());
+
+			Assertions.assertEquals(
+				PlayerState.BATTLE,
+				player.getState()
+			);
+			Assertions.assertEquals(
+				100,
+				player.getCoins()
+			);
+			Assertions.assertNotNull(player.getCurrentNPC());
+			Assertions.assertTrue(player.getConfirming());
+		}
 	}
 
 	@Test
 	public void testInvalidCommandFormat() {
-		// Test all commands with wrong number of arguments
-
 		// Move command with too many arguments
 		arguments.add("north");
 		arguments.add("south");

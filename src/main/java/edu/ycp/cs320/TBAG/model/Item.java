@@ -58,7 +58,7 @@ public class Item {
 	}
 
 	public Integer getPrice() {
-		return value * 4;
+		return value * 2;
 	}
 
 	public Integer getAmount() {

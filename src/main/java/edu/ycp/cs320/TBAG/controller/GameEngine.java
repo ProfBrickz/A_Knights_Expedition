@@ -333,11 +333,11 @@ public class GameEngine {
 
 	public String buyItem(ArrayList<String> arguments) {
 		NPC npc = database.getNpcForPlayer();
-		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
-
-
 		if (npc == null) return "You are not currently talking to an NPC.";
+
+		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
 		if (npcItems == null) return "I am not selling anything.";
+		npc.getInventory().addItems(npcItems);
 
 		String itemName = arguments.get(1).toLowerCase();
 		for (Item item : npcItems.values()) {
@@ -494,9 +494,10 @@ public class GameEngine {
 
 	public String validateCommand(Command command, ArrayList<String> arguments) {
 		String error = validatePlayerState(command);
+		String error = validateConfirming(command);
 		if (error != null) return error;
 
-		error = validateConfirming(command);
+		error = validatePlayerState(command);
 		if (error != null) return error;
 
 		error = validateCommandFormat(command, arguments);
