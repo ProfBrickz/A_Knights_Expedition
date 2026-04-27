@@ -272,7 +272,7 @@ public class InitialData {
 				Integer id = npcs.size();
 				npcIds.put(npcId, id);
 
-				npcs.put(id, new NPC(Integer.valueOf(npcId), name, Integer.valueOf(maxHealth), Integer.valueOf(maxHealth), greeting, goodbye));
+				npcs.put(id, new NPC(id, name, Integer.valueOf(maxHealth), Integer.valueOf(maxHealth), greeting, goodbye));
 			}
 			return npcs;
 		} finally{
@@ -369,7 +369,32 @@ public class InitialData {
 	}
 
 	public static HashMap<Integer, ArrayList<NPC>> getRoomNPCs() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ReadCSV npcsFile = openCSV("npcs.csv");
+		HashMap<Integer, ArrayList<NPC>> room_npcs = new HashMap<>();
+
+		try{
+			while (true){
+				List<String> tuple = npcsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> it = tuple.iterator();
+
+				String snpcId = it.next(); // String npc id
+				String sroomId = it.next(); // String room id
+
+
+				Integer inpcId = npcIds.get(snpcId); // Integer npc id
+				Integer iroomId = roomIds.get(sroomId); // Integer room id
+				if (!room_npcs.containsKey(iroomId)){
+					room_npcs.put(iroomId, new ArrayList<NPC>());
+				}
+				room_npcs.get(iroomId).add(npcs.get(inpcId));
+
+			}
+			return room_npcs;
+		} finally{
+			npcsFile.close();
+		}
 	}
 
 	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
@@ -476,7 +501,9 @@ public class InitialData {
 				Integer maxHealth = Integer.parseInt(iterator.next());
 
 				Player player = new Player(maxHealth, health, state, playerRoom, coins);
+				player.setRoom(playerRoom);
 				players.add(player);
+
 			}
 
 			if (players.size() > 1) {

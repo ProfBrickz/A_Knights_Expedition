@@ -196,8 +196,7 @@ public class DerbyDatabase implements Database {
 					roomConnections = InitialData.getRoomConnections();
 //					roomItems = InitialData.getRoomItems();
 					roomItems = new HashMap<>();
-//					roomNPCs = InitialData.getRoomNPCs();
-					roomNPCs = new HashMap<>();
+					roomNPCs = InitialData.getRoomNPCs();
 //					roomEnemies = InitialData.getRoomEnemies();
 					roomEnemies = new HashMap<>();
 
@@ -293,6 +292,7 @@ public class DerbyDatabase implements Database {
 						statement.setInt(3, npc.getHealth());
 						statement.setString(4, npc.getGreeting());
 						statement.setString(5, npc.getGoodbye());
+						statement.addBatch();
 					}
 					statement.executeBatch();
 
@@ -1566,7 +1566,7 @@ public class DerbyDatabase implements Database {
 									npcs.health,
 									npcs.greeting,
 									npcs.goodbye
-								FROM npcs
+								FROM npcs, player
 								WHERE npcs.id = player.current_npc
 							""");
 
@@ -1848,7 +1848,13 @@ public class DerbyDatabase implements Database {
 						"UPDATE player SET current_npc = ?"
 					);
 
-					statement.setInt(1, npc.getId());
+
+					if (npc == null){
+						statement.setNull(1, Types.INTEGER);
+					} else{
+						statement.setInt(1, npc.getId());
+					}
+
 
 					int rowsUpdated = statement.executeUpdate();
 
