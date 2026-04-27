@@ -251,7 +251,33 @@ public class InitialData {
 
 	// NPCs
 	public static HashMap<Integer, NPC> getNPCs() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ReadCSV npcsFile = openCSV("npcs.csv");
+		npcs.clear();
+		npcIds.clear();
+
+		try{
+			while (true){
+				List<String> tuple = npcsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> it = tuple.iterator();
+
+				String npcId = it.next();
+				String roomId = it.next();
+				String name = it.next();
+				String maxHealth = it.next();
+				String greeting = it.next();
+				String goodbye = it.next();
+
+				Integer id = npcs.size();
+				npcIds.put(npcId, id);
+
+				npcs.put(id, new NPC(Integer.valueOf(npcId), name, Integer.valueOf(maxHealth), Integer.valueOf(maxHealth), greeting, goodbye));
+			}
+			return npcs;
+		} finally{
+			npcsFile.close();
+		}
 	}
 
 	public static HashMap<Integer, ArrayList<Item>> getNPCItems() throws IOException {
