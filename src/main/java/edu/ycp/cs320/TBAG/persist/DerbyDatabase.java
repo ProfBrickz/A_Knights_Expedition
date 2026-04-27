@@ -284,12 +284,15 @@ public class DerbyDatabase implements Database {
 
 					// NPCs
 					statement = connection.prepareStatement("""
-							INSERT INTO npcs (name, max_health)
-							VALUES (?, ?)
+							INSERT INTO npcs (name, max_health, health, greeting, goodbye)
+							VALUES (?, ?, ?, ?, ?)
 						""");
 					for (NPC npc : npcs.values()) {
 						statement.setString(1, npc.getName());
 						statement.setInt(2, npc.getMaxHealth());
+						statement.setInt(3, npc.getHealth());
+						statement.setString(4, npc.getGreeting());
+						statement.setString(5, npc.getGoodbye());
 					}
 					statement.executeBatch();
 
