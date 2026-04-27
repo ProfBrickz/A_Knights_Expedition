@@ -94,7 +94,7 @@ public enum Command {
 		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC),
 		List.of()
 	),
-		TALK_TO(
+	TALK_TO(
 		"talk-to",
 		GameEngine::talkToNPC,
 		"Initiates a conversation with a specified NPC in the current room",
