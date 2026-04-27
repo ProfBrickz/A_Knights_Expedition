@@ -119,7 +119,7 @@ public class InitialData {
 
 				Enemy enemy;
 
-					enemy = new Enemy(id, name, maxhealth, health);
+				enemy = new Enemy(id, name, maxhealth, health);
 
 
 				enemies.put(id, enemy);
@@ -156,7 +156,6 @@ public class InitialData {
 		copy.setAssetName(baseItem.getAssetName());
 		return copy;
 	}
-
 
 
 	public static ArrayList<String> getDialog() throws IOException {
@@ -479,6 +478,7 @@ public class InitialData {
 //				if (enemy != null) {
 //					roomEnemies.add(enemy);
 //				}
+				roomEnemies.add(baseEnemy);
 			}
 
 			return result;
