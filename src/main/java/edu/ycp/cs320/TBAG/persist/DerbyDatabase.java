@@ -179,8 +179,7 @@ public class DerbyDatabase implements Database {
 					weaponAbilitiesJunction = new ArrayList<>();
 
 					// NPCs
-//					npcs = InitialData.getNPCs();
-					npcs = new HashMap<>();
+					npcs = InitialData.getNPCs();
 //					npcItems = InitialData.getNPCItems();
 					npcItems = new HashMap<>();
 
@@ -558,7 +557,10 @@ public class DerbyDatabase implements Database {
 								id INTEGER PRIMARY KEY
 									GENERATED ALWAYS AS IDENTITY (START WITH 0, INCREMENT BY 1),
 								name VARCHAR(%d) NOT NULL,
-								max_health INTEGER
+								max_health INTEGER,
+								health INTEGER,
+								greeting VARCHAR(128),
+								goodbye VARCHAR(128)
 							)
 						""".formatted(
 						NAME_MAX_LENGTH
