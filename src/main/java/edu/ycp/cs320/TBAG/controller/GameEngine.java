@@ -387,20 +387,22 @@ public class GameEngine {
 		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
 
-//	public String sellAllItem(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String itemName = arguments.get(0).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have any " + itemName + " to sell.\n";
-//
-//		Integer amount = item.getAmount();
-//
-//		npcController.sell(player, item, amount);
-//
-//		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
-//	}
+	public String sellAllItem(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to anyone.\n";
+
+		String itemName = arguments.get(0).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have any " + itemName + " to sell.\n";
+
+		Integer amount = item.getAmount();
+
+		npcController.sell(player, item, amount);
+		database.removeItemFromPlayer(item);
+		database.setPlayerCoins(player.getCoins());
+
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
+	}
 
 	public String restart(ArrayList<String> arguments) {
 		if (!player.getConfirming()) {
