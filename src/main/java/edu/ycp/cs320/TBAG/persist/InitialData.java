@@ -572,7 +572,34 @@ public class InitialData {
 	 * Returns a list of enemies without items
 	 */
 	public static HashMap<Integer, Enemy> getEnemies() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ReadCSV enemiesFile = new ReadCSV("enemies.csv");
+		enemies.clear();
+		enemyIds.clear();
+
+		try {
+			while (true) {
+				List<String> tuple = enemiesFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> it = tuple.iterator();
+
+				String enemyKey = it.next();   // CSV string ID
+				String name = it.next();
+				Integer maxhealth = parseIntegerOrNull(it.next());
+				Integer health = parseIntegerOrNull(it.next());
+
+				// Map CSV string ID → integer ID
+				Integer id = enemyIds.size();
+				enemyIds.put(enemyKey, id);
+
+				Enemy enemy = new Enemy(id, name, maxhealth, health);
+				enemies.put(id, enemy);
+			}
+
+			return enemies;
+		} finally {
+			enemiesFile.close();
+		}
 	}
 
 	/**

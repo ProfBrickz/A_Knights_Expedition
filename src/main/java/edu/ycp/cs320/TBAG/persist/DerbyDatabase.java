@@ -186,8 +186,7 @@ public class DerbyDatabase implements Database {
 
 
 					// Enemies
-//					enemies = InitialData.getEnemies();
-					enemies = new HashMap<>();
+					enemies = InitialData.getEnemies();
 //					enemyItems = InitialData.getEnemyItems();
 					enemyItems = new HashMap<>();
 
@@ -199,8 +198,7 @@ public class DerbyDatabase implements Database {
 					roomItems = new HashMap<>();
 //					roomNPCs = InitialData.getRoomNPCs();
 					roomNPCs = new HashMap<>();
-//					roomEnemies = InitialData.getRoomEnemies();
-					roomEnemies = new HashMap<>();
+					roomEnemies = InitialData.getRoomEnemies();
 
 
 					// Player
