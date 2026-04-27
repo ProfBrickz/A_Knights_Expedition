@@ -94,7 +94,7 @@ public enum Command {
 		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC),
 		List.of()
 	),
-		TALK_TO(
+	TALK_TO(
 		"talk-to",
 		GameEngine::talkToNPC,
 		"Initiates a conversation with a specified NPC in the current room",
@@ -126,22 +126,22 @@ public enum Command {
 		List.of(PlayerState.TALKING_TO_NPC),
 		List.of("buy 1 sword", "buy 3 potion", "buy 5 \"Diamond pickaxe\"")
 	),
-//	SELL(
-//		"sell",
-//		GameEngine::sellItem,
-//		"Sells an item from the player's inventory to the current NPC",
-//		List.of("Amount", "Item name"),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of("sell 1 sword", "sell 2 potion", "sell 5 \"Diamond pickaxe\"")
-//	),
-//	SELL_ALL(
-//		"sell-all",
-//		GameEngine::sellAllItem,
-//		"Sells all of a specific item from the player's inventory to the current NPC",
-//		List.of("Item name"),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of("sell-all sword", "sell-all potion", "sell-all \"Diamond pickaxe\"")
-//	),
+	SELL(
+		"sell",
+		GameEngine::sellItem,
+		"Sells an item from the player's inventory to the current NPC",
+		List.of("Amount", "Item name"),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of("sell 1 sword", "sell 2 potion", "sell 5 \"Diamond pickaxe\"")
+	),
+	SELL_ALL(
+		"sell-all",
+		GameEngine::sellAllItem,
+		"Sells all of a specific item from the player's inventory to the current NPC",
+		List.of("Item name"),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of("sell-all sword", "sell-all potion", "sell-all \"Diamond pickaxe\"")
+	),
 	RESTART(
 		"restart",
 		GameEngine::restart,
