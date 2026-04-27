@@ -82,6 +82,54 @@ public class InitialData {
 		}
 	}
 
+	private static void ensureEnemiesLoaded() throws IOException {
+		if (!enemies.isEmpty()) {
+			return;
+		}
+
+		ReadCSV enemiesFile = new ReadCSV("enemies.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = enemiesFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String enemyKey = iterator.next();
+				String name = iterator.next();
+				Integer maxhealth = parseIntegerOrNull(iterator.next());
+				Integer health = parseIntegerOrNull(iterator.next());
+
+				if (enemyIds.containsKey(enemyKey)) {
+					throw new IllegalStateException(
+						"Duplicate enemy id \"" + enemyKey + "\" in enemy CSV."
+					);
+				}
+
+				Integer id;
+				try {
+					id = Integer.parseInt(enemyKey);
+				} catch (NumberFormatException exception) {
+					id = 0;
+					while (enemies.containsKey(id) || enemyIds.containsValue(id)) {
+						id++;
+					}
+				}
+
+				Enemy enemy;
+
+					enemy = new Enemy(id, name, maxhealth, health);
+
+
+				enemies.put(id, enemy);
+				enemyIds.put(enemyKey, id);
+			}
+		} finally {
+			enemiesFile.close();
+		}
+	}
+
 	private static Item copyItemWithAmount(Item baseItem, Integer amount) {
 		if (baseItem == null) {
 			return null;
@@ -108,6 +156,8 @@ public class InitialData {
 		copy.setAssetName(baseItem.getAssetName());
 		return copy;
 	}
+
+
 
 	public static ArrayList<String> getDialog() throws IOException {
 		ArrayList<String> dialog = new ArrayList<>();
@@ -382,7 +432,59 @@ public class InitialData {
 	 * Returns a map between room ids and a list of enemies
 	 */
 	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureEnemiesLoaded();
+
+		HashMap<Integer, ArrayList<Enemy>> result = new HashMap<>();
+		ReadCSV roomEnemiesFile = new ReadCSV("room_enemies.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = roomEnemiesFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+
+				String roomKey = iterator.next();
+				String enemyKey = iterator.next();
+				Integer amount = Integer.parseInt(iterator.next());
+
+				if (!roomIds.containsKey(roomKey)) {
+					throw new IllegalStateException(
+						"The room with the id \"" + roomKey + "\" does not exist in the rooms CSV."
+					);
+				}
+
+				if (!enemyIds.containsKey(enemyKey)) {
+					throw new IllegalStateException(
+						"The enemy with the id \"" + enemyKey + "\" does not exist in the enemies CSV."
+					);
+				}
+
+				Integer roomId = roomIds.get(roomKey);
+				Integer enemyId = enemyIds.get(enemyKey);
+				Enemy baseEnemy = enemies.get(enemyId);
+				if (baseEnemy == null) {
+					throw new IllegalStateException(
+						"The enemy with the id \"" + enemyKey + "\" does not exist in the enemies CSV."
+					);
+				}
+
+				ArrayList<Enemy> roomEnemies = result.get(roomId);
+				if (roomEnemies == null) {
+					roomEnemies = new ArrayList<>();
+					result.put(roomId, roomEnemies);
+				}
+
+//				Enemy enemy = copyEnemyWithAmount(baseEnemy, amount);
+//				if (enemy != null) {
+//					roomEnemies.add(enemy);
+//				}
+			}
+
+			return result;
+		} finally {
+			roomEnemiesFile.close();
+		}
 	}
 
 	/**

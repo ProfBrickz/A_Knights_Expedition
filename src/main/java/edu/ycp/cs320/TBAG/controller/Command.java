@@ -142,6 +142,32 @@ public enum Command {
 //		List.of(PlayerState.TALKING_TO_NPC),
 //		List.of("sell-all sword", "sell-all potion", "sell-all \"Diamond pickaxe\"")
 //	),
+	ATTACK(
+		"attack",
+		GameEngine::attack,
+		"Attack the enemy",
+		List.of(),
+		List.of(PlayerState.BATTLE),
+		List.of("attack")
+	),
+
+	DEFEND(
+		"defend",
+		GameEngine::defend,
+		"Defend against the next attack",
+		List.of(),
+		List.of(PlayerState.BATTLE),
+		List.of("defend")
+	),
+
+	HEAL(
+		"heal",
+		GameEngine::heal,
+		"Use a healing item",
+		List.of("item name"),
+		List.of(PlayerState.BATTLE),
+		List.of("heal potion")
+	),
 	RESTART(
 		"restart",
 		GameEngine::restart,

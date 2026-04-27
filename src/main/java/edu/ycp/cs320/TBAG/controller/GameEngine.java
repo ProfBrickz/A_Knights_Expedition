@@ -127,7 +127,39 @@ public class GameEngine {
 			return "Move failed, either player, or the room does not exist\n";
 		}
 
+		HashMap<Integer, Enemy> enemies =
+			database.getEnemiesForRoom(player.getRoom());
+		System.out.println("Enemies found: " + enemies.size());
+
+		player.getRoom().getEnemies().clear();
+		player.getRoom().addEnemies(new ArrayList<>(enemies.values()));
+		System.out.println("Enemies found: " + enemies.size());
+
+		//  ENTER BATTLE IF NEEDED
+		if (!player.getRoom().getEnemies().isEmpty()) {
+			Enemy enemy = player.getRoom().getEnemies().values().iterator().next();
+
+			player.setCurrentEnemy(enemy);   // required field
+			database.setPlayerState(PlayerState.BATTLE);
+
+			return "You encountered a " + enemy.getName() + "! Prepare for battle.\n";
+		}player.getRoom().getEnemies().clear();
+		player.getRoom().addEnemies(new ArrayList<>(enemies.values()));
+
+		//  ENTER BATTLE IF NEEDED
+		if (!player.getRoom().getEnemies().isEmpty()) {
+			Enemy enemy = player.getRoom().getEnemies().values().iterator().next();
+
+			player.setCurrentEnemy(enemy);   // required field
+			database.setPlayerState(PlayerState.BATTLE);
+
+			return "You encountered a " + enemy.getName() + "! Prepare for battle.\n";
+		}
+
 		database.setPlayerRoom(player.getRoom().getID());
+
+		System.out.println("Enemies found: " + enemies.size());
+		System.out.println("Player room: " + database.getPlayer().getRoom().getID());
 
 		return player.getRoom().getDescription() + "\n";
 	}
@@ -407,6 +439,72 @@ public class GameEngine {
 //		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 //	}
 
+	public String attack(ArrayList<String> args) {
+		Enemy enemy = player.getCurrentEnemy();
+		if (enemy == null) return "No enemy to attack.\n";
+
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		EnemyController ec = new EnemyController(new BattleEntityController());
+
+		WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
+		pc.attack(enemy, attack);
+
+		if (enemy.getHealth() <= 0) {
+			endBattle(true);
+			return "You defeated the enemy!\n";
+		}
+
+		ec.takeTurn(enemy, player);
+
+		if (player.getHealth() <= 0) {
+			endBattle(false);
+			return "You were defeated!\n";
+		}
+
+		return "You attack the enemy!\n";
+	}
+
+	public String defend(ArrayList<String> args) {
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		EnemyController ec = new EnemyController(new BattleEntityController());
+
+		Armor armor = new Armor(0, "Defense", "Temporary defense", 5, true, 0);
+		pc.defend(armor);
+
+		Enemy enemy = player.getCurrentEnemy();
+		ec.takeTurn(enemy, player);
+
+		return "You brace for impact!\n";
+	}
+
+	public String heal(ArrayList<String> args) {
+		String itemName = args.get(0);
+
+		InventoryController ic = new InventoryController();
+		HealingItem item = (HealingItem) ic.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+
+		if (item == null) return "You don't have that item.\n";
+
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		pc.heal(item);
+
+		EnemyController ec = new EnemyController(new BattleEntityController());
+		ec.takeTurn(player.getCurrentEnemy(), player);
+
+		return "You healed yourself.\n";
+	}
+
+	private void endBattle(boolean playerWon) {
+		Enemy enemy = player.getCurrentEnemy();
+
+		if (playerWon) {
+			player.getRoom().removeEnemy(enemy);
+		}
+
+		player.setCurrentEnemy(null);
+		database.setPlayerState(PlayerState.EXPLORING);
+	}
+
 	public String restart(ArrayList<String> arguments) {
 		if (!player.getConfirming()) {
 			database.setConfirming(true);
@@ -456,6 +554,41 @@ public class GameEngine {
 
 
 	// Utility methods
+
+	private void checkBattleState() {
+		if (player.getState() != PlayerState.BATTLE) {
+			return;
+		}
+
+		Enemy enemy = player.getCurrentEnemy();
+
+		// Safety fallback
+		if (enemy == null) {
+			database.setPlayerState(PlayerState.EXPLORING);
+			return;
+		}
+
+		// Enemy dead → exit battle
+		if (enemy.getHealth() <= 0) {
+			player.getRoom().removeEnemy(enemy);
+			player.setCurrentEnemy(null);
+			database.setPlayerState(PlayerState.EXPLORING);
+
+			addDialog("You defeated the enemy!\n");
+			return;
+		}
+
+		// Player dead → reset + exit battle
+		if (player.getHealth() <= 0) {
+			PlayerController pc = new PlayerController(player, new BattleEntityController());
+
+			pc.die(100, 100, player.getRoom()); // or starting room
+			player.setCurrentEnemy(null);
+			database.setPlayerState(PlayerState.EXPLORING);
+
+			addDialog("You died!\n");
+		}
+	}
 
 	private String getItemFormat(Item item) {
 		String output = "";

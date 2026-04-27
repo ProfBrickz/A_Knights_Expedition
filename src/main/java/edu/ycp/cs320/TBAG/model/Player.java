@@ -110,4 +110,14 @@ public class Player extends BattleEntity {
 	public void setConfirming(Boolean confirming) {
 		this.confirming = confirming;
 	}
+
+	private Enemy currentEnemy = null;
+
+	public Enemy getCurrentEnemy() {
+		return currentEnemy;
+	}
+
+	public void setCurrentEnemy(Enemy enemy) {
+		this.currentEnemy = enemy;
+	}
 }

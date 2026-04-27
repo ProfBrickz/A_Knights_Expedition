@@ -1658,6 +1658,7 @@ public class DerbyDatabase implements Database {
 		if (room == null) {
 			return new HashMap<>();
 		}
+		System.out.println("Querying enemies for room ID: " + room.getID());
 
 		return executeTransaction(new Transaction<HashMap<Integer, Enemy>>() {
 			@Override
