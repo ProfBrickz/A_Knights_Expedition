@@ -173,32 +173,23 @@ public class DerbyDatabase implements Database {
 
 					// Items
 					items = InitialData.getItems();
-//					weaponAbilities = InitialData.getWeaponAbilities();
-					weaponAbilities = new HashMap<>();
-//					weaponAbilitiesJunction = InitialData.getWeaponAbilitiesJunction();
-					weaponAbilitiesJunction = new ArrayList<>();
+					weaponAbilities = InitialData.getWeaponAbilities();
+					weaponAbilitiesJunction = InitialData.getWeaponAbilitiesJunction();
 
 					// NPCs
 					npcs = InitialData.getNPCs();
-//					npcItems = InitialData.getNPCItems();
-					npcItems = new HashMap<>();
-
+					npcItems = InitialData.getNPCItems();
 
 					// Enemies
-//					enemies = InitialData.getEnemies();
-					enemies = new HashMap<>();
-//					enemyItems = InitialData.getEnemyItems();
-					enemyItems = new HashMap<>();
-
+					enemies = InitialData.getEnemies();
+					enemyItems = InitialData.getEnemyItems();
 
 					// Rooms
 					rooms = InitialData.getRooms();
 					roomConnections = InitialData.getRoomConnections();
-//					roomItems = InitialData.getRoomItems();
-					roomItems = new HashMap<>();
+					roomItems = InitialData.getRoomItems();
 					roomNPCs = InitialData.getRoomNPCs();
-//					roomEnemies = InitialData.getRoomEnemies();
-					roomEnemies = new HashMap<>();
+					roomEnemies = InitialData.getRoomEnemies();
 
 
 					// Player
@@ -380,7 +371,7 @@ public class DerbyDatabase implements Database {
 							INSERT INTO room_items (room_id, item_id, amount)
 							VALUES (?, ?, ?)
 						""");
-					for (Map.Entry<Integer, ArrayList<Item>> entry : npcItems.entrySet()) {
+					for (Map.Entry<Integer, ArrayList<Item>> entry : roomItems.entrySet()) {
 						for (Item item : entry.getValue()) {
 							statement.setInt(1, entry.getKey());
 							statement.setInt(2, item.getId());
@@ -1849,9 +1840,9 @@ public class DerbyDatabase implements Database {
 					);
 
 
-					if (npc == null){
+					if (npc == null) {
 						statement.setNull(1, Types.INTEGER);
-					} else{
+					} else {
 						statement.setInt(1, npc.getId());
 					}
 
