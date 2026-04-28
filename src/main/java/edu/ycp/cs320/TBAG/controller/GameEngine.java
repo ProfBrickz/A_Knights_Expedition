@@ -136,6 +136,7 @@ public class GameEngine {
 	 */
 	public String look(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
+		playerRoom.addNPCs(database.getNPCsForRoom(playerRoom));
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
 		if (!playerRoom.getNpcs().isEmpty()) {

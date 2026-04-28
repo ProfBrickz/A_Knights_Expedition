@@ -112,6 +112,12 @@ public class Room {
 		}
 	}
 
+	public void addEnemies(HashMap<Integer, Enemy> enemies) {
+		for (Enemy enemy : enemies.values()) {
+			addEnemy(enemy);
+		}
+	}
+
 	public Enemy removeEnemy(Enemy enemy) {
 		return enemies.remove(enemy.getId());
 	}
@@ -130,6 +136,12 @@ public class Room {
 
 	public void addNPCs(ArrayList<NPC> npcs) {
 		for (NPC npc : npcs) {
+			addNPC(npc);
+		}
+	}
+
+	public void addNPCs(HashMap<Integer, NPC> npcs) {
+		for (NPC npc : npcs.values()) {
 			addNPC(npc);
 		}
 	}
