@@ -49,9 +49,9 @@ public enum Command {
 	SEARCH(
 		"search",
 		GameEngine::search,
-		"Searches the current room for hidden items or clues",
+		"Searches the current room for hidden items or clues, or displays items available for purchase from the current NPC",
 		List.of(),
-		List.of(PlayerState.EXPLORING),
+		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC),
 		List.of()
 	),
 	PICKUP(
@@ -106,14 +106,6 @@ public enum Command {
 		"leave",
 		GameEngine::leaveNPC,
 		"Ends the current conversation with an NPC and returns to exploring state",
-		List.of(),
-		List.of(PlayerState.TALKING_TO_NPC),
-		List.of()
-	),
-	SEARCH_SHOP(
-		"search-shop",
-		GameEngine::searchShop,
-		"Displays the items available for purchase from the current NPC",
 		List.of(),
 		List.of(PlayerState.TALKING_TO_NPC),
 		List.of()
@@ -190,7 +182,14 @@ public enum Command {
 	private final List<PlayerState> allowedPlayerStates;
 	private final List<String> examples;
 
-	Command(String name, BiFunction<GameEngine, ArrayList<String>, String> method, String description, List<String> arguments, List<PlayerState> allowedPlayerStates, List<String> examples) {
+	Command(
+		String name,
+		BiFunction<GameEngine, ArrayList<String>, String> method,
+		String description,
+		List<String> arguments,
+		List<PlayerState> allowedPlayerStates,
+		List<String> examples
+	) {
 		this.name = name;
 		this.method = method;
 		this.description = description;

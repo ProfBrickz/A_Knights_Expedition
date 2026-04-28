@@ -176,11 +176,19 @@ public class GameEngine {
 		return playerController.inspectItem(item);
 	}
 
+	public String search(ArrayList<String> arguments) {
+		if (player.getState().equals(PlayerState.TALKING_TO_NPC)) {
+			return searchShop(arguments);
+		} else {
+			return searchRoom(arguments);
+		}
+	}
+
 	/**
 	 * Handles the "search" command.
 	 * Checks if the room has any items and returns them.
 	 */
-	public String search(ArrayList<String> arguments) {
+	public String searchRoom(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
 
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
