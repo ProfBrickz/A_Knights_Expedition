@@ -84,6 +84,7 @@
 
       pre {
       	text-wrap: balance;
+      	margin: 0;
       }
     }
 
@@ -182,11 +183,20 @@
       <div class="location">
         <div class="location-name">${player.room.name}</div>
         <c:choose>
-           <c:when test="${not empty player.room.assetName}">
-			<img class="location-image" src="${pageContext.request.contextPath}/assets/locations/${player.room.assetName}" alt="${player.room.assetName}" />
+          <c:when test="${not empty player.room.assetName}">
+			<img
+			  class="location-image"
+			  src="${pageContext.request.contextPath}/assets/locations/${player.room.assetName}"
+			  alt="${player.room.assetName}"
+			  onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/assets/locations/Backrooms.gif';"
+			/>
 		  </c:when>
 		  <c:otherwise>
-			<img class="location-image" src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif" alt="${player.room.assetName}" />
+			<img
+			  class="location-image"
+			  src="${pageContext.request.contextPath}/assets/locations/Backrooms.gif"
+			  alt="${player.room.assetName}"
+			/>
 		  </c:otherwise>
         </c:choose>
       </div>
@@ -202,7 +212,12 @@
         		<li class="inventory-item">
 					<c:choose>
 						<c:when test="${not empty item.assetName}">
-							<img class="item-icon" src="${pageContext.request.contextPath}/assets/items/${item.assetName}" alt="${item.name}" />
+							<img
+								class="item-icon"
+								src="${pageContext.request.contextPath}/assets/items/${item.assetName}"
+								alt="${item.name}"
+								onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/assets/items/fixIt.png';"
+							/>
 						</c:when>
 						<c:otherwise>
 							<img class="item-icon" src="${pageContext.request.contextPath}/assets/items/fixIt.png" alt="${item.name}" />
