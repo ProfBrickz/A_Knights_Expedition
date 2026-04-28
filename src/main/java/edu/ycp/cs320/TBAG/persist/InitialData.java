@@ -16,10 +16,12 @@ public class InitialData {
 	// Cached data
 	private static final HashMap<Integer, Room> rooms = new HashMap<>();
 	private static final HashMap<Integer, Item> items = new HashMap<>();
+	private static final HashMap<Integer, WeaponAbility> weaponAbilities = new HashMap<>();
 	private static final HashMap<Integer, NPC> npcs = new HashMap<>();
 	private static final HashMap<Integer, Enemy> enemies = new HashMap<>();
 	private static final HashMap<String, Integer> roomIds = new HashMap<>();
 	private static final HashMap<String, Integer> itemIds = new HashMap<>();
+	private static final HashMap<String, Integer> weaponAbilityIds = new HashMap<>();
 	private static final HashMap<String, Integer> npcIds = new HashMap<>();
 	private static final HashMap<String, Integer> enemyIds = new HashMap<>();
 
@@ -33,10 +35,12 @@ public class InitialData {
 	public static void clearCache() {
 		rooms.clear();
 		items.clear();
+		weaponAbilities.clear();
 		npcs.clear();
 		enemies.clear();
 		roomIds.clear();
 		itemIds.clear();
+		weaponAbilityIds.clear();
 		npcIds.clear();
 		enemyIds.clear();
 	}
@@ -108,6 +112,38 @@ public class InitialData {
 		} finally {
 			itemsFile.close();
 		}
+	}
+
+	private static void ensureWeaponAbilitiesLoaded() throws IOException {
+		if (!weaponAbilities.isEmpty() || !weaponAbilityIds.isEmpty()) {
+			return;
+		}
+
+		getWeaponAbilities();
+	}
+
+	private static void ensureNPCsLoaded() throws IOException {
+		if (!npcs.isEmpty()) {
+			return;
+		}
+
+		getNPCs();
+	}
+
+	private static void ensureEnemiesLoaded() throws IOException {
+		if (!enemies.isEmpty()) {
+			return;
+		}
+
+		getEnemies();
+	}
+
+	private static void ensureRoomsLoaded() throws IOException {
+		if (!rooms.isEmpty()) {
+			return;
+		}
+
+		getRooms();
 	}
 
 	private static Item copyItemWithAmount(Item baseItem, Integer amount) {
@@ -241,31 +277,218 @@ public class InitialData {
 	}
 
 	public static HashMap<Integer, WeaponAbility> getWeaponAbilities() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ReadCSV weaponAbilitiesFile = openCSV("weapon_abilities.csv");
+		weaponAbilities.clear();
+		weaponAbilityIds.clear();
+
+		try {
+			while (true) {
+				List<String> tuple = weaponAbilitiesFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String idString = iterator.next();
+				Integer id = weaponAbilityIds.size();
+				Integer damage = Integer.parseInt(iterator.next());
+				String attackDescription = iterator.next();
+
+				weaponAbilities.put(id, new WeaponAbility(id, damage, attackDescription));
+				weaponAbilityIds.put(idString, id);
+			}
+
+			return weaponAbilities;
+		} finally {
+			weaponAbilitiesFile.close();
+		}
 	}
 
 	public static ArrayList<Pair<Integer, Integer>> getWeaponAbilitiesJunction() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureItemsLoaded();
+		ensureWeaponAbilitiesLoaded();
+
+		ArrayList<Pair<Integer, Integer>> result = new ArrayList<>();
+		ReadCSV junctionFile = openCSV("weapon_abilities_junction.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = junctionFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String itemKey = iterator.next();
+				String weaponAbilityKey = iterator.next();
+
+				if (!itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+				if (!weaponAbilityIds.containsKey(weaponAbilityKey)) {
+					throw new IllegalStateException(
+						"The weapon ability with the id \"" + weaponAbilityKey + "\" does not exist in the weapon abilities CSV."
+					);
+				}
+
+				result.add(new Pair<>(
+					itemIds.get(itemKey),
+					weaponAbilityIds.get(weaponAbilityKey)
+				));
+			}
+
+			return result;
+		} finally {
+			junctionFile.close();
+		}
 	}
 
 
 	// NPCs
 	public static HashMap<Integer, NPC> getNPCs() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ReadCSV npcsFile = openCSV("npcs.csv");
+		npcs.clear();
+		npcIds.clear();
+
+		try {
+			while (true) {
+				List<String> tuple = npcsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String idString = iterator.next();
+				iterator.next(); // room id, used by getRoomNPCs
+				String name = iterator.next();
+				Integer maxHealth = Integer.parseInt(iterator.next());
+				String greeting = iterator.next();
+				String goodbye = iterator.next();
+				Integer id = npcIds.size();
+
+				npcs.put(id, new NPC(id, name, maxHealth, maxHealth, greeting, goodbye));
+				npcIds.put(idString, id);
+			}
+
+			return npcs;
+		} finally {
+			npcsFile.close();
+		}
 	}
 
 	public static HashMap<Integer, ArrayList<Item>> getNPCItems() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureItemsLoaded();
+		ensureNPCsLoaded();
+
+		HashMap<Integer, ArrayList<Item>> result = new HashMap<>();
+		ReadCSV npcItemsFile = openCSV("npc_items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = npcItemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String npcKey = iterator.next();
+				String itemKey = iterator.next();
+				String amountString = iterator.next();
+
+				if (itemKey.isEmpty() || amountString.isEmpty()) {
+					continue;
+				}
+				if (!npcIds.containsKey(npcKey)) {
+					throw new IllegalStateException(
+						"The NPC with the id \"" + npcKey + "\" does not exist in the NPCs CSV."
+					);
+				}
+				if (!itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Integer npcId = npcIds.get(npcKey);
+				Integer itemId = itemIds.get(itemKey);
+				Item item = copyItemWithAmount(items.get(itemId), Integer.parseInt(amountString));
+				if (item == null) {
+					continue;
+				}
+
+				result.computeIfAbsent(npcId, key -> new ArrayList<>()).add(item);
+			}
+
+			return result;
+		} finally {
+			npcItemsFile.close();
+		}
 	}
 
 
 	// Enemies
 	public static HashMap<Integer, Enemy> getEnemies() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ReadCSV enemiesFile = openCSV("enemies.csv");
+		enemies.clear();
+		enemyIds.clear();
+
+		try {
+			while (true) {
+				List<String> tuple = enemiesFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String idString = iterator.next();
+				String name = iterator.next();
+				Integer maxHealth = Integer.parseInt(iterator.next());
+				Integer id = enemyIds.size();
+
+				enemies.put(id, new Enemy(id, name, maxHealth, maxHealth));
+				enemyIds.put(idString, id);
+			}
+
+			return enemies;
+		} finally {
+			enemiesFile.close();
+		}
 	}
 
 	public static HashMap<Integer, ArrayList<Item>> getEnemyItems() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureItemsLoaded();
+		ensureEnemiesLoaded();
+
+		HashMap<Integer, ArrayList<Item>> result = new HashMap<>();
+		ReadCSV enemyItemsFile = openCSV("enemy_items.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = enemyItemsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String enemyKey = iterator.next();
+				String itemKey = iterator.next();
+				Integer amount = Integer.parseInt(iterator.next());
+
+				if (!enemyIds.containsKey(enemyKey)) {
+					throw new IllegalStateException(
+						"The enemy with the id \"" + enemyKey + "\" does not exist in the enemies CSV."
+					);
+				}
+				if (!itemIds.containsKey(itemKey)) {
+					throw new IllegalStateException(
+						"The item with the id \"" + itemKey + "\" does not exist in the items CSV."
+					);
+				}
+
+				Integer enemyId = enemyIds.get(enemyKey);
+				Integer itemId = itemIds.get(itemKey);
+				Item item = copyItemWithAmount(items.get(itemId), amount);
+				if (item == null) {
+					continue;
+				}
+
+				result.computeIfAbsent(enemyId, key -> new ArrayList<>()).add(item);
+			}
+
+			return result;
+		} finally {
+			enemyItemsFile.close();
+		}
 	}
 
 
@@ -343,11 +566,101 @@ public class InitialData {
 	}
 
 	public static HashMap<Integer, ArrayList<NPC>> getRoomNPCs() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureRoomsLoaded();
+		ensureNPCsLoaded();
+
+		HashMap<Integer, ArrayList<NPC>> result = new HashMap<>();
+		ReadCSV npcsFile = openCSV("npcs.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = npcsFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String npcKey = iterator.next();
+				String roomKey = iterator.next();
+				iterator.next();
+				iterator.next();
+				iterator.next();
+				iterator.next();
+
+				if (!roomIds.containsKey(roomKey)) {
+					throw new IllegalStateException(
+						"The room with the id \"" + roomKey + "\" does not exist in the rooms CSV."
+					);
+				}
+				if (!npcIds.containsKey(npcKey)) {
+					throw new IllegalStateException(
+						"The NPC with the id \"" + npcKey + "\" does not exist in the NPCs CSV."
+					);
+				}
+
+				Integer roomId = roomIds.get(roomKey);
+				Integer npcId = npcIds.get(npcKey);
+				NPC npc = npcs.get(npcId);
+				if (npc == null) {
+					throw new IllegalStateException(
+						"The NPC with the id \"" + npcKey + "\" does not exist in the NPCs CSV."
+					);
+				}
+
+				result.computeIfAbsent(roomId, key -> new ArrayList<>()).add(npc.copy());
+			}
+
+			return result;
+		} finally {
+			npcsFile.close();
+		}
 	}
 
 	public static HashMap<Integer, ArrayList<Enemy>> getRoomEnemies() throws IOException {
-		throw new UnsupportedOperationException("TODO - implement");
+		ensureRoomsLoaded();
+		ensureEnemiesLoaded();
+
+		HashMap<Integer, ArrayList<Enemy>> result = new HashMap<>();
+		ReadCSV roomEnemiesFile = openCSV("room_enemies.csv");
+
+		try {
+			while (true) {
+				List<String> tuple = roomEnemiesFile.next();
+				if (tuple == null) break;
+
+				Iterator<String> iterator = tuple.iterator();
+				String roomKey = iterator.next();
+				String enemyKey = iterator.next();
+				Integer amount = Integer.parseInt(iterator.next());
+
+				if (!roomIds.containsKey(roomKey)) {
+					throw new IllegalStateException(
+						"The room with the id \"" + roomKey + "\" does not exist in the rooms CSV."
+					);
+				}
+				if (!enemyIds.containsKey(enemyKey)) {
+					throw new IllegalStateException(
+						"The enemy with the id \"" + enemyKey + "\" does not exist in the enemies CSV."
+					);
+				}
+
+				Integer roomId = roomIds.get(roomKey);
+				Integer enemyId = enemyIds.get(enemyKey);
+				Enemy enemy = enemies.get(enemyId);
+				if (enemy == null) {
+					throw new IllegalStateException(
+						"The enemy with the id \"" + enemyKey + "\" does not exist in the enemies CSV."
+					);
+				}
+
+				ArrayList<Enemy> roomEnemies = result.computeIfAbsent(roomId, key -> new ArrayList<>());
+				for (int i = 0; i < amount; i++) {
+					roomEnemies.add(enemy.copy());
+				}
+			}
+
+			return result;
+		} finally {
+			roomEnemiesFile.close();
+		}
 	}
 
 	public static HashMap<Integer, ArrayList<Item>> getRoomItems() throws IOException {
