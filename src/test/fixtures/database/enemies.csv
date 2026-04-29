@@ -1,0 +1,3 @@
+id,name,max_health
+String,String,Integer
+0,Goblin,30

@@ -7,8 +7,8 @@ Fountain_NB, Town Center, Fountain, NewBrambleton.gif
 North_Street_NB,North Street,You're in North Street. It's where most shops are.,NewBrambleton.gif
 Blacksmith_NB,Northwest Lane,"You're at Northwest Lane, the smithy is nearby.",NewBrambleton.gif
 Robert_NB,Northeast Lane,"You're at Northeast Lane, nearby is a startup resturant.",NewBrambleton.gif
-Arcadia_NB,West  Road,"You're on West Road. A small building nearby has a sign, ""Arcadia's Cauldron"".",NewBrambleton.gif
-Shop_NB,East Road,You're on East Road. You know a good thrift shop nearby.,NewBrambleton.gif
+Arcadia_Cauldron_NB,West  Road,"You're on West Road. A small building nearby has a sign, ""Arcadia's Cauldron"".",NewBrambleton.gif
+Shopkeeper_NB,East Road,You're on East Road. You know a good thrift shop nearby.,NewBrambleton.gif
 Fred_NB,Southwest Avenue,"You're walking on Southwest Avenue. An orange haired man is nearby, looking morose.",NewBrambleton.gif
 God_NB,Southeast Avenue,"You're walking on Southeast Avenue. Theres a strange man in an alley, chuckling maniaclly.",NewBrambleton.gif
 Gate_NB,New Brambleton Gate,"You're at the gate to New Brambleton, ahead is the Crossroads.",NewBrambleton.gif

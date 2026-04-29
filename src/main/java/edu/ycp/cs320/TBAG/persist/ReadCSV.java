@@ -10,7 +10,11 @@ public class ReadCSV implements Closeable {
 
 	/// Modified from lab 7 to work with different file structure
 	public ReadCSV(String resourceName) throws IOException {
-		File file = new File("src/resources/" + resourceName);
+		this("src/resources", resourceName);
+	}
+
+	public ReadCSV(String folderPath, String resourceName) throws IOException {
+		File file = new File(folderPath + "/" + resourceName);
 		if (!file.exists()) {
 			throw new IOException("Couldn't open " + resourceName);
 		}

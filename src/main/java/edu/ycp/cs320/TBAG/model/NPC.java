@@ -52,4 +52,15 @@ public class NPC extends Entity {
 	public void setGoodbye(String goodbye) {
 		this.goodbye = goodbye;
 	}
+
+	public NPC copy() {
+		return new NPC(
+			id,
+			name,
+			getMaxHealth(),
+			getHealth(),
+			greeting,
+			goodbye
+		);
+	}
 }

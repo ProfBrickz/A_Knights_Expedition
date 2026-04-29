@@ -11,7 +11,7 @@ import java.sql.Statement;
 public abstract class DBUtil {
 	/**
 	 * Attempt to close a Statement.
-	 * 
+	 *
 	 * @param stmt the Statement to close
 	 */
 	public static void closeQuietly(Statement stmt) {
@@ -26,7 +26,7 @@ public abstract class DBUtil {
 
 	/**
 	 * Attempt to close a ResultSet.
-	 * 
+	 *
 	 * @param resultSet the ResultSet to close
 	 */
 	public static void closeQuietly(ResultSet resultSet) {
@@ -41,7 +41,7 @@ public abstract class DBUtil {
 
 	/**
 	 * Attempt to close a Connection.
-	 * 
+	 *
 	 * @param conn the Connection to close
 	 */
 	public static void closeQuietly(Connection conn) {

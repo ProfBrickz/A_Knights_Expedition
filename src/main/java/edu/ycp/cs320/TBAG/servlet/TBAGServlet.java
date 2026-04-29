@@ -31,7 +31,7 @@ public class TBAGServlet extends HttpServlet {
 		req.setAttribute("dialog", gameEngine.getDialog());
 		req.setAttribute("player", gameEngine.getPlayer());
 		req.setAttribute("commandHistory", gameEngine.getCommandHistory());
-		
+
 		// call JSP to generate empty form
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);
 	}
@@ -43,16 +43,7 @@ public class TBAGServlet extends HttpServlet {
 		System.out.println("TBAG Servlet: doPost");
 
 		// create GameEngine controller
-
-		GameEngine gameEngine =
-			(GameEngine) req.getSession().getAttribute("gameEngine");
-
-		if (gameEngine == null) {
-			gameEngine = new GameEngine();
-			req.getSession().setAttribute("gameEngine", gameEngine);
-		}
-//		req.getSession().setAttribute("player", player);
-
+		GameEngine gameEngine = new GameEngine();
 
 		// get direction command from jsp
 		String input = req.getParameter("command");

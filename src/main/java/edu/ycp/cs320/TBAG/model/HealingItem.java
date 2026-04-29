@@ -63,4 +63,16 @@ public class HealingItem extends Item {
 	public void setHealAmount(Integer healAmount) {
 		this.healAmount = healAmount;
 	}
+
+	public HealingItem copy() {
+		return new HealingItem(
+			getId(),
+			getName(),
+			getDescription(),
+			healAmount,
+			getValue(),
+			getAmount(),
+			getAssetName()
+		);
+	}
 }

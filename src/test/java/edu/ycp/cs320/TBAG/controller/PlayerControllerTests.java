@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class PlayerControllerTest {
+public class PlayerControllerTests {
 	private Player player;
 	private Room roomA;
 	private Room roomB;

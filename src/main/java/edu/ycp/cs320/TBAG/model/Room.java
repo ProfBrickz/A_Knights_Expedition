@@ -50,7 +50,7 @@ public class Room {
 	}
 
 
-	public Integer getID() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -112,6 +112,12 @@ public class Room {
 		}
 	}
 
+	public void addEnemies(HashMap<Integer, Enemy> enemies) {
+		for (Enemy enemy : enemies.values()) {
+			addEnemy(enemy);
+		}
+	}
+
 	public Enemy removeEnemy(Enemy enemy) {
 		return enemies.remove(enemy.getId());
 	}
@@ -134,8 +140,23 @@ public class Room {
 		}
 	}
 
+	public void addNPCs(HashMap<Integer, NPC> npcs) {
+		for (NPC npc : npcs.values()) {
+			addNPC(npc);
+		}
+	}
+
 	public NPC removeNPC(NPC npc) {
 		return npcs.remove(npc.getId());
+	}
+
+	public Room copy() {
+		return new Room(
+			id,
+			roomName,
+			roomDescription,
+			assetName
+		);
 	}
 }
 

@@ -15,16 +15,16 @@ import java.util.Iterator;
  */
 public class GameEngine {
 	private final Database database;
-	private final Player player;
+	private Player player;
 	private final InventoryController inventoryController = new InventoryController();
+	private final NPCController npcController = new NPCController(inventoryController);
 
 	// Constructor
 	public GameEngine(Database database) {
 		DatabaseProvider.setInstance(database);
 		this.database = DatabaseProvider.getInstance();
 
-		player = this.database.getPlayer();
-		player.getInventory().addItems((this.database.getItemsForPlayer()));
+		getPlayer();
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class GameEngine {
 		for (String text : dialog) {
 			output
 				.append(text)
-				.append("\n");
+				.append("\n\n");
 		}
 
 		return output.toString();
@@ -57,6 +57,9 @@ public class GameEngine {
 	}
 
 	public Player getPlayer() {
+		player = database.getPlayer();
+		player.getInventory().addItems((database.getItemsForPlayer()));
+
 		return player;
 	}
 
@@ -77,30 +80,27 @@ public class GameEngine {
 	public String inputCommand(String commandName, ArrayList<String> arguments) {
 		commandName = commandName.trim().toLowerCase();
 
-		String output = "";
+		player = this.database.getPlayer();
+		player.getInventory().addItems((this.database.getItemsForPlayer()));
 
 		for (Command command : Command.values()) {
-			if (command.getName().equals(commandName)) {
-				String error = validateCommand(command, arguments);
-				if (error != null) return error;
+			if (!command.getName().equals(commandName)) continue;
 
-				Boolean confirming = player.getConfirming();
+			String error = validateCommand(command, arguments);
+			if (error != null) return error;
 
-				if (!confirming) {
-					player.setLastCommand(command);
-				}
-				output = command.run(this, arguments);
-				if (confirming) {
-					player.setLastCommand(command);
-				}
-				database.setLastCommand(command);
+			Boolean confirming = player.getConfirming();
 
-				break;
+			if (!confirming) {
+				player.setLastCommand(command);
 			}
-		}
-		if (output != null && output.isEmpty()) output = "Sorry, command not recognized.\n";
 
-		return output;
+			String output = command.run(this, arguments);
+
+			database.setLastCommand(command);
+			return output;
+		}
+		return "Sorry, command not recognized.";
 	}
 
 
@@ -118,13 +118,13 @@ public class GameEngine {
 		PlayerController playerController = new PlayerController(player, new BattleEntityController());
 
 		if (!roomController.isValidDirection(player.getRoom(), direction)) {
-			return "Invalid direction for this room\n";
+			return "Invalid direction for this room";
 		}
 		//database.getEnemiesForRoom
 
 		Boolean successfulMove = playerController.move(direction);
 		if (!successfulMove) {
-			return "Move failed, either player, or the room does not exist\n";
+			return "Move failed, either player, or the room does not exist";
 		}
 
 		HashMap<Integer, Enemy> enemies =
@@ -158,12 +158,9 @@ public class GameEngine {
 			return "You encountered a " + enemy.getName() + "! Prepare for battle.\n";
 		}
 
-		database.setPlayerRoom(player.getRoom().getID());
+		database.setPlayerRoom(player.getRoom().getId());
 
-		System.out.println("Enemies found: " + enemies.size());
-		System.out.println("Player room: " + database.getPlayer().getRoom().getID());
-
-		return player.getRoom().getDescription() + "\n";
+		return player.getRoom().getDescription();
 	}
 
 	/**
@@ -172,6 +169,7 @@ public class GameEngine {
 	 */
 	public String look(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
+		playerRoom.addNPCs(database.getNPCsForRoom(playerRoom));
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
 		if (!playerRoom.getNpcs().isEmpty()) {
@@ -185,7 +183,7 @@ public class GameEngine {
 				.append("\n");
 		}
 
-		return output + "\n";
+		return output.toString();
 	}
 
 
@@ -206,16 +204,24 @@ public class GameEngine {
 
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-		if (item == null) return "You do not have a " + itemName + " in your inventory.\n";
+		if (item == null) return "You do not have a " + itemName + " in your inventory.";
 
-		return playerController.inspectItem(item) + "\n";
+		return playerController.inspectItem(item);
+	}
+
+	public String search(ArrayList<String> arguments) {
+		if (player.getState().equals(PlayerState.TALKING_TO_NPC)) {
+			return searchShop(arguments);
+		} else {
+			return searchRoom(arguments);
+		}
 	}
 
 	/**
 	 * Handles the "search" command.
 	 * Checks if the room has any items and returns them.
 	 */
-	public String search(ArrayList<String> arguments) {
+	public String searchRoom(ArrayList<String> arguments) {
 		Room playerRoom = player.getRoom();
 
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
@@ -233,16 +239,12 @@ public class GameEngine {
 
 		String itemName = arguments.get(0).toLowerCase();
 		Item item = inventoryController.getItemByNameCaseInsensitive(playerRoom.getInventory(), itemName);
-		if (item == null) return "This room does not have a " + itemName + ".\n";
+		if (item == null) return "This room does not have a " + itemName + ".";
 
 		database.removeItemFromRoom(playerRoom, item);
-		inventoryController.removeItem(playerRoom.getInventory(), item, item.getAmount());
 		database.addItemToPlayer(item);
-		inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
-		return "You picked up "
-			+ getItemFormat(item)
-			+ ".\n";
+		return "You picked up " + getItemFormat(item) + ".";
 	}
 
 	public String pickupAllItems(ArrayList<String> arguments) {
@@ -250,20 +252,14 @@ public class GameEngine {
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
 		if (playerRoom.getInventory().getItems().isEmpty()) {
-			return "You did not pick anything up from this room.\n";
+			return "You did not pick anything up from this room.";
 		}
 
 		StringBuilder output = new StringBuilder("You picked up:\n");
 
-		Iterator<Item> itemIterator = playerRoom.getInventory().getItems().values().iterator();
-
-		while (itemIterator.hasNext()) {
-			Item item = itemIterator.next();
-
+		for (Item item : playerRoom.getInventory().getItems().values()) {
 			database.removeItemFromRoom(playerRoom, item);
-			itemIterator.remove();
 			database.addItemToPlayer(item);
-			inventoryController.addItem(player.getInventory(), item, item.getAmount());
 
 			output
 				.append(item.getAmount())
@@ -285,21 +281,17 @@ public class GameEngine {
 
 		String itemName = arguments.get(0).toLowerCase();
 		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-		if (item == null) return "You do not have a " + itemName + ".\n";
+		if (item == null) return "You do not have a " + itemName + ".";
 
 		database.removeItemFromPlayer(item);
-		inventoryController.removeItem(player.getInventory(), item, item.getAmount());
 		database.addItemToRoom(playerRoom, item);
-		inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
 
-		return "You dropped "
-			+ getItemFormat(item)
-			+ ".\n";
+		return "You dropped " + getItemFormat(item) + ".";
 	}
 
 	public String dropAllItems(ArrayList<String> arguments) {
 		if (player.getInventory().getItems().isEmpty()) {
-			return "You do not have anything to drop.\n";
+			return "You do not have anything to drop.";
 		}
 
 		Room playerRoom = player.getRoom();
@@ -307,15 +299,9 @@ public class GameEngine {
 
 		StringBuilder output = new StringBuilder("You dropped:\n");
 
-		Iterator<Item> itemIterator = player.getInventory().getItems().values().iterator();
-
-		while (itemIterator.hasNext()) {
-			Item item = itemIterator.next();
-
+		for (Item item : player.getInventory().getItems().values()) {
 			database.removeItemFromPlayer(item);
-			itemIterator.remove();
 			database.addItemToRoom(playerRoom, item);
-			inventoryController.addItem(playerRoom.getInventory(), item, item.getAmount());
 
 			output
 				.append(item.getAmount())
@@ -331,208 +317,146 @@ public class GameEngine {
 		String output = "You have " + player.getCoins() + " coin";
 		if (player.getCoins() != 1) output += "s";
 
-		return output + ".\n";
+		return output + ".";
 	}
 
-//	public String talkToNPC(ArrayList<String> arguments) {
-//		Room playerRoom = player.getRoom();
-//
-//		String npcName = arguments.get(0);
-//		NPC npc = roomController.getNPCByNameCaseInsensitive(playerRoom, npcName);
-//		if (npc == null) return npcName + " is not in this room.\n";
-//
-//		player.setCurrentNPC(npc);
-//		player.setState(PlayerState.TALKING_TO_NPC);
-//
-//		return npc.getGreeting() + "\n";
-//	}
+	public String talkToNPC(ArrayList<String> arguments) {
+		HashMap<Integer, NPC> npcs = database.getNPCsForRoom(player.getRoom());
+		String npcName = arguments.get(0);
+		NPC currentNPC = null;
 
-//	public String leaveNPC(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String goodbye = npc.getGoodbye() + "\n";
-//
-//		player.setCurrentNPC(null);
-//		player.setState(PlayerState.EXPLORING);
-//
-//		return goodbye;
-//	}
-
-//	public String searchShop(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//
-//		if (npc.getInventory().getItems().isEmpty()) return "I am not selling anything.\n";
-//
-//		StringBuilder output = new StringBuilder("I am selling:\n");
-//
-//		for (Item item : npc.getInventory().getItems().values()) {
-//			output
-//				.append("- ")
-//				.append(item.getAmount())
-//				.append(" x ")
-//				.append(item.getName())
-//				.append(" for ")
-//				.append(item.getPrice() * item.getAmount())
-//				.append(" coins\n");
-//		}
-//
-//		return output.toString();
-//	}
-
-//	public String buyItem(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String itemName = arguments.get(1).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(npc.getInventory(), itemName);
-//		if (item == null) return "I am not selling any " + itemName + "s.\n";
-//
-//		Integer amount = null;
-//		try {
-//			amount = Integer.parseInt(arguments.get(0));
-//		} catch (NumberFormatException ignored) {
-//		}
-//		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
-//		if (player.getCoins() < item.getPrice() * amount) {
-//			return "You are too poor to buy " + amount + " x " + item.getName() + ".\n";
-//		}
-//
-//		npcController.buy(npc, player, item, amount);
-//
-//		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.\n";
-//	}
-
-//	public String sellItem(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String itemName = arguments.get(1).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have any " + itemName + " to sell.\n";
-//
-//		Integer amount = null;
-//		try {
-//			amount = Integer.parseInt(arguments.get(0));
-//		} catch (NumberFormatException ignored) {
-//		}
-//		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
-//		if (item.getAmount() < amount) {
-//			return "You do not have " + amount + " of " + item.getName() + ".\n";
-//		}
-//
-//		npcController.sell(player, item, amount);
-//
-//		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
-//	}
-
-//	public String sellAllItem(ArrayList<String> arguments) {
-//		NPC npc = player.getCurrentNPC();
-//		if (npc == null) return "You are not currently talking to an NPC.\n";
-//
-//		String itemName = arguments.get(0).toLowerCase();
-//		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-//		if (item == null) return "You do not have any " + itemName + " to sell.\n";
-//
-//		Integer amount = item.getAmount();
-//
-//		npcController.sell(player, item, amount);
-//
-//		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
-//	}
-
-	public String attack(ArrayList<String> args) {
-		Enemy enemy = player.getCurrentEnemy();
-		if (enemy == null) return "No enemy to attack.\n";
-
-		PlayerController pc = new PlayerController(player, new BattleEntityController());
-		EnemyController ec = new EnemyController(new BattleEntityController());
-
-		WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
-		pc.attack(enemy, attack);
-
-		if (enemy.getHealth() <= 0) {
-			endBattle(true);
-			return "You defeated the enemy!\n";
+		for (NPC npc : npcs.values()) {
+			if (npc.getName().equalsIgnoreCase(npcName)) {
+				currentNPC = npc;
+			}
 		}
 
-		String enemyTurn = ec.takeTurn(enemy, player);
-		System.out.println("Enemy taking turn...");
+		if (currentNPC == null) return npcName + " is not in this room.";
 
-		if (player.getHealth() <= 0) {
-			endBattle(false);
-			return "You were defeated!\n";
-		}
+		database.setPlayerNPC(currentNPC);
+		database.setPlayerState(PlayerState.TALKING_TO_NPC);
 
-		return "You attack the enemy!\n" + enemyTurn;
+		return currentNPC.getGreeting();
 	}
 
-	public String defend(ArrayList<String> args) {
-		PlayerController pc = new PlayerController(player, new BattleEntityController());
-		EnemyController ec = new EnemyController(new BattleEntityController());
+	public String leaveNPC(ArrayList<String> arguments) {
+		NPC npc = database.getNpcForPlayer();
+		if (npc == null) return "You are not currently talking to an NPC.";
 
-		Armor armor = new Armor(0, "Defense", "Temporary defense", 5, true, 0);
-		pc.defend(armor);
+		String goodbye = npc.getGoodbye();
 
-		Enemy enemy = player.getCurrentEnemy();
-
-		if (enemy == null) {
-			return "No enemy to defend against.\n";
-		}
-
-		String enemyTurn = ec.takeTurn(enemy, player);
-		System.out.println("Enemy taking turn...");
-
-		return "You brace for impact!\n" + enemyTurn;
-	}
-
-	public String heal(ArrayList<String> args) {
-		String itemName = args.get(0);
-
-		InventoryController ic = new InventoryController();
-		HealingItem item = (HealingItem) ic.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-
-		if (item == null) return "You don't have that item.\n";
-
-		PlayerController pc = new PlayerController(player, new BattleEntityController());
-		pc.heal(item);
-
-		EnemyController ec = new EnemyController(new BattleEntityController());
-		Enemy enemy = player.getCurrentEnemy();
-
-		if (enemy == null) {
-			return "No enemy is attacking you.\n";
-		}
-
-		String enemyTurn = ec.takeTurn(enemy, player);
-		System.out.println("Enemy taking turn...");
-
-		return "You healed yourself.\n" + enemyTurn;
-	}
-
-	private void endBattle(boolean playerWon) {
-		Enemy enemy = player.getCurrentEnemy();
-
-		if (playerWon) {
-			player.getRoom().removeEnemy(enemy);
-		}
-
-		player.setCurrentEnemy(null);
-		player.setState(PlayerState.EXPLORING);
+		database.setPlayerNPC(null);
 		database.setPlayerState(PlayerState.EXPLORING);
+
+		return goodbye;
+	}
+
+	public String searchShop(ArrayList<String> arguments) {
+		NPC npc = database.getNpcForPlayer();
+		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
+
+		if (npcItems == null || npcItems.isEmpty()) return "I am not selling anything.";
+
+		StringBuilder output = new StringBuilder("I am selling:\n");
+
+		for (Item item : npcItems.values()) {
+			output
+				.append("- ")
+				.append(item.getAmount())
+				.append(" x ")
+				.append(item.getName())
+				.append(" for ")
+				.append(item.getPrice() * item.getAmount())
+				.append(" coins\n");
+		}
+
+		return output.toString();
+	}
+
+	public String buyItem(ArrayList<String> arguments) {
+		NPC npc = database.getNpcForPlayer();
+		if (npc == null) return "You are not currently talking to an NPC.";
+
+		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
+		if (npcItems == null) return "I am not selling anything.";
+		npc.getInventory().addItems(npcItems);
+
+		String itemName = arguments.get(1).toLowerCase();
+		for (Item item : npcItems.values()) {
+			if (!item.getName().equals(itemName)) continue;
+
+			Integer amount = null;
+			try {
+				amount = Integer.parseInt(arguments.get(0));
+			} catch (NumberFormatException ignored) {
+			}
+
+			if (amount == null) return arguments.get(0) + " is not a valid amount.";
+			if (player.getCoins() < item.getPrice() * amount) {
+				return "You are too poor to buy " + amount + " x " + item.getName() + ".";
+			}
+			npcController.buy(npc, player, item, amount);
+			database.setPlayerCoins(player.getCoins());
+			database.addItemToPlayer(item);
+			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
+		}
+
+		return "I am not selling any " + itemName + "s.";
+	}
+
+	public String sellItem(ArrayList<String> arguments) {
+		NPC npc = database.getNpcForPlayer();
+		if (npc == null) return "You are not currently talking to an NPC.\n";
+
+		String itemName = arguments.get(1).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have any " + itemName + " to sell.\n";
+
+		Integer amount = null;
+		try {
+			amount = Integer.parseInt(arguments.get(0));
+		} catch (NumberFormatException ignored) {
+		}
+		if (amount == null) return arguments.get(0) + " is not a valid amount.\n";
+		if (item.getAmount() < amount) {
+			return "You do not have " + amount + " of " + item.getName() + ".\n";
+		}
+
+		npcController.sell(player, item, amount);
+		database.removeItemFromPlayer(item);
+		database.setPlayerCoins(player.getCoins());
+
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
+	}
+
+	public String sellAllItem(ArrayList<String> arguments) {
+		NPC npc = player.getCurrentNPC();
+		if (npc == null) return "You are not currently talking to anyone.\n";
+
+		String itemName = arguments.get(0).toLowerCase();
+		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+		if (item == null) return "You do not have any " + itemName + " to sell.\n";
+
+		Integer amount = item.getAmount();
+
+		npcController.sell(player, item, amount);
+		database.removeItemFromPlayer(item);
+		database.setPlayerCoins(player.getCoins());
+
+		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
 
 	public String restart(ArrayList<String> arguments) {
 		if (!player.getConfirming()) {
 			database.setConfirming(true);
-			return "Are you sure (yes or no)?\n";
+			return "Are you sure (yes or no)?";
 		}
 
 		Boolean success = database.reset();
 
-		if (!success) return "Reset failed, try again.\n";
+		if (!success) return "Reset failed, try again.";
 
-		return "Restarted game.\n";
+		return "Restarted game.";
 	}
 
 	public String yes(ArrayList<String> arguments) {
@@ -550,7 +474,7 @@ public class GameEngine {
 
 		database.setConfirming(false);
 
-		return lastCommand.getName() + " command canceled.\n";
+		return lastCommand.getName() + " command canceled.";
 	}
 
 	public String help(ArrayList<String> arguments) {
@@ -571,44 +495,6 @@ public class GameEngine {
 
 
 	// Utility methods
-
-	private void checkBattleState() {
-		if (player.getState() != PlayerState.BATTLE) {
-			return;
-		}
-
-		Enemy enemy = player.getCurrentEnemy();
-
-		// Safety fallback
-		if (enemy == null) {
-			player.setState(PlayerState.EXPLORING);
-			database.setPlayerState(PlayerState.EXPLORING);
-			return;
-		}
-
-		// Enemy dead → exit battle
-		if (enemy.getHealth() <= 0) {
-			player.getRoom().removeEnemy(enemy);
-			player.setCurrentEnemy(null);
-			player.setState(PlayerState.EXPLORING);
-			database.setPlayerState(PlayerState.EXPLORING);
-
-			addDialog("You defeated the enemy!\n");
-			return;
-		}
-
-		// Player dead → reset + exit battle
-		if (player.getHealth() <= 0) {
-			PlayerController pc = new PlayerController(player, new BattleEntityController());
-
-			pc.die(100, 100, player.getRoom()); // or starting room
-			player.setCurrentEnemy(null);
-			player.setState(PlayerState.EXPLORING);
-			database.setPlayerState(PlayerState.EXPLORING);
-
-			addDialog("You died!\n");
-		}
-	}
 
 	private String getItemFormat(Item item) {
 		String output = "";
@@ -651,10 +537,10 @@ public class GameEngine {
 	}
 
 	public String validateCommand(Command command, ArrayList<String> arguments) {
-		String error = validatePlayerState(command);
+		String error = validateConfirming(command);
 		if (error != null) return error;
 
-		error = validateConfirming(command);
+		error = validatePlayerState(command);
 		if (error != null) return error;
 
 		error = validateCommandFormat(command, arguments);
@@ -667,7 +553,10 @@ public class GameEngine {
 	 */
 	private String validateCommandFormat(Command command, ArrayList<String> arguments) {
 		if (arguments.size() != command.getArguments().size()) {
-			return "Invalid " + command.getName() + " command. Must be in the format:\n" + command.getFormat() + "\n";
+			return "Invalid "
+				+ command.getName()
+				+ " command. Must be in the format:\n"
+				+ command.getFormat();
 		}
 
 		return null;
@@ -675,7 +564,11 @@ public class GameEngine {
 
 	private String validatePlayerState(Command command) {
 		if (!command.getAllowedPlayerStates().contains(player.getState())) {
-			return "You are not allowed to use " + command.getName() + " while " + player.getState().getName() + ".\n";
+			return "You are not allowed to use "
+				+ command.getName()
+				+ " while "
+				+ player.getState().getName()
+				+ ".";
 		}
 
 		return null;
@@ -686,9 +579,9 @@ public class GameEngine {
 		Boolean isConfirmationCommand = command == Command.YES || command == Command.NO;
 
 		if (confirming && !isConfirmationCommand) {
-			return "You can not use " + command.getName() + " while confirming a command use yes or no.\n";
+			return "You can not use " + command.getName() + " while confirming a command use yes or no.";
 		} else if (!confirming && isConfirmationCommand) {
-			return "There is nothing to confirm.\n";
+			return "There is nothing to confirm.";
 		}
 
 		return null;

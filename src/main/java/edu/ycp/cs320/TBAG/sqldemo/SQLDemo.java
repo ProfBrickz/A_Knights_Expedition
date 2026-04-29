@@ -18,17 +18,17 @@ public class SQLDemo {
 	static class RowList extends ArrayList<List<String>> {
 		private static final long serialVersionUID = 1L;
 	}
-	
+
 	private static final String PAD =
 		"                                                    " +
-		"                                                    " +
-		"                                                    " +
-		"                                                    ";
+			"                                                    " +
+			"                                                    " +
+			"                                                    ";
 	private static final String SEP =
 		"----------------------------------------------------" +
-		"----------------------------------------------------" +
-		"----------------------------------------------------" +
-		"----------------------------------------------------";
+			"----------------------------------------------------" +
+			"----------------------------------------------------" +
+			"----------------------------------------------------";
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
 		Connection conn = null;
@@ -36,14 +36,14 @@ public class SQLDemo {
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
 			conn = DriverManager.getConnection("jdbc:derby:database.db;create=true");
 			conn.setAutoCommit(true);
-	
+
 			queryLoop(conn);
 		} catch (SQLException e) {
 			System.out.println("Error: " + e.getMessage());
 		} finally {
 			DBUtil.closeQuietly(conn);
 		}
-}
+	}
 
 	private static void queryLoop(Connection conn) throws IOException {
 		StatementReader stmtReader = new StatementReader(new InputStreamReader(System.in));
@@ -160,14 +160,14 @@ public class SQLDemo {
 		for (String colName : colNames) {
 			colWidths.add(colName.length());
 		}
-		for (List<String> row: rowList) {
+		for (List<String> row : rowList) {
 			for (int i = 0; i < row.size(); i++) {
 				colWidths.set(i, Math.max(colWidths.get(i), row.get(i).length()));
 			}
 		}
 		return colWidths;
 	}
-	
+
 	private static final Pattern INTEGER = Pattern.compile("\\d+");
 
 	private static void importCSV(Connection conn, String tableName, String csvFile) throws IOException, SQLException {
@@ -189,20 +189,20 @@ public class SQLDemo {
 	 * @throws SQLException
 	 */
 	public static void readCSV(Connection conn, String tableName,
-			BufferedReader reader) throws IOException, SQLException {
+	                           BufferedReader reader) throws IOException, SQLException {
 		PreparedStatement stmt = null;
-		
+
 		while (true) {
 			String line = reader.readLine();
 			if (line == null) {
 				break;
 			}
-			
+
 			line = line.trim();
 			if (line.equals("")) {
 				continue;
 			}
-			
+
 			List<String> row = new ArrayList<String>();
 			// DJH2-3-12-17: changed tokenizer to '|' so that comma's can be embedded in titles
 			StringTokenizer tok = new StringTokenizer(line, "|");
@@ -219,19 +219,15 @@ public class SQLDemo {
 // DJH2-3-12-17: Added 'published' as an attribute of books table
 // DJH2-3-12-17: changed attributes to 'lastname' and 'firstname' for authors table
 				System.out.println("Importing data for table: <" + tableName + ">");
-				if (tableName.toLowerCase().equals("books"))
-				{
+				if (tableName.toLowerCase().equals("books")) {
 					buf.append("insert into " + tableName + " (author_id, title, isbn, published) values (");
-				}
-				else if (tableName.toLowerCase().equals("authors"))
-				{
+				} else if (tableName.toLowerCase().equals("authors")) {
 					buf.append("insert into " + tableName + " (lastname, firstname) values (");
 				}
 // DJH2: this is the original code - it will not import into a table with an auto-incrementing primary key
 // DJH2: The primary key values must be manually determined and included in the CSV file.
-				else
-				{
-					buf.append("insert into " + tableName + " values (");					
+				else {
+					buf.append("insert into " + tableName + " values (");
 				}
 				for (int i = 0; i < row.size(); i++) {
 					if (i > 0) {
@@ -246,18 +242,18 @@ public class SQLDemo {
 				String value = row.get(i);
 				Matcher m = INTEGER.matcher(value);
 				if (m.matches()) {
-					stmt.setInt(i+1, Integer.parseInt(value));
+					stmt.setInt(i + 1, Integer.parseInt(value));
 				} else {
-					stmt.setString(i+1, row.get(i));
+					stmt.setString(i + 1, row.get(i));
 				}
 			}
 			stmt.addBatch();
 		}
-		
+
 		conn.setAutoCommit(false);
 		stmt.executeBatch();
 		conn.setAutoCommit(true);
-		
+
 		System.out.println("Successful import");
 	}
 }

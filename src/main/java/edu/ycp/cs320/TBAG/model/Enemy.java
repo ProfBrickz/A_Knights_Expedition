@@ -43,4 +43,13 @@ public class Enemy extends BattleEntity {
 	public double getSpecialChance() {
 		return specialChance;
 	}
+
+	public Enemy copy() {
+		return new Enemy(
+			id,
+			name,
+			getMaxHealth(),
+			getHealth()
+		);
+	}
 }

@@ -120,4 +120,16 @@ public class Player extends BattleEntity {
 	public void setCurrentEnemy(Enemy enemy) {
 		this.currentEnemy = enemy;
 	}
+
+	public Player copy() {
+		return new Player(
+			getMaxHealth(),
+			getHealth(),
+			playerState,
+			room.copy(),
+			coins,
+			lastCommand,
+			confirming
+		);
+	}
 }

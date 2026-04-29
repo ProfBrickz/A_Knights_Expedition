@@ -49,9 +49,9 @@ public enum Command {
 	SEARCH(
 		"search",
 		GameEngine::search,
-		"Searches the current room for hidden items or clues",
+		"Searches the current room for hidden items or clues, or displays items available for purchase from the current NPC",
 		List.of(),
-		List.of(PlayerState.EXPLORING),
+		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC),
 		List.of()
 	),
 	PICKUP(
@@ -94,79 +94,45 @@ public enum Command {
 		List.of(PlayerState.EXPLORING, PlayerState.TALKING_TO_NPC),
 		List.of()
 	),
-	//	TALK_TO(
-//		"talk-to",
-//		GameEngine::talkToNPC,
-//		"Initiates a conversation with a specified NPC in the current room",
-//		List.of("NPC name"),
-//		List.of(PlayerState.EXPLORING),
-//		List.of("talk-to blacksmith", "talk-to brewer", "talk-to \"Dr. Babock\"")
-//	),
-//	LEAVE(
-//		"leave",
-//		GameEngine::leaveNPC,
-//		"Ends the current conversation with an NPC and returns to exploring state",
-//		List.of(),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of()
-//	),
-//	SEARCH_SHOP(
-//		"search-shop",
-//		GameEngine::searchShop,
-//		"Displays the items available for purchase from the current NPC",
-//		List.of(),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of()
-//	),
-//	BUY(
-//		"buy",
-//		GameEngine::buyItem,
-//		"Purchase an item from the current NPC's shop",
-//		List.of("Amount", "Item name"),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of("buy 1 sword", "buy 3 potion", "buy 5 \"Diamond pickaxe\"")
-//	),
-//	SELL(
-//		"sell",
-//		GameEngine::sellItem,
-//		"Sells an item from the player's inventory to the current NPC",
-//		List.of("Amount", "Item name"),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of("sell 1 sword", "sell 2 potion", "sell 5 \"Diamond pickaxe\"")
-//	),
-//	SELL_ALL(
-//		"sell-all",
-//		GameEngine::sellAllItem,
-//		"Sells all of a specific item from the player's inventory to the current NPC",
-//		List.of("Item name"),
-//		List.of(PlayerState.TALKING_TO_NPC),
-//		List.of("sell-all sword", "sell-all potion", "sell-all \"Diamond pickaxe\"")
-//	),
-	ATTACK(
-		"attack",
-		GameEngine::attack,
-		"Attack the enemy",
-		List.of(),
-		List.of(PlayerState.BATTLE),
-		List.of("attack")
+	TALK_TO(
+		"talk-to",
+		GameEngine::talkToNPC,
+		"Initiates a conversation with a specified NPC in the current room",
+		List.of("NPC name"),
+		List.of(PlayerState.EXPLORING),
+		List.of("talk-to blacksmith", "talk-to brewer", "talk-to \"Dr. Babock\"")
 	),
-
-	DEFEND(
-		"defend",
-		GameEngine::defend,
-		"Defend against the next attack",
+	LEAVE(
+		"leave",
+		GameEngine::leaveNPC,
+		"Ends the current conversation with an NPC and returns to exploring state",
 		List.of(),
-		List.of(PlayerState.BATTLE),
-		List.of("defend")
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of()
 	),
-
-	HEAL(
-		"heal",
-		GameEngine::heal,
-		"Use a healing item",
-		List.of("item name"),
-		List.of(PlayerState.BATTLE),
-		List.of("heal potion")
+	BUY(
+		"buy",
+		GameEngine::buyItem,
+		"Purchase an item from the current NPC's shop",
+		List.of("Amount", "Item name"),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of("buy 1 sword", "buy 3 potion", "buy 5 \"Diamond pickaxe\"")
+	),
+	SELL(
+		"sell",
+		GameEngine::sellItem,
+		"Sells an item from the player's inventory to the current NPC",
+		List.of("Amount", "Item name"),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of("sell 1 sword", "sell 2 potion", "sell 5 \"Diamond pickaxe\"")
+	),
+	SELL_ALL(
+		"sell-all",
+		GameEngine::sellAllItem,
+		"Sells all of a specific item from the player's inventory to the current NPC",
+		List.of("Item name"),
+		List.of(PlayerState.TALKING_TO_NPC),
+		List.of("sell-all sword", "sell-all potion", "sell-all \"Diamond pickaxe\"")
 	),
 	RESTART(
 		"restart",
@@ -216,7 +182,14 @@ public enum Command {
 	private final List<PlayerState> allowedPlayerStates;
 	private final List<String> examples;
 
-	Command(String name, BiFunction<GameEngine, ArrayList<String>, String> method, String description, List<String> arguments, List<PlayerState> allowedPlayerStates, List<String> examples) {
+	Command(
+		String name,
+		BiFunction<GameEngine, ArrayList<String>, String> method,
+		String description,
+		List<String> arguments,
+		List<PlayerState> allowedPlayerStates,
+		List<String> examples
+	) {
 		this.name = name;
 		this.method = method;
 		this.description = description;

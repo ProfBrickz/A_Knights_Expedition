@@ -48,6 +48,14 @@ public class RoomConnection {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	public RoomConnection copy() {
+		return new RoomConnection(
+			room.copy(),
+			description,
+			traveled
+		);
+	}
 }
 
 

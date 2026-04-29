@@ -58,7 +58,7 @@ public class Item {
 	}
 
 	public Integer getPrice() {
-		return value * 4;
+		return value * 2;
 	}
 
 	public Integer getAmount() {
@@ -75,5 +75,16 @@ public class Item {
 
 	public void setAssetName(String assetName) {
 		this.assetName = assetName;
+	}
+
+	public Item copy() {
+		return new Item(
+			id,
+			name,
+			description,
+			value,
+			amount,
+			assetName
+		);
 	}
 }
