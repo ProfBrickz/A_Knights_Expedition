@@ -173,7 +173,35 @@ public enum Command {
 		List.of(),
 		List.of(PlayerState.values()),
 		List.of()
-	);
+	),
+	ATTACK(
+      "attack",
+	  GameEngine::attack,
+      "Attack the enemy",
+	  List.of(),
+      List.of(PlayerState.BATTLE),
+		List.of("attack")
+		),
+
+
+	DEFEND(
+      "defend",
+	  GameEngine::defend,
+      "Defend against the next attack",
+	  List.of(),
+      List.of(PlayerState.BATTLE),
+		List.of("defend")
+		),
+
+
+	HEAL(
+      "heal",
+	  GameEngine::heal,
+      "Use a healing item",
+	  List.of("item name"),
+      List.of(PlayerState.BATTLE),
+		List.of("heal potion")
+		);
 
 	private final String name;
 	private final BiFunction<GameEngine, ArrayList<String>, String> method;

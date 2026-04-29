@@ -30,3 +30,4 @@ String,String,String,String,Integer,item or healing or weapon or armor,Integer,I
 28,Game Cartridge,There�s a 2D Eastern Girl on the cover,,0,Item,0,0,FALSE
 29,Sewer Key,Key to the sewer,Sewer_Key.png,0,Item,0,0,FALSE
 30,Kitchen Key,Key to the Kitchen,Kitchen_Key.png,0,Item,0,0,FALSE
+31,enemy weapon,temp,temp,0,weapon,0,0,FALSE

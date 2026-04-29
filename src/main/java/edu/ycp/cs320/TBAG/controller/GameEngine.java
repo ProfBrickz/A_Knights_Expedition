@@ -5,6 +5,7 @@ import edu.ycp.cs320.TBAG.persist.Database;
 import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -334,6 +335,7 @@ public class GameEngine {
 		if (currentNPC == null) return npcName + " is not in this room.";
 
 		database.setPlayerNPC(currentNPC);
+		player.setState(PlayerState.TALKING_TO_NPC);
 		database.setPlayerState(PlayerState.TALKING_TO_NPC);
 
 		return currentNPC.getGreeting();
@@ -346,6 +348,7 @@ public class GameEngine {
 		String goodbye = npc.getGoodbye();
 
 		database.setPlayerNPC(null);
+		player.setState(PlayerState.EXPLORING);
 		database.setPlayerState(PlayerState.EXPLORING);
 
 		return goodbye;
@@ -445,6 +448,100 @@ public class GameEngine {
 
 		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
 	}
+
+	public String attack(ArrayList<String> args) {
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
+		if (enemy == null) return "No enemy to attack.\n";
+
+
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		EnemyController ec = new EnemyController(new BattleEntityController());
+
+
+		WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
+		pc.attack(enemy, attack);
+
+
+		if (enemy.getHealth() <= 0) {
+			endBattle(true);
+			return "You defeated the enemy!\n";
+		}
+
+
+		String enemyTurn = ec.takeTurn(enemy, player);
+
+
+		if (player.getHealth() <= 0) {
+			endBattle(false);
+			return "You were defeated!\n";
+		}
+
+
+		return "You attack the enemy!\n" + enemyTurn;
+	}
+
+
+	public String defend(ArrayList<String> args) {
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		EnemyController ec = new EnemyController(new BattleEntityController());
+
+
+		Armor armor = new Armor(0, "Defense", "Temporary defense", 5, true, 0);
+		pc.defend(armor);
+
+
+		Enemy enemy = player.getCurrentEnemy();
+		String enemyTurn = ec.takeTurn(enemy, player);
+
+
+		return "You brace for impact!\n" + enemyTurn;
+	}
+
+
+	public String heal(ArrayList<String> args) {
+		String itemName = args.get(0);
+
+
+		InventoryController ic = new InventoryController();
+		HealingItem item = (HealingItem) ic.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+
+
+		if (item == null) return "You don't have that item.\n";
+
+
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		pc.heal(item);
+
+
+		EnemyController ec = new EnemyController(new BattleEntityController());
+		Enemy enemy = player.getCurrentEnemy();
+
+		if (enemy == null) {
+			return "No enemy is attacking you.\n";
+		}
+
+		String enemyTurn = ec.takeTurn(enemy, player);
+		System.out.println("Enemy taking turn...");
+
+
+		return "You healed yourself.\n" + enemyTurn;
+	}
+
+
+	private void endBattle(boolean playerWon) {
+		Enemy enemy = player.getCurrentEnemy();
+
+
+		if (playerWon) {
+			player.getRoom().removeEnemy(enemy);
+		}
+
+
+		player.setCurrentEnemy(null);
+		player.setState(PlayerState.EXPLORING);
+		database.setPlayerState(PlayerState.EXPLORING);
+	}
+
 
 	public String restart(ArrayList<String> arguments) {
 		if (!player.getConfirming()) {
