@@ -20,7 +20,13 @@ public class TBAGServlet extends HttpServlet {
 
 		System.out.println("TBAG Servlet: doGet");
 
-		GameEngine gameEngine = new GameEngine();
+		GameEngine gameEngine =
+			(GameEngine) req.getSession().getAttribute("gameEngine");
+
+		if (gameEngine == null) {
+			gameEngine = new GameEngine();
+			req.getSession().setAttribute("gameEngine", gameEngine);
+		}
 
 		req.setAttribute("dialog", gameEngine.getDialog());
 		req.setAttribute("player", gameEngine.getPlayer());
@@ -38,9 +44,13 @@ public class TBAGServlet extends HttpServlet {
 
 		// create GameEngine controller
 
-		GameEngine gameEngine = new GameEngine();
+		GameEngine gameEngine =
+			(GameEngine) req.getSession().getAttribute("gameEngine");
 
-		req.getSession().setAttribute("gameEngine", gameEngine);
+		if (gameEngine == null) {
+			gameEngine = new GameEngine();
+			req.getSession().setAttribute("gameEngine", gameEngine);
+		}
 //		req.getSession().setAttribute("player", player);
 
 

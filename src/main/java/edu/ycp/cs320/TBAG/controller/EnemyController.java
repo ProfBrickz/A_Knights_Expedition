@@ -11,33 +11,38 @@ public class EnemyController {
 		this.battleEntityController = battleEntityController;
 	}
 
-	public void takeTurn(Enemy enemy, Player player) {
+	public String takeTurn(Enemy enemy, Player player) {
 		double roll = random.nextDouble();
+
+		if (enemy == null || player == null) {
+			return "";
+		}
 
 		// PRIORITY: low health → heal
 		if (enemy.getHealth() < enemy.getMaxHealth() * 0.3 && roll < 0.3) {
 			heal(enemy);
 			System.out.println(enemy.getName() + " uses a potion!");
-			return;
+			return enemy.getName() + " uses a potion!";
 		}
 
 		// SPECIAL MOVE
 		if (roll < enemy.getSpecialChance()) {
 			specialMove(enemy, player);
 			System.out.println(enemy.getName() + " uses a SPECIAL attack!");
-			return;
+			return enemy.getName() + " uses a SPECIAL attack!";
 		}
 
 		// DEFEND
 		if (roll < 0.6) {
 			defend(enemy);
 			System.out.println(enemy.getName() + " defends!");
-			return;
+			return enemy.getName() + " defends!";
 		}
 
 		// NORMAL ATTACK
 		attack(enemy, player);
 		System.out.println(enemy.getName() + " attacks!");
+		return enemy.getName() + " attacks!";
 	}
 
 	public void attack(Enemy enemy, Player player) {

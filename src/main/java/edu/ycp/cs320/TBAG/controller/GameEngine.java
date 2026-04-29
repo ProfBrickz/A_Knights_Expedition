@@ -140,6 +140,7 @@ public class GameEngine {
 			Enemy enemy = player.getRoom().getEnemies().values().iterator().next();
 
 			player.setCurrentEnemy(enemy);   // required field
+			player.setState(PlayerState.BATTLE);
 			database.setPlayerState(PlayerState.BATTLE);
 
 			return "You encountered a " + enemy.getName() + "! Prepare for battle.\n";
@@ -151,6 +152,7 @@ public class GameEngine {
 			Enemy enemy = player.getRoom().getEnemies().values().iterator().next();
 
 			player.setCurrentEnemy(enemy);   // required field
+			player.setState(PlayerState.BATTLE);
 			database.setPlayerState(PlayerState.BATTLE);
 
 			return "You encountered a " + enemy.getName() + "! Prepare for battle.\n";
@@ -454,14 +456,15 @@ public class GameEngine {
 			return "You defeated the enemy!\n";
 		}
 
-		ec.takeTurn(enemy, player);
+		String enemyTurn = ec.takeTurn(enemy, player);
+		System.out.println("Enemy taking turn...");
 
 		if (player.getHealth() <= 0) {
 			endBattle(false);
 			return "You were defeated!\n";
 		}
 
-		return "You attack the enemy!\n";
+		return "You attack the enemy!\n" + enemyTurn;
 	}
 
 	public String defend(ArrayList<String> args) {
@@ -472,9 +475,15 @@ public class GameEngine {
 		pc.defend(armor);
 
 		Enemy enemy = player.getCurrentEnemy();
-		ec.takeTurn(enemy, player);
 
-		return "You brace for impact!\n";
+		if (enemy == null) {
+			return "No enemy to defend against.\n";
+		}
+
+		String enemyTurn = ec.takeTurn(enemy, player);
+		System.out.println("Enemy taking turn...");
+
+		return "You brace for impact!\n" + enemyTurn;
 	}
 
 	public String heal(ArrayList<String> args) {
@@ -489,9 +498,16 @@ public class GameEngine {
 		pc.heal(item);
 
 		EnemyController ec = new EnemyController(new BattleEntityController());
-		ec.takeTurn(player.getCurrentEnemy(), player);
+		Enemy enemy = player.getCurrentEnemy();
 
-		return "You healed yourself.\n";
+		if (enemy == null) {
+			return "No enemy is attacking you.\n";
+		}
+
+		String enemyTurn = ec.takeTurn(enemy, player);
+		System.out.println("Enemy taking turn...");
+
+		return "You healed yourself.\n" + enemyTurn;
 	}
 
 	private void endBattle(boolean playerWon) {
@@ -502,6 +518,7 @@ public class GameEngine {
 		}
 
 		player.setCurrentEnemy(null);
+		player.setState(PlayerState.EXPLORING);
 		database.setPlayerState(PlayerState.EXPLORING);
 	}
 
@@ -564,6 +581,7 @@ public class GameEngine {
 
 		// Safety fallback
 		if (enemy == null) {
+			player.setState(PlayerState.EXPLORING);
 			database.setPlayerState(PlayerState.EXPLORING);
 			return;
 		}
@@ -572,6 +590,7 @@ public class GameEngine {
 		if (enemy.getHealth() <= 0) {
 			player.getRoom().removeEnemy(enemy);
 			player.setCurrentEnemy(null);
+			player.setState(PlayerState.EXPLORING);
 			database.setPlayerState(PlayerState.EXPLORING);
 
 			addDialog("You defeated the enemy!\n");
@@ -584,6 +603,7 @@ public class GameEngine {
 
 			pc.die(100, 100, player.getRoom()); // or starting room
 			player.setCurrentEnemy(null);
+			player.setState(PlayerState.EXPLORING);
 			database.setPlayerState(PlayerState.EXPLORING);
 
 			addDialog("You died!\n");
