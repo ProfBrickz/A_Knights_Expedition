@@ -1,21 +1,22 @@
 id,name,description,asset_name
 String,String,String,String
 Hotel,Hotel,Your hotel room.,NewBrambleton.gif
-South_Street_NB,South Street,Your in South Street. Its where most people live.,NewBrambleton.gif
-Center_NB,Town Center,Your at the center of New Bramblton. There's a nice fountain nearby.,NewBrambleton.gif
-North_Street_NB,North Street,Your in North Street. It's where most shops are.,NewBrambleton.gif
-Blacksmith_NB,Northwest Lane,"Your at Northwest Lane, the smithy is nearby.",NewBrambleton.gif
-Robert_NB,Northeast Lane,"Your at Northeast Lane, nearby is a startup resturant.",NewBrambleton.gif
-Arcadia_NB,West  Road,"Your on West Road. A small building nearby has a sign, ""Arcadia's Cauldron"".",NewBrambleton.gif
-Shop_NB,East Road,Your on East Road. You know a good thrift shop nearby.,NewBrambleton.gif
-Fred_NB,Southwest Avenue,"Your walking on Southwest Avenue. An orange haired man is nearby, looking morose.",NewBrambleton.gif
-God_NB,Southeast Avenue,"Your walking on Southeast Avenue. Theres a strange man in an alley, chuckling maniaclly.",NewBrambleton.gif
-Gate_NB,New Brambleton Gate,"Your at the gate to New Brambleton, ahead is the Crossroads.",NewBrambleton.gif
-South_CR,Southern Bridge,Your walking on the southern bridge. Below you is the abyss.,Crossroads.gif
-North_CR,Northern Bridge,Your walking on the northern bridge. Below you is the abyss.,Crossroads.gif
-West_CR,Western Bridge,Your walking on the western bridge. Below you is the abyss.,Crossroads.gif
-East_CR,Eastern Bridge,Your walking on the eastern bridge. Below you is the abyss.,Crossroads.gif
-Center_CR,The Crossroads,Your standing on the the crossroads. Below you is the abyss.,Crossroads.gif
+South_Street_NB,South Street,You're in South Street. Its where most people live.,NewBrambleton.gif
+Center_NB,Town Center,You're at the center of New Bramblton. There's a nice fountain nearby.,NewBrambleton.gif
+Fountain_NB, Town Center, Fountain, NewBrambleton.gif
+North_Street_NB,North Street,You're in North Street. It's where most shops are.,NewBrambleton.gif
+Blacksmith_NB,Northwest Lane,"You're at Northwest Lane, the smithy is nearby.",NewBrambleton.gif
+Robert_NB,Northeast Lane,"You're at Northeast Lane, nearby is a startup resturant.",NewBrambleton.gif
+Arcadia_Cauldron_NB,West  Road,"You're on West Road. A small building nearby has a sign, ""Arcadia's Cauldron"".",NewBrambleton.gif
+Shopkeeper_NB,East Road,You're on East Road. You know a good thrift shop nearby.,NewBrambleton.gif
+Fred_NB,Southwest Avenue,"You're walking on Southwest Avenue. An orange haired man is nearby, looking morose.",NewBrambleton.gif
+God_NB,Southeast Avenue,"You're walking on Southeast Avenue. Theres a strange man in an alley, chuckling maniaclly.",NewBrambleton.gif
+Gate_NB,New Brambleton Gate,"You're at the gate to New Brambleton, ahead is the Crossroads.",NewBrambleton.gif
+South_CR,Southern Bridge,You're walking on the southern bridge. Below you is the abyss.,Crossroads.gif
+North_CR,Northern Bridge,You're walking on the northern bridge. Below you is the abyss.,Crossroads.gif
+West_CR,Western Bridge,You're walking on the western bridge. Below you is the abyss.,Crossroads.gif
+East_CR,Eastern Bridge,You're walking on the eastern bridge. Below you is the abyss.,Crossroads.gif
+Center_CR,The Crossroads,You're standing on the the crossroads. Below you is the abyss.,Crossroads.gif
 1_FR,North West Corner,Towering pines loom overhead.,Forest.gif
 2_FR,Twisted Oak,Twisted oak trees stretch overhead.,Forest.gif
 3_FR,Ferns-a-plenty,Ferns blanket the ground.,Forest.gif

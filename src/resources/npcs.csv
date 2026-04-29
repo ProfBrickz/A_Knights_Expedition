@@ -1,10 +1,9 @@
 id,room_id,name,max_health,greeting,goodbye
 String,String,String,Integer,String,String
-1,Blacksmith_Store_NB,Eorlund,999,"I'm Eorlund, the blacksmith of New Brambleton. What do you want?",Hmm?
-2,Shopkeeper_Store_NB,Morshu,200,"Hello adventure, I'm Morshu and if you want anything come to me, if you have the coin.",Do come back.
+1,Blacksmith_NB,Eorlund,999,"I'm Eorlund, the blacksmith of New Brambleton. What do you want?",Hmm?
+2,Shopkeeper_NB,Morshu,200,"Hello adventure, I'm Morshu and if you want anything come to me, if you have the coin.",Do come back.
 3,Arcadia_Cauldron_NB,Arcadia,100,"Ah, welcome to my cauldron. I'm Arcadia, can I help you dear?","If there's anything I can help you with, you have but to ask."
 4,Center_NB,Malcolm,100,"Hello there. It's good to see a friendly face. Almost took you for a raider, I did. Name's Malcolm. Malcolm Holmes.",See yah.
-5,Dusty_Lobster_NB,Robert,100,"Welcome to the Dusty Lobster! We sell burgers and fries, or we will. I'm Robert.",Bye!
-6,Babcock_Alley_NB,Dr. Babcock,999,"Oh, if it isn't the player. Come to see the great God Babcock?","May your days be many, and your woes few."
-7,Fountain_NB,Mayor,200,"Ah, so you’re the up and coming squire I've heard so much about. I'm the mayor of these parts, Mayor.",Good luck hero.
-8,Resident_NB,Fred,100,"Oh hey, you’re the squire everyones been talking about. Names Fred, and I'd like to ask a favor.","Oh, ok then."
+5,Robert_NB,Robert,100,"Welcome to the Dusty Lobster! We sell burgers and fries, or we will. I'm Robert.",Bye!
+6,God_NB,Dr. Babcock,999,"Oh, if it isn't the player. Come to see the great God Babcock?","May your days be many, and your woes few."
+7,Fountain_NB,Mayor,200,"Ah, so youï¿½re the up and coming squire I've heard so much about. I'm the mayor of these parts, Mayor.",Good luck hero.
