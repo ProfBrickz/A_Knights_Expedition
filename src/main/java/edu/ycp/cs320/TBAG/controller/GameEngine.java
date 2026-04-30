@@ -111,6 +111,7 @@ public class GameEngine {
 	 * Validates direction and updates player position.
 	 */
 	public String move(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
 		String direction = arguments.get(0).toLowerCase();
 
 		playerRoom.setRoomConnections(database.getConnectionsForRoom(playerRoom));
