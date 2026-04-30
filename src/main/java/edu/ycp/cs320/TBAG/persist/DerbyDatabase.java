@@ -297,6 +297,7 @@ public class DerbyDatabase implements Database {
 							statement.setInt(1, entry.getKey());
 							statement.setInt(2, item.getId());
 							statement.setInt(3, item.getAmount());
+							statement.addBatch();
 						}
 					}
 					statement.executeBatch();
@@ -310,6 +311,7 @@ public class DerbyDatabase implements Database {
 					for (Enemy enemy : enemies.values()) {
 						statement.setString(1, enemy.getName());
 						statement.setInt(2, enemy.getMaxHealth());
+						statement.addBatch();
 					}
 					statement.executeBatch();
 
@@ -323,6 +325,7 @@ public class DerbyDatabase implements Database {
 							statement.setInt(1, entry.getKey());
 							statement.setInt(2, item.getId());
 							statement.setInt(3, item.getAmount());
+							statement.addBatch();
 						}
 					}
 					statement.executeBatch();
