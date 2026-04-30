@@ -45,8 +45,9 @@ public class GameEngine {
 		for (String text : dialog) {
 			output
 				.append(text)
-				.append("\n\n");
+				.append("\n");
 		}
+		output.append("=> ");
 
 		return output.toString();
 	}
@@ -86,7 +87,7 @@ public class GameEngine {
 			if (!command.getName().equals(commandName)) continue;
 
 			String error = validateCommand(command, arguments);
-			if (error != null) return error;
+			if (error != null) return error + "\n";
 
 			Boolean confirming = player.getConfirming();
 
@@ -95,11 +96,15 @@ public class GameEngine {
 			}
 
 			String output = command.run(this, arguments);
+			if (output.endsWith("\n")) {
+				output = output.substring(0, output.length() - 1);
+			}
 
 			database.setLastCommand(command);
-			return output;
+			return output + "\n";
 		}
-		return "Sorry, command not recognized.";
+
+		return "Sorry, command not recognized.\n";
 	}
 
 

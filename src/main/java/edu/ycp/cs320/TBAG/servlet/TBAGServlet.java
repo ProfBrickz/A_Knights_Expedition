@@ -42,7 +42,7 @@ public class TBAGServlet extends HttpServlet {
 		// get direction command from jsp
 		String input = req.getParameter("command");
 		// Append user's command
-		gameEngine.addDialog(input);
+		gameEngine.addDialog("=> " + input);
 
 		gameEngine.addCommandToHistory(input);
 
