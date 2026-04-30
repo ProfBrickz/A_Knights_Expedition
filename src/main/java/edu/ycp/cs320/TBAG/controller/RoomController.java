@@ -1,21 +1,12 @@
 package edu.ycp.cs320.TBAG.controller;
 
 
+import edu.ycp.cs320.TBAG.model.Enemy;
 import edu.ycp.cs320.TBAG.model.NPC;
 import edu.ycp.cs320.TBAG.model.Room;
 
-import java.util.HashMap;
-
 
 public class RoomController {
-	//HashMap :: room ID : Room
-	private final HashMap<Integer, Room> roomList;
-
-
-	public RoomController(HashMap<Integer, Room> roomList) {
-		this.roomList = roomList;
-	}
-
 	//adds a connection from fromID to toID, accessed by a keyword of key
 	public void addRoomConnection(Room fromRoom, Room toRoom, String key) {
 		fromRoom.setConnection(toRoom, key);
@@ -41,6 +32,14 @@ public class RoomController {
 		}
 
 		return null;
+	}
+
+	public Boolean hasAliveEnemies(Room room) {
+		for (Enemy enemy : room.getEnemies().values()) {
+			if (enemy.getHealth() > 0) return true;
+		}
+
+		return false;
 	}
 }
 

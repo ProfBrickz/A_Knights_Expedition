@@ -5,10 +5,8 @@ import edu.ycp.cs320.TBAG.persist.Database;
 import edu.ycp.cs320.TBAG.persist.DatabaseProvider;
 import edu.ycp.cs320.TBAG.persist.DerbyDatabase;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 
 /**
@@ -19,6 +17,7 @@ public class GameEngine {
 	private Player player;
 	private final InventoryController inventoryController = new InventoryController();
 	private final NPCController npcController = new NPCController(inventoryController);
+	private final RoomController roomController = new RoomController();
 
 	// Constructor
 	public GameEngine(Database database) {
@@ -114,54 +113,38 @@ public class GameEngine {
 	public String move(ArrayList<String> arguments) {
 		String direction = arguments.get(0).toLowerCase();
 
-		player.getRoom().setRoomConnections(database.getConnectionsForRoom(player.getRoom()));
-		RoomController roomController = new RoomController(new HashMap<>());
+		playerRoom.setRoomConnections(database.getConnectionsForRoom(playerRoom));
 		PlayerController playerController = new PlayerController(player, new BattleEntityController());
 
-		if (!roomController.isValidDirection(player.getRoom(), direction)) {
+		if (!roomController.isValidDirection(playerRoom, direction)) {
 			return "Invalid direction for this room";
 		}
-		//database.getEnemiesForRoom
 
 		Boolean successfulMove = playerController.move(direction);
 		if (!successfulMove) {
 			return "Move failed, either player, or the room does not exist";
 		}
+		playerRoom = player.getRoom();
 
-		HashMap<Integer, Enemy> enemies =
-			database.getEnemiesForRoom(player.getRoom());
-		System.out.println("Enemies found: " + enemies.size());
+		HashMap<Integer, Enemy> enemies = database.getEnemiesForRoom(playerRoom);
+		playerRoom.addEnemies(enemies);
 
-		player.getRoom().getEnemies().clear();
-		player.getRoom().addEnemies(new ArrayList<>(enemies.values()));
-		System.out.println("Enemies found: " + enemies.size());
+		database.setPlayerRoom(playerRoom.getId());
+
+		String output = playerRoom.getDescription();
 
 		//  ENTER BATTLE IF NEEDED
-		if (!player.getRoom().getEnemies().isEmpty()) {
-			Enemy enemy = player.getRoom().getEnemies().values().iterator().next();
+		if (roomController.hasAliveEnemies(playerRoom)) {
+			Enemy enemy = playerRoom.getEnemies().values().iterator().next();
 
 			player.setCurrentEnemy(enemy);   // required field
 			player.setState(PlayerState.BATTLE);
 			database.setPlayerState(PlayerState.BATTLE);
 
-			return "You encountered a " + enemy.getName() + "! Prepare for battle.\n";
-		}player.getRoom().getEnemies().clear();
-		player.getRoom().addEnemies(new ArrayList<>(enemies.values()));
-
-		//  ENTER BATTLE IF NEEDED
-		if (!player.getRoom().getEnemies().isEmpty()) {
-			Enemy enemy = player.getRoom().getEnemies().values().iterator().next();
-
-			player.setCurrentEnemy(enemy);   // required field
-			player.setState(PlayerState.BATTLE);
-			database.setPlayerState(PlayerState.BATTLE);
-
-			return "You encountered a " + enemy.getName() + "! Prepare for battle.\n";
+			output += "\nYou encountered a " + enemy.getName() + "! Prepare for battle.\n";
 		}
 
-		database.setPlayerRoom(player.getRoom().getId());
-
-		return player.getRoom().getDescription();
+		return output;
 	}
 
 	/**
@@ -186,7 +169,6 @@ public class GameEngine {
 
 		return output.toString();
 	}
-
 
 	/**
 	 * Handles the "inventory" command.
@@ -450,53 +432,43 @@ public class GameEngine {
 	}
 
 	public String attack(ArrayList<String> args) {
-		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
+		Room playerRoom = player.getRoom();
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(playerRoom).values()).get(0);
 		if (enemy == null) return "No enemy to attack.\n";
-
 
 		PlayerController pc = new PlayerController(player, new BattleEntityController());
 		EnemyController ec = new EnemyController(new BattleEntityController());
 
-
 		WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
 		pc.attack(enemy, attack);
 
-
-		if (enemy.getHealth() <= 0) {
+		if (!roomController.hasAliveEnemies(playerRoom)) {
 			endBattle(true);
 			return "You defeated the enemy!\n";
 		}
 
-
 		String enemyTurn = ec.takeTurn(enemy, player);
-
 
 		if (player.getHealth() <= 0) {
 			endBattle(false);
 			return "You were defeated!\n";
 		}
 
-
 		return "You attack the enemy!\n" + enemyTurn;
 	}
-
 
 	public String defend(ArrayList<String> args) {
 		PlayerController pc = new PlayerController(player, new BattleEntityController());
 		EnemyController ec = new EnemyController(new BattleEntityController());
 
-
 		Armor armor = new Armor(0, "Defense", "Temporary defense", 5, true, 0);
 		pc.defend(armor);
-
 
 		Enemy enemy = player.getCurrentEnemy();
 		String enemyTurn = ec.takeTurn(enemy, player);
 
-
 		return "You brace for impact!\n" + enemyTurn;
 	}
-
 
 	public String heal(ArrayList<String> args) {
 		String itemName = args.get(0);
@@ -527,21 +499,15 @@ public class GameEngine {
 		return "You healed yourself.\n" + enemyTurn;
 	}
 
-
 	private void endBattle(boolean playerWon) {
-		Enemy enemy = player.getCurrentEnemy();
+//		Enemy enemy = player.getCurrentEnemy();
+//
+//		if (playerWon) {
+//			player.getRoom().removeEnemy(enemy);
+//		}
 
-
-		if (playerWon) {
-			player.getRoom().removeEnemy(enemy);
-		}
-
-
-		player.setCurrentEnemy(null);
-		player.setState(PlayerState.EXPLORING);
 		database.setPlayerState(PlayerState.EXPLORING);
 	}
-
 
 	public String restart(ArrayList<String> arguments) {
 		if (!player.getConfirming()) {
