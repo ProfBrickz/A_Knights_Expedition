@@ -157,6 +157,10 @@ public class GameEngine {
 		playerRoom.addNPCs(database.getNPCsForRoom(playerRoom));
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
 
+		WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
+		System.out.println("other:" + attack);
+		System.out.println("Items:" + database.getAbilitiesForWeapon(inventoryController.getWeapons(player.getInventory()).get(3)).get(3));
+
 		if (!playerRoom.getNpcs().isEmpty()) {
 			if (!output.isEmpty()) output.append("\n");
 			output.append("You see:\n");
@@ -434,28 +438,60 @@ public class GameEngine {
 
 	public String attack(ArrayList<String> args) {
 		Room playerRoom = player.getRoom();
-		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(playerRoom).values()).get(0);
+		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
 		if (enemy == null) return "No enemy to attack.\n";
 
 		PlayerController pc = new PlayerController(player, new BattleEntityController());
 		EnemyController ec = new EnemyController(new BattleEntityController());
 
-		WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
+		//WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
+		int max = -1; // or 0 if you prefer
+
+		for (Integer itemId : inventoryController.getWeapons(player.getInventory()).keySet()) {
+			if (itemId >= 0 && itemId <= 4) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility attack = database.getAbilitiesForWeapon(inventoryController.getWeapons(player.getInventory()).get(max)).get(max);
+		System.out.println("Items:" + database.getAbilitiesForWeapon(inventoryController.getWeapons(player.getInventory()).get(max)));
+//		System.out.println("Items:" + max);
+		String desc = attack.getAttackDescription();
 		pc.attack(enemy, attack);
 
 		if (!roomController.hasAliveEnemies(playerRoom)) {
 			endBattle(true);
-			return "You defeated the enemy!\n";
+			return desc + "\nYou defeated the enemy!\n";
 		}
 
-		String enemyTurn = ec.takeTurn(enemy, player);
+		for (Integer itemId : inventoryController.getWeapons(enemy.getInventory()).keySet()) {
+			if (itemId >= 0 && itemId <= 40) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility enemyAttack = new WeaponAbility(9, 15, "wacks with his cool stick");
+		if (max == 30) {
+			enemyAttack.setDamage(5);
+			enemyAttack.setAttackDescription("pokes with their crude spear");
+		} else if (max == 31) {
+			enemyAttack.setDamage(7);
+			enemyAttack.setAttackDescription("slashes with their sharp claws");
+		} else {
+			enemyAttack.setDamage(15);
+			enemyAttack.setAttackDescription("wacks with his cool stick");
+		}
+		//WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
+		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
 
 		if (player.getHealth() <= 0) {
 			endBattle(false);
-			return "You were defeated!\n";
+			return desc + "\nYou were defeated!\n";
 		}
 
-		return "You attack the enemy!\n" + enemyTurn;
+		return "You " + desc + "\nAttack Success!\n" + enemyTurn;
 	}
 
 	public String defend(ArrayList<String> args) {
@@ -466,10 +502,34 @@ public class GameEngine {
 		pc.defend(armor);
 
 		//Enemy enemy = player.getCurrentEnemy();
-		Enemy enemy = player.getRoom().getEnemies().get(0);
-		String enemyTurn = ec.takeTurn(enemy, player);
-		System.out.println("Enemy:" + enemy);
-		System.out.println("Enemy taking turn:" + enemyTurn);
+
+		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		int max = -1;
+		for (Integer itemId : database.getItemsForEnemy(enemy).keySet()) {
+			if (itemId >= 0 && itemId <= 40) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility enemyAttack = new WeaponAbility(9, 15, "wacks with his cool stick");
+		if (max == 30) {
+			enemyAttack.setDamage(5);
+			enemyAttack.setAttackDescription("pokes with their crude spear");
+		} else if (max == 31) {
+			enemyAttack.setDamage(7);
+			enemyAttack.setAttackDescription("slashes with their sharp claws");
+		} else {
+			enemyAttack.setDamage(15);
+			enemyAttack.setAttackDescription("wacks with his cool stick");
+		}
+//		WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
+		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
+//		System.out.println("Enemy:" + enemy);
+//		System.out.println("Enemy max:" + max);
+//		System.out.println("Enemy:" + inventoryController.getWeapons(enemy.getInventory()));
+//		System.out.println("Enemy attack:" + database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max));
+//		System.out.println("Enemy taking turn:" + enemyTurn);
 
 		return "You brace for impact!\n" + enemyTurn;
 	}
@@ -490,13 +550,35 @@ public class GameEngine {
 
 
 		EnemyController ec = new EnemyController(new BattleEntityController());
-		Enemy enemy = player.getCurrentEnemy();
+		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		int max = -1;
+		for (Integer itemId : inventoryController.getWeapons(enemy.getInventory()).keySet()) {
+			if (itemId >= 0 && itemId <= 40) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility enemyAttack = new WeaponAbility(9, 15, "wacks with his cool stick");
+		if (max == 30) {
+			enemyAttack.setDamage(5);
+			enemyAttack.setAttackDescription("pokes with their crude spear");
+		} else if (max == 31) {
+			enemyAttack.setDamage(7);
+			enemyAttack.setAttackDescription("slashes with their sharp claws");
+		} else {
+			enemyAttack.setDamage(15);
+			enemyAttack.setAttackDescription("wacks with his cool stick");
+		}
+		//WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
+		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
 
 		if (enemy == null) {
 			return "No enemy is attacking you.\n";
 		}
 
-		String enemyTurn = ec.takeTurn(enemy, player);
+		database.removeItemFromPlayer(item);
+
 		System.out.println("Enemy taking turn...");
 
 

@@ -11,7 +11,7 @@ public class EnemyController {
 		this.battleEntityController = battleEntityController;
 	}
 
-	public String takeTurn(Enemy enemy, Player player) {
+	public String takeTurn(Enemy enemy, Player player, WeaponAbility ability) {
 		double roll = random.nextDouble();
 
 		if (enemy == null || player == null) {
@@ -40,13 +40,13 @@ public class EnemyController {
 		}
 
 		// NORMAL ATTACK
-		attack(enemy, player);
+		attack(enemy, player, ability);
 		System.out.println(enemy.getName() + " attacks!");
-		return enemy.getName() + " attacks!";
+		return enemy.getName() + " " + ability.getAttackDescription() +"!";
 	}
 
-	public void attack(Enemy enemy, Player player) {
-		WeaponAbility ability = new WeaponAbility(0, enemy.getAttackPower(), "Enemy attacks!");
+	public void attack(Enemy enemy, Player player, WeaponAbility ability) {
+		//WeaponAbility ability = new WeaponAbility(0, enemy.getAttackPower(), "Enemy attacks!");
 		battleEntityController.attack(enemy, player, ability);
 	}
 
