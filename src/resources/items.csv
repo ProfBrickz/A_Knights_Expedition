@@ -17,8 +17,8 @@ String,String,String,String,Integer,item or healing or weapon or armor,Integer,I
 15,Green Omelets,Made from a green egg. If only you had some ham.,Green_Omelette.png,100,Healing,40,0,FALSE
 16,Baked Truffle Pie,A modified truffle pie. It makes you feel fuzzy.,,420,Healing,100,0,FALSE
 17,Limon,A hybrid lemon and lime with a penchant for doing challenge runs.,Limon.png,15,Healing,10,0,FALSE
-18,Rick's Key,The key to the Great Canyon.,,0,Item,0,0,FALSE
-19,Convient Ladder,It's very convient.,,0,Item,0,0,FALSE
+18,Rick's Key,The key to the Great Canyon.,Canyon_Key,0,Item,0,0,FALSE
+19,Convient Ladder,It's very convient.,Ladder,0,Item,0,0,FALSE
 20,Headlamp,Good for all spelunkers and vloggers,Headlamp.png,0,Item,0,0,FALSE
 21,McGuffin Muffin,"The powers of god, in a healthy balanced breakfest.",,0,Item,0,0,FALSE
 22,Truffle,"Taller than a mushroom, shorter than a stoll.",Truffle.png,5,Healing,0,0,FALSE
@@ -30,4 +30,6 @@ String,String,String,String,Integer,item or healing or weapon or armor,Integer,I
 28,Game Cartridge,There�s a 2D Eastern Girl on the cover,,0,Item,0,0,FALSE
 29,Sewer Key,Key to the sewer,Sewer_Key.png,0,Item,0,0,FALSE
 30,Kitchen Key,Key to the Kitchen,Kitchen_Key.png,0,Item,0,0,FALSE
-31,enemy weapon,temp,temp,0,weapon,0,0,FALSE
+31,moblin weapon,temp,temp,0,weapon,0,0,FALSE
+32,wolote weapon,temp,temp,0,weapon,0,0,FALSE
+33,rick weapon,temp,temp,0,weapon,0,0,FALSE

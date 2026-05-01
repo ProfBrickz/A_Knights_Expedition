@@ -465,8 +465,11 @@ public class GameEngine {
 		Armor armor = new Armor(0, "Defense", "Temporary defense", 5, true, 0);
 		pc.defend(armor);
 
-		Enemy enemy = player.getCurrentEnemy();
+		//Enemy enemy = player.getCurrentEnemy();
+		Enemy enemy = player.getRoom().getEnemies().get(0);
 		String enemyTurn = ec.takeTurn(enemy, player);
+		System.out.println("Enemy:" + enemy);
+		System.out.println("Enemy taking turn:" + enemyTurn);
 
 		return "You brace for impact!\n" + enemyTurn;
 	}
