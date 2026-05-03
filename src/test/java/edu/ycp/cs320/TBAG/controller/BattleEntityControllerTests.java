@@ -47,6 +47,7 @@ public class BattleEntityControllerTests {
 		enemy.setHealth(20);
 
 		HealingItem potion = new HealingItem(0, "Potion", "Heal", 15, 0);
+		enemy.getInventory().addItem(potion);
 
 		controller.heal(enemy, potion);
 
@@ -56,6 +57,7 @@ public class BattleEntityControllerTests {
 	@Test
 	public void testHealDoesNotExceedMax() {
 		HealingItem potion = new HealingItem(0, "Potion", "Heal", 50, 0);
+		player.getInventory().addItem(potion);
 
 		controller.heal(player, potion);
 
