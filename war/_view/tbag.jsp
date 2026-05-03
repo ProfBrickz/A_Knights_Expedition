@@ -207,6 +207,7 @@
 	</div>
 
     <div class="inventory">
+    	<p>Coins: ${player.coins}</p>
     	<ul>
     		<c:forEach var="item" items="${player.inventory.items.values()}">
         		<li class="inventory-item">
