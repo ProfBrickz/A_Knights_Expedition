@@ -15,8 +15,7 @@ public class TBAGServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-		throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		System.out.println("TBAG Servlet: doGet");
 
@@ -31,14 +30,14 @@ public class TBAGServlet extends HttpServlet {
 		req.setAttribute("dialog", gameEngine.getDialog());
 		req.setAttribute("player", gameEngine.getPlayer());
 		req.setAttribute("commandHistory", gameEngine.getCommandHistory());
+		req.setAttribute("enemies", gameEngine.getEnemies());
 
 		// call JSP to generate empty form
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-		throws ServletException, IOException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		System.out.println("TBAG Servlet: doPost");
 
@@ -96,6 +95,7 @@ public class TBAGServlet extends HttpServlet {
 		req.setAttribute("dialog", gameEngine.getDialog());
 		req.setAttribute("player", gameEngine.getPlayer());
 		req.setAttribute("commandHistory", gameEngine.getCommandHistory());
+		req.setAttribute("enemies", gameEngine.getEnemies());
 
 		// now call the JSP to render the new page
 		req.getRequestDispatcher("/_view/tbag.jsp").forward(req, resp);

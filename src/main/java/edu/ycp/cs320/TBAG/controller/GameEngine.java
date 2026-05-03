@@ -64,6 +64,10 @@ public class GameEngine {
 		return player;
 	}
 
+	public HashMap<Integer, Enemy> getEnemies() {
+		return database.getEnemiesForRoom(player.getRoom());
+	}
+
 	public ArrayList<String> getCommandHistory() {
 		return database.getCommandHistory();
 	}
@@ -198,6 +202,10 @@ public class GameEngine {
 		String itemName = arguments.get(0);
 		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
 		if (item == null) return "You do not have a " + itemName + " in your inventory.";
+
+		if (item instanceof Weapon weapon) {
+			weapon.getAbilities().putAll(database.getAbilitiesForWeapon(weapon));
+		}
 
 		return playerController.inspectItem(item);
 	}
@@ -373,30 +381,27 @@ public class GameEngine {
 		if (npc == null) return "You are not currently talking to an NPC.";
 
 		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
-		if (npcItems == null) return "I am not selling anything.";
 		npc.getInventory().addItems(npcItems);
 
 		String itemName = arguments.get(1).toLowerCase();
-		for (Item item : npcItems.values()) {
-			if (!item.getName().equals(itemName)) continue;
+		Item item = inventoryController.getItemByNameCaseInsensitive(npc.getInventory(), itemName);
+		if (item == null) return "I am not selling any " + itemName + ".";
 
-			Integer amount = null;
-			try {
-				amount = Integer.parseInt(arguments.get(0));
-			} catch (NumberFormatException ignored) {
-			}
-
-			if (amount == null) return arguments.get(0) + " is not a valid amount.";
-			if (player.getCoins() < item.getPrice() * amount) {
-				return "You are too poor to buy " + amount + " x " + item.getName() + ".";
-			}
-			npcController.buy(npc, player, item, amount);
-			database.setPlayerCoins(player.getCoins());
-			database.addItemToPlayer(item);
-			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
+		Integer amount = null;
+		try {
+			amount = Integer.parseInt(arguments.get(0));
+		} catch (NumberFormatException ignored) {
+		}
+		if (amount == null) return arguments.get(0) + " is not a valid amount.";
+		if (player.getCoins() < item.getPrice() * amount) {
+			return "You are too poor to buy " + amount + " x " + item.getName() + ".";
 		}
 
-		return "I am not selling any " + itemName + "s.";
+		npcController.buy(npc, player, item, amount);
+		database.setPlayerCoins(player.getCoins());
+		database.addItemToPlayer(item);
+
+		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
 	}
 
 	public String sellItem(ArrayList<String> arguments) {
@@ -425,7 +430,7 @@ public class GameEngine {
 	}
 
 	public String sellAllItem(ArrayList<String> arguments) {
-		NPC npc = player.getCurrentNPC();
+		NPC npc = database.getNpcForPlayer();
 		if (npc == null) return "You are not currently talking to anyone.\n";
 
 		String itemName = arguments.get(0).toLowerCase();
@@ -443,7 +448,7 @@ public class GameEngine {
 
 	public String attack(ArrayList<String> args) {
 		Room playerRoom = player.getRoom();
-		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
 		if (enemy == null) return "No enemy to attack.\n";
 
 		PlayerController pc = new PlayerController(player, new BattleEntityController());
@@ -464,6 +469,8 @@ public class GameEngine {
 //		System.out.println("Items:" + max);
 		String desc = attack.getAttackDescription();
 		pc.attack(enemy, attack);
+		database.setEnemyHealth(playerRoom, enemy, enemy.getHealth());
+
 
 		if (!roomController.hasAliveEnemies(playerRoom)) {
 			endBattle(true);
@@ -490,6 +497,7 @@ public class GameEngine {
 		}
 		//WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
 		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
+		database.setPlayerHealth(player.getHealth());
 
 		if (player.getHealth() <= 0) {
 			endBattle(false);
@@ -508,7 +516,7 @@ public class GameEngine {
 
 		//Enemy enemy = player.getCurrentEnemy();
 
-		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
 		int max = -1;
 		for (Integer itemId : database.getItemsForEnemy(enemy).keySet()) {
 			if (itemId >= 0 && itemId <= 40) {
@@ -555,7 +563,7 @@ public class GameEngine {
 
 
 		EnemyController ec = new EnemyController(new BattleEntityController());
-		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
 		int max = -1;
 		for (Integer itemId : inventoryController.getWeapons(enemy.getInventory()).keySet()) {
 			if (itemId >= 0 && itemId <= 40) {
@@ -654,10 +662,8 @@ public class GameEngine {
 		String output = "";
 
 		output += item.getAmount()
-			+ " "
+			+ " x "
 			+ item.getName();
-
-		if (item.getAmount() > 1) output += "s";
 
 		return output;
 	}
@@ -681,8 +687,6 @@ public class GameEngine {
 				.append(item.getAmount())
 				.append(" x ")
 				.append(item.getName());
-
-			if (item.getAmount() > 1) itemList.append("s");
 
 			itemList.append("\n");
 		}

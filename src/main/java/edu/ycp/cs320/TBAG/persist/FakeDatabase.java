@@ -315,6 +315,19 @@ public class FakeDatabase implements Database {
 		}
 	}
 
+	@Override
+	public void setEnemyHealth(Room room, Enemy enemy, Integer health) {
+		Room databaseRoom = rooms.get(room.getId());
+		if (databaseRoom == null) {
+			throw new IllegalArgumentException("There is no room with the id: " + room.getId());
+		}
+		Enemy databaseEnemy = databaseRoom.getEnemies().get(enemy.getId());
+		if (databaseEnemy == null) {
+			throw new IllegalArgumentException("There is no enemy with the id: " + enemy.getId());
+		}
+
+		databaseEnemy.setHealth(health);
+	}
 
 	// Room
 	@Override
@@ -532,6 +545,14 @@ public class FakeDatabase implements Database {
 			throw new IllegalStateException("No player exists");
 		}
 		player.setCoins(coins);
+	}
+
+	@Override
+	public void setPlayerHealth(Integer health) {
+		if (player == null) {
+			throw new IllegalStateException("No player exists");
+		}
+		player.setHealth(health);
 	}
 
 	@Override

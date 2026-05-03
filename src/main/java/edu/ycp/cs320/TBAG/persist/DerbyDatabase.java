@@ -1049,14 +1049,9 @@ public class DerbyDatabase implements Database {
 					selectStatement.setInt(2, item.getId());
 					resultSet = selectStatement.executeQuery();
 
-					int delta = item.getAmount() == null ? 1 : item.getAmount();
-					if (delta <= 0) {
-						return true;
-					}
-
 					if (resultSet.next()) {
 						int currentAmount = resultSet.getInt(1);
-						int newAmount = currentAmount + delta;
+						int newAmount = item.getAmount();
 
 						updateStatement = connection.prepareStatement("""
 								UPDATE enemy_items
@@ -1074,7 +1069,7 @@ public class DerbyDatabase implements Database {
 							""");
 						insertStatement.setInt(1, enemy.getId());
 						insertStatement.setInt(2, item.getId());
-						insertStatement.setInt(3, delta);
+						insertStatement.setInt(3, item.getAmount());
 						insertStatement.executeUpdate();
 					}
 
@@ -1117,13 +1112,7 @@ public class DerbyDatabase implements Database {
 						return true;
 					}
 
-					int delta = item.getAmount() == null ? 1 : item.getAmount();
-					if (delta <= 0) {
-						return true;
-					}
-
-					int currentAmount = resultSet.getInt(1);
-					int newAmount = currentAmount - delta;
+					int newAmount = item.getAmount();
 
 					if (newAmount > 0) {
 						updateStatement = connection.prepareStatement("""
@@ -1156,6 +1145,34 @@ public class DerbyDatabase implements Database {
 		});
 	}
 
+	@Override
+	public void setEnemyHealth(Room room, Enemy enemy, Integer health) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE room_enemies SET health = ? WHERE room_id = ? AND enemy_id = ?"
+					);
+					statement.setInt(1, health);
+					statement.setInt(2, room.getId());
+					statement.setInt(3, enemy.getId());
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
 
 	// Rooms
 	@Override
@@ -1393,14 +1410,8 @@ public class DerbyDatabase implements Database {
 					selectStatement.setInt(2, item.getId());
 					resultSet = selectStatement.executeQuery();
 
-					int delta = item.getAmount() == null ? 1 : item.getAmount();
-					if (delta <= 0) {
-						return true;
-					}
-
 					if (resultSet.next()) {
-						int currentAmount = resultSet.getInt(1);
-						int newAmount = currentAmount + delta;
+						int newAmount = item.getAmount();
 
 						updateStatement = connection.prepareStatement("""
 								UPDATE room_items
@@ -1418,7 +1429,7 @@ public class DerbyDatabase implements Database {
 							""");
 						insertStatement.setInt(1, room.getId());
 						insertStatement.setInt(2, item.getId());
-						insertStatement.setInt(3, delta);
+						insertStatement.setInt(3, item.getAmount());
 						insertStatement.executeUpdate();
 					}
 
@@ -1460,14 +1471,8 @@ public class DerbyDatabase implements Database {
 					if (!resultSet.next()) {
 						return true;
 					}
-
-					int delta = item.getAmount() == null ? 1 : item.getAmount();
-					if (delta <= 0) {
-						return true;
-					}
-
-					int currentAmount = resultSet.getInt(1);
-					int newAmount = currentAmount - delta;
+					
+					int newAmount = item.getAmount();
 
 					if (newAmount > 0) {
 						updateStatement = connection.prepareStatement("""
@@ -1644,14 +1649,8 @@ public class DerbyDatabase implements Database {
 					selectStatement.setInt(1, item.getId());
 					resultSet = selectStatement.executeQuery();
 
-					int delta = item.getAmount() == null ? 1 : item.getAmount();
-					if (delta <= 0) {
-						return true;
-					}
-
 					if (resultSet.next()) {
-						int currentAmount = resultSet.getInt(1);
-						int newAmount = currentAmount + delta;
+						int newAmount = item.getAmount();
 
 						updateStatement = connection.prepareStatement("""
 								UPDATE player_items
@@ -1667,7 +1666,7 @@ public class DerbyDatabase implements Database {
 								VALUES (?, ?)
 							""");
 						insertStatement.setInt(1, item.getId());
-						insertStatement.setInt(2, delta);
+						insertStatement.setInt(2, item.getAmount());
 						insertStatement.executeUpdate();
 					}
 
@@ -1709,13 +1708,7 @@ public class DerbyDatabase implements Database {
 						return true;
 					}
 
-					int delta = item.getAmount() == null ? 1 : item.getAmount();
-					if (delta <= 0) {
-						return true;
-					}
-
-					int currentAmount = resultSet.getInt(1);
-					int newAmount = currentAmount - delta;
+					int newAmount = item.getAmount();
 
 					if (newAmount > 0) {
 						updateStatement = connection.prepareStatement("""
@@ -1803,6 +1796,34 @@ public class DerbyDatabase implements Database {
 	}
 
 	@Override
+	public void setPlayerHealth(Integer health) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET health = ?"
+					);
+
+					statement.setInt(1, health);
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
+	@Override
 	public void setPlayerState(PlayerState playerState) {
 		executeTransaction(new Transaction<Void>() {
 			@Override
@@ -1813,7 +1834,6 @@ public class DerbyDatabase implements Database {
 					statement = connection.prepareStatement(
 						"UPDATE player SET state = ?"
 					);
-
 					statement.setInt(1, playerState.ordinal());
 
 					int rowsUpdated = statement.executeUpdate();
