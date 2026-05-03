@@ -385,7 +385,7 @@ public class GameEngine {
 
 		String itemName = arguments.get(1).toLowerCase();
 		Item item = inventoryController.getItemByNameCaseInsensitive(npc.getInventory(), itemName);
-		if (item == null) return "I am not selling any " + itemName + "s.";
+		if (item == null) return "I am not selling any " + itemName + ".";
 
 		Integer amount = null;
 		try {
@@ -662,10 +662,8 @@ public class GameEngine {
 		String output = "";
 
 		output += item.getAmount()
-			+ " "
+			+ " x "
 			+ item.getName();
-
-		if (item.getAmount() > 1) output += "s";
 
 		return output;
 	}
@@ -689,8 +687,6 @@ public class GameEngine {
 				.append(item.getAmount())
 				.append(" x ")
 				.append(item.getName());
-
-			if (item.getAmount() > 1) itemList.append("s");
 
 			itemList.append("\n");
 		}
