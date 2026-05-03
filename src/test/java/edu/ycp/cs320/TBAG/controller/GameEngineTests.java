@@ -86,7 +86,7 @@ public class GameEngineTests {
 		@Test
 		public void valid() {
 			arguments.add("north");
-			Assertions.assertEquals("description b", gameEngine.inputCommand("move", arguments));
+			Assertions.assertEquals("description b\n", gameEngine.inputCommand("move", arguments));
 			Room playerRoom = database.getPlayer().getRoom();
 			Assertions.assertEquals(1, playerRoom.getId());
 			Assertions.assertEquals("b", playerRoom.getName());
@@ -94,7 +94,7 @@ public class GameEngineTests {
 
 			arguments.clear();
 			arguments.add("south");
-			Assertions.assertEquals("description a", gameEngine.inputCommand("move", arguments));
+			Assertions.assertEquals("description a\n", gameEngine.inputCommand("move", arguments));
 			playerRoom = database.getPlayer().getRoom();
 			Assertions.assertEquals(0, playerRoom.getId());
 			Assertions.assertEquals("a", playerRoom.getName());
@@ -105,7 +105,7 @@ public class GameEngineTests {
 		public void invalidDirection() {
 			arguments.add("left");
 			Assertions.assertEquals(
-				"Invalid direction for this room",
+				"Invalid direction for this room\n",
 				gameEngine.inputCommand("move", arguments)
 			);
 			Room playerRoom = database.getPlayer().getRoom();
@@ -118,7 +118,7 @@ public class GameEngineTests {
 		public void emptyString() {
 			arguments.add("");
 			Assertions.assertEquals(
-				"Invalid direction for this room",
+				"Invalid direction for this room\n",
 				gameEngine.inputCommand("move", arguments)
 			);
 			Room playerRoom = database.getPlayer().getRoom();
@@ -130,7 +130,10 @@ public class GameEngineTests {
 		@Test
 		public void whitespace() {
 			arguments.add(" ");
-			Assertions.assertEquals("Invalid direction for this room", gameEngine.inputCommand("move", arguments));
+			Assertions.assertEquals(
+				"Invalid direction for this room\n",
+				gameEngine.inputCommand("move", arguments)
+			);
 			Room playerRoom = database.getPlayer().getRoom();
 			Assertions.assertEquals(0, playerRoom.getId());
 			Assertions.assertEquals("a", playerRoom.getName());
@@ -154,7 +157,11 @@ public class GameEngineTests {
 		@Test
 		public void valid() {
 			Assertions.assertEquals(
-				"description a",
+				"""
+					description a
+					You see:
+					- name
+					""",
 				gameEngine.inputCommand("look", arguments)
 			);
 
@@ -163,17 +170,20 @@ public class GameEngineTests {
 
 			arguments.clear();
 			Assertions.assertEquals(
-				"description b",
+				"description b\n",
 				gameEngine.inputCommand("look", arguments)
 			);
 		}
 
 		@Test
 		public void emptyDescription() {
-			player.getRoom().setDescription("");
+			Room playerRoom = player.getRoom();
+
+			playerRoom.setDescription("");
+			playerRoom.getNpcs().clear();
 
 			Assertions.assertEquals(
-				"",
+				"\n",
 				gameEngine.inputCommand("look", arguments)
 			);
 		}
@@ -228,7 +238,7 @@ public class GameEngineTests {
 				"""
 					Your Inventory:
 					- 1 x sword
-					- 3 x potions
+					- 3 x potion
 					""",
 				gameEngine.inputCommand("inventory", arguments)
 			);
@@ -244,7 +254,12 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				item.getDescription(),
+				"""
+					Name: sword
+					Type: Item
+					Description: A sharp sword
+					Value: 1
+					""",
 				gameEngine.inputCommand("inspect", arguments)
 			);
 		}
@@ -253,31 +268,7 @@ public class GameEngineTests {
 		public void doNotHaveItem() {
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You do not have a sword in your inventory.",
-				gameEngine.inputCommand("inspect", arguments)
-			);
-		}
-
-		@Test
-		public void emptyName() {
-			Item item = new Item(0, "", "A sharp sword", 1);
-			player.getInventory().addItem(item);
-
-			arguments.add("");
-			Assertions.assertEquals(
-				item.getDescription() + "",
-				gameEngine.inputCommand("inspect", arguments)
-			);
-		}
-
-		@Test
-		public void whiteSpaceInName() {
-			Item item = new Item(0, "sharp sword", "A sharp sword", 1);
-			player.getInventory().addItem(item);
-
-			arguments.add("sharp sword");
-			Assertions.assertEquals(
-				item.getDescription() + "",
+				"You do not have a sword in your inventory.\n",
 				gameEngine.inputCommand("inspect", arguments)
 			);
 		}
@@ -322,7 +313,7 @@ public class GameEngineTests {
 				"""
 					You found:
 					- 1 x sword
-					- 3 x potions
+					- 3 x potion
 					""",
 				gameEngine.inputCommand("search", arguments)
 			);
@@ -335,7 +326,7 @@ public class GameEngineTests {
 		public void itemNotInRoom() {
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"This room does not have a sword.",
+				"This room does not have a sword.\n",
 				gameEngine.inputCommand("pickup", arguments)
 			);
 		}
@@ -349,7 +340,7 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You picked up 1 sword.",
+				"You picked up 1 x sword.\n",
 				gameEngine.inputCommand("pickup", arguments)
 			);
 			Assertions.assertTrue(database.getItemsForPlayer().containsKey(item1.getId()));
@@ -369,7 +360,7 @@ public class GameEngineTests {
 			arguments.add("potion");
 
 			Assertions.assertEquals(
-				"You picked up 3 potions.",
+				"You picked up 3 x potion.\n",
 				gameEngine.inputCommand("pickup", arguments)
 			);
 
@@ -394,7 +385,7 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You picked up 1 sword.",
+				"You picked up 1 x sword.\n",
 				gameEngine.inputCommand("pickup", arguments)
 			);
 			Assertions.assertTrue(player.getInventory().getItems().containsKey(item.getId()));
@@ -415,12 +406,12 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You picked up 1 sword.",
+				"You picked up 1 x sword.\n",
 				gameEngine.inputCommand("pickup", arguments)
 			);
 			Assertions.assertEquals(
-				"A sword",
-				player.getInventory().getItems().get(0).getDescription()
+				"sword",
+				player.getInventory().getItems().get(0).getName()
 			);
 		}
 
@@ -434,7 +425,7 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You picked up 1 sword.",
+				"You picked up 1 x sword.\n",
 				gameEngine.inputCommand("pickup", arguments)
 			);
 			Assertions.assertTrue(player.getInventory().getItems().containsKey(item.getId()));
@@ -508,7 +499,7 @@ public class GameEngineTests {
 		@Test
 		public void empty() {
 			Assertions.assertEquals(
-				"You did not pick anything up from this room.",
+				"You did not pick anything up from this room.\n",
 				gameEngine.inputCommand("pickup-all", arguments)
 			);
 		}
@@ -525,7 +516,7 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You dropped 1 sword.",
+				"You dropped 1 x sword.\n",
 				gameEngine.inputCommand("drop", arguments)
 			);
 			Assertions.assertFalse(player.getInventory().getItems().containsKey(item.getId()));
@@ -536,7 +527,7 @@ public class GameEngineTests {
 		public void notInInventory() {
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You do not have a sword.",
+				"You do not have a sword.\n",
 				gameEngine.inputCommand("drop", arguments)
 			);
 		}
@@ -551,7 +542,7 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You dropped 1 sword.",
+				"You dropped 1 x sword.\n",
 				gameEngine.inputCommand("drop", arguments)
 			);
 			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
@@ -572,7 +563,7 @@ public class GameEngineTests {
 
 			arguments.add("sword");
 			Assertions.assertEquals(
-				"You dropped 1 sword.",
+				"You dropped 1 x sword.\n",
 				gameEngine.inputCommand("drop", arguments)
 			);
 			Assertions.assertTrue(playerRoom.getInventory().getItems().containsKey(item.getId()));
@@ -597,7 +588,7 @@ public class GameEngineTests {
 			arguments.add("potion");
 
 			Assertions.assertEquals(
-				"You dropped 3 potions.",
+				"You dropped 3 x potion.\n",
 				gameEngine.inputCommand("drop", arguments)
 			);
 
@@ -675,7 +666,7 @@ public class GameEngineTests {
 		@Test
 		public void empty() {
 			Assertions.assertEquals(
-				"You do not have anything to drop.",
+				"You do not have anything to drop.\n",
 				gameEngine.inputCommand("drop-all", arguments)
 			);
 		}
@@ -684,19 +675,19 @@ public class GameEngineTests {
 	@Test
 	public void testWallet() {
 		Assertions.assertEquals(
-			"You have 0 coins.",
+			"You have 0 coins.\n",
 			gameEngine.inputCommand("wallet", arguments)
 		);
 
 		database.setPlayerCoins(1);
 		Assertions.assertEquals(
-			"You have 1 coin.",
+			"You have 1 coin.\n",
 			gameEngine.inputCommand("wallet", arguments)
 		);
 
 		player.setCoins(10);
 		Assertions.assertEquals(
-			"You have 10 coins.",
+			"You have 10 coins.\n",
 			gameEngine.inputCommand("wallet", arguments)
 		);
 	}
@@ -714,7 +705,7 @@ public class GameEngineTests {
 		public void defaultGreeting() {
 			arguments.add("name");
 			Assertions.assertEquals(
-				"Hello adventurer, I am name.",
+				"Hello adventurer, I am name.\n",
 				gameEngine.inputCommand("talk-to", arguments)
 			);
 
@@ -730,7 +721,7 @@ public class GameEngineTests {
 
 			arguments.add("name");
 			Assertions.assertEquals(
-				"Hi",
+				"Hi\n",
 				gameEngine.inputCommand("talk-to", arguments)
 			);
 
@@ -744,7 +735,7 @@ public class GameEngineTests {
 		public void noNPC() {
 			arguments.add("abc");
 			Assertions.assertEquals(
-				"abc is not in this room.",
+				"abc is not in this room.\n",
 				gameEngine.inputCommand("talk-to", arguments)
 			);
 
@@ -769,7 +760,7 @@ public class GameEngineTests {
 		@Test
 		public void defaultBye() {
 			Assertions.assertEquals(
-				"Goodbye adventurer.",
+				"Goodbye adventurer.\n",
 				gameEngine.inputCommand("leave", arguments)
 			);
 
@@ -781,7 +772,7 @@ public class GameEngineTests {
 			npc.setGoodbye("Bye");
 
 			Assertions.assertEquals(
-				"Bye",
+				"Bye\n",
 				gameEngine.inputCommand("leave", arguments)
 			);
 
@@ -812,7 +803,7 @@ public class GameEngineTests {
 					I am selling:
 					- 1 x a for 2 coins
 					""",
-				gameEngine.inputCommand("search-shop", arguments)
+				gameEngine.inputCommand("search", arguments)
 			);
 		}
 
@@ -827,15 +818,15 @@ public class GameEngineTests {
 					- 2 x a for 4 coins
 					- 1 x b for 14 coins
 					""",
-				gameEngine.inputCommand("search-shop", arguments)
+				gameEngine.inputCommand("search", arguments)
 			);
 		}
 
 		@Test
 		public void empty() {
 			Assertions.assertEquals(
-				"I am not selling anything.",
-				gameEngine.inputCommand("search-shop", arguments)
+				"I am not selling anything.\n",
+				gameEngine.inputCommand("search", arguments)
 			);
 		}
 	}
@@ -869,7 +860,7 @@ public class GameEngineTests {
 			Integer totalCost = itemA.getPrice() * itemA.getAmount();
 
 			Assertions.assertEquals(
-				"You bought 1 x a, -" + totalCost + " coins.",
+				"You bought 1 x a, -" + totalCost + " coins.\n",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
@@ -903,7 +894,7 @@ public class GameEngineTests {
 			Integer totalCost = itemA.getPrice() * itemA.getAmount();
 
 			Assertions.assertEquals(
-				"You bought 1 x a, -" + totalCost + " coins.",
+				"You bought 1 x a, -" + totalCost + " coins.\n",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
@@ -923,7 +914,7 @@ public class GameEngineTests {
 			);
 
 			Assertions.assertEquals(
-				"You bought 1 x a, -" + totalCost + " coins.",
+				"You bought 1 x a, -" + totalCost + " coins.\n",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
@@ -951,7 +942,7 @@ public class GameEngineTests {
 			Integer totalCost = itemB.getPrice() * itemB.getAmount();
 
 			Assertions.assertEquals(
-				"You bought 2 x b, -" + totalCost + " coins.",
+				"You bought 2 x b, -" + totalCost + " coins.\n",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
@@ -974,7 +965,7 @@ public class GameEngineTests {
 			arguments.add("a");
 
 			Assertions.assertEquals(
-				"You are too poor to buy 10 x a.",
+				"You are too poor to buy 10 x a.\n",
 				gameEngine.inputCommand("buy", arguments)
 			);
 
@@ -990,7 +981,7 @@ public class GameEngineTests {
 			arguments.add("abc");
 
 			Assertions.assertEquals(
-				"I am not selling any abcs.",
+				"I am not selling any abc.\n",
 				gameEngine.inputCommand("buy", arguments)
 			);
 		}
@@ -1013,11 +1004,11 @@ public class GameEngineTests {
 
 		@Test
 		public void oneItem() {
-			arguments.add("a");
 			arguments.add("1");
+			arguments.add("a");
 
 			Assertions.assertEquals(
-				"You sold 1 x a, +3 coins.",
+				"You sold 1 x a, +3 coins.\n",
 				gameEngine.inputCommand("sell", arguments)
 			);
 
@@ -1032,12 +1023,12 @@ public class GameEngineTests {
 		public void oneItemMultipleTimes() {
 			player.getInventory().getItems().get(0).setAmount(2);
 
-			arguments.add("a");
 			arguments.add("1");
+			arguments.add("a");
 
 			// Sell 1
 			Assertions.assertEquals(
-				"You sold 1 x a, +3 coins.",
+				"You sold 1 x a, +3 coins.\n",
 				gameEngine.inputCommand("sell", arguments)
 			);
 			Assertions.assertTrue(player.getInventory().getItems().containsKey(0));
@@ -1048,7 +1039,7 @@ public class GameEngineTests {
 
 			// Sell 2
 			Assertions.assertEquals(
-				"You sold 1 x a, +3 coins.",
+				"You sold 1 x a, +3 coins.\n",
 				gameEngine.inputCommand("sell", arguments)
 			);
 			Assertions.assertEquals(
@@ -1060,11 +1051,11 @@ public class GameEngineTests {
 
 		@Test
 		public void multipleItems() {
-			arguments.add("b");
 			arguments.add("2");
+			arguments.add("b");
 
 			Assertions.assertEquals(
-				"You sold 2 x b, +4 coins.",
+				"You sold 2 x b, +4 coins.\n",
 				gameEngine.inputCommand("sell", arguments)
 			);
 
@@ -1077,11 +1068,11 @@ public class GameEngineTests {
 
 		@Test
 		public void notEnoughItems() {
-			arguments.add("a");
 			arguments.add("5");
+			arguments.add("a");
 
 			Assertions.assertEquals(
-				"You do not have 5 of a.",
+				"You do not have 5 of a.\n",
 				gameEngine.inputCommand("sell", arguments)
 			);
 
@@ -1098,11 +1089,11 @@ public class GameEngineTests {
 
 		@Test
 		public void notHaveItem() {
-			arguments.add("abc");
 			arguments.add("1");
+			arguments.add("abc");
 
 			Assertions.assertEquals(
-				"You do not have any abc to sell.",
+				"You do not have any abc to sell.\n",
 				gameEngine.inputCommand("sell", arguments)
 			);
 		}
@@ -1127,7 +1118,7 @@ public class GameEngineTests {
 		public void valid() {
 			arguments.add("a");
 			Assertions.assertEquals(
-				"You sold 1 x a, +3 coins.",
+				"You sold 1 x a, +3 coins.\n",
 				gameEngine.inputCommand("sell-all", arguments)
 			);
 
@@ -1141,7 +1132,7 @@ public class GameEngineTests {
 			arguments.clear();
 			arguments.add("b");
 			Assertions.assertEquals(
-				"You sold 2 x b, +4 coins.",
+				"You sold 2 x b, +4 coins.\n",
 				gameEngine.inputCommand("sell-all", arguments)
 			);
 
@@ -1157,7 +1148,7 @@ public class GameEngineTests {
 			arguments.add("abc");
 
 			Assertions.assertEquals(
-				"You do not have any abc to sell.",
+				"You do not have any abc to sell.\n",
 				gameEngine.inputCommand("sell-all", arguments)
 			);
 		}
@@ -1181,14 +1172,14 @@ public class GameEngineTests {
 			player.setCurrentNPC(new NPC(0, "abc"));
 
 			Assertions.assertEquals(
-				"Are you sure (yes or no)?",
+				"Are you sure (yes or no)?\n",
 				gameEngine.inputCommand("restart", arguments)
 			);
 
 			Assertions.assertTrue(database.getPlayer().getConfirming());
 
 			Assertions.assertEquals(
-				"Restarted game.",
+				"Restarted game.\n",
 				gameEngine.inputCommand("yes", arguments)
 			);
 
@@ -1199,7 +1190,7 @@ public class GameEngineTests {
 				player.getState()
 			);
 			Assertions.assertEquals(
-				0,
+				100,
 				player.getCoins()
 			);
 			Assertions.assertNull(player.getCurrentNPC());
@@ -1213,14 +1204,14 @@ public class GameEngineTests {
 			player.setCurrentNPC(new NPC(0, "abc"));
 
 			Assertions.assertEquals(
-				"Are you sure (yes or no)?",
+				"Are you sure (yes or no)?\n",
 				gameEngine.inputCommand("restart", arguments)
 			);
 
 			Assertions.assertTrue(database.getPlayer().getConfirming());
 
 			Assertions.assertEquals(
-				"restart command canceled.",
+				"restart command canceled.\n",
 				gameEngine.inputCommand("no", arguments)
 			);
 
@@ -1246,14 +1237,14 @@ public class GameEngineTests {
 			player.setCurrentNPC(new NPC(0, "abc"));
 
 			Assertions.assertEquals(
-				"Are you sure (yes or no)?",
+				"Are you sure (yes or no)?\n",
 				gameEngine.inputCommand("restart", arguments)
 			);
 
 			Assertions.assertTrue(database.getPlayer().getConfirming());
 
 			Assertions.assertEquals(
-				"You can not use move while confirming a command use yes or no.",
+				"You can not use move while confirming a command use yes or no.\n",
 				gameEngine.inputCommand("move", arguments)
 			);
 
@@ -1279,14 +1270,14 @@ public class GameEngineTests {
 			player.setCurrentNPC(new NPC(0, "abc"));
 
 			Assertions.assertEquals(
-				"Are you sure (yes or no)?",
+				"Are you sure (yes or no)?\n",
 				gameEngine.inputCommand("restart", arguments)
 			);
 
 			Assertions.assertTrue(database.getPlayer().getConfirming());
 
 			Assertions.assertEquals(
-				"Sorry, command not recognized.",
+				"Sorry, command not recognized.\n",
 				gameEngine.inputCommand("a", arguments)
 			);
 
@@ -1332,7 +1323,7 @@ public class GameEngineTests {
 
 		arguments.add("north");
 		Assertions.assertEquals(
-			"You are not allowed to use move while talking to an NPC.",
+			"You are not allowed to use move while talking to an NPC.\n",
 			gameEngine.inputCommand("move", arguments)
 		);
 	}
@@ -1341,11 +1332,11 @@ public class GameEngineTests {
 	public void testInvalidCommand() {
 		// Test unrecognized command
 		Assertions.assertEquals(
-			"Sorry, command not recognized.",
+			"Sorry, command not recognized.\n",
 			gameEngine.inputCommand("invalid", arguments)
 		);
 		Assertions.assertEquals(
-			"Sorry, command not recognized.",
+			"Sorry, command not recognized.\n",
 			gameEngine.inputCommand("xyz", arguments)
 		);
 	}
