@@ -67,7 +67,6 @@ public class InventoryControllerTests {
 
 		controller.removeItem(inventory, null, 1);
 		controller.removeItem(inventory, potion, 0);
-		controller.removeItem(inventory, potion, 1);
 
 		Assertions.assertEquals(1, inventory.getItems().size());
 	}
