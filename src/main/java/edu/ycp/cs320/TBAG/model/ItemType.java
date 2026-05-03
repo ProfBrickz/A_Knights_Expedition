@@ -1,17 +1,12 @@
-package edu.ycp.cs320.TBAG.persist;
-
-import edu.ycp.cs320.TBAG.model.Armor;
-import edu.ycp.cs320.TBAG.model.HealingItem;
-import edu.ycp.cs320.TBAG.model.Item;
-import edu.ycp.cs320.TBAG.model.Weapon;
+package edu.ycp.cs320.TBAG.model;
 
 public enum ItemType {
 	//	item or healing or weapon or armor or unlock
-	ITEM("item"),
-	HEALING("healing"),
-	WEAPON("weapon"),
-	ARMOR("armor"),
-	UNLOCK("unlock");
+	ITEM("Item"),
+	HEALING("Healing"),
+	WEAPON("Weapon"),
+	ARMOR("Armor"),
+	UNLOCK("Unlock");
 
 	private final String name;
 
@@ -23,15 +18,17 @@ public enum ItemType {
 		return name;
 	}
 
-	static ItemType getByName(String name) {
+	public static ItemType getByName(String name) {
+		name = name.toLowerCase();
+
 		for (ItemType itemType : ItemType.values()) {
-			if (itemType.getName().equals(name)) return itemType;
+			if (itemType.getName().toLowerCase().equals(name)) return itemType;
 		}
 
 		return null;
 	}
 
-	static ItemType getByItem(Item item) {
+	public static ItemType getByItem(Item item) {
 		if (item instanceof HealingItem) return HEALING;
 		if (item instanceof Weapon) return WEAPON;
 		if (item instanceof Armor) return ARMOR;

@@ -134,9 +134,42 @@ public class PlayerController {
 			return null;
 		}
 
-		return item.getDescription();
+		String type = ItemType.getByItem(item).getName();
+		if (item instanceof Armor armor) {
+			if (armor.getActive()) type = "shield";
+		}
+
+		StringBuilder output = new StringBuilder()
+			.append("Name: ")
+			.append(item.getName())
+			.append("\nType: ")
+			.append(type)
+			.append("\nDescription: ")
+			.append(item.getDescription());
+
+		if (item instanceof Armor armor) {
+			output
+				.append("\nDefense: ")
+				.append(armor.getDefense());
+		} else if (item instanceof HealingItem healingItem) {
+			output
+				.append("\nHeal amount: ")
+				.append(healingItem.getHealAmount());
+		} else if (item instanceof Weapon weapon) {
+			output.append("\nAbilities:");
+
+			for (WeaponAbility ability : weapon.getAbilities().values()) {
+				output
+					.append("\n- ")
+					.append(ability.getAttackDescription())
+					.append(" (")
+					.append(ability.getDamage())
+					.append(" damage)");
+			}
+		}
+
+		output.append("\nValue: ").append(item.getValue());
+
+		return output.toString();
 	}
-
-
-
 }

@@ -203,6 +203,10 @@ public class GameEngine {
 		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
 		if (item == null) return "You do not have a " + itemName + " in your inventory.";
 
+		if (item instanceof Weapon weapon) {
+			weapon.getAbilities().putAll(database.getAbilitiesForWeapon(weapon));
+		}
+
 		return playerController.inspectItem(item);
 	}
 
@@ -444,7 +448,7 @@ public class GameEngine {
 
 	public String attack(ArrayList<String> args) {
 		Room playerRoom = player.getRoom();
-		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
 		if (enemy == null) return "No enemy to attack.\n";
 
 		PlayerController pc = new PlayerController(player, new BattleEntityController());
@@ -512,7 +516,7 @@ public class GameEngine {
 
 		//Enemy enemy = player.getCurrentEnemy();
 
-		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
 		int max = -1;
 		for (Integer itemId : database.getItemsForEnemy(enemy).keySet()) {
 			if (itemId >= 0 && itemId <= 40) {
@@ -559,7 +563,7 @@ public class GameEngine {
 
 
 		EnemyController ec = new EnemyController(new BattleEntityController());
-		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		Enemy enemy = new ArrayList<>(database.getEnemiesForRoom(player.getRoom()).values()).get(0);
 		int max = -1;
 		for (Integer itemId : inventoryController.getWeapons(enemy.getInventory()).keySet()) {
 			if (itemId >= 0 && itemId <= 40) {
