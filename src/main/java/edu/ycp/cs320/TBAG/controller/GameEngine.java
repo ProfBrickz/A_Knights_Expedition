@@ -373,30 +373,27 @@ public class GameEngine {
 		if (npc == null) return "You are not currently talking to an NPC.";
 
 		HashMap<Integer, Item> npcItems = database.getItemsForNPC(npc);
-		if (npcItems == null) return "I am not selling anything.";
 		npc.getInventory().addItems(npcItems);
 
 		String itemName = arguments.get(1).toLowerCase();
-		for (Item item : npcItems.values()) {
-			if (!item.getName().equals(itemName)) continue;
+		Item item = inventoryController.getItemByNameCaseInsensitive(npc.getInventory(), itemName);
+		if (item == null) return "I am not selling any " + itemName + "s.";
 
-			Integer amount = null;
-			try {
-				amount = Integer.parseInt(arguments.get(0));
-			} catch (NumberFormatException ignored) {
-			}
-
-			if (amount == null) return arguments.get(0) + " is not a valid amount.";
-			if (player.getCoins() < item.getPrice() * amount) {
-				return "You are too poor to buy " + amount + " x " + item.getName() + ".";
-			}
-			npcController.buy(npc, player, item, amount);
-			database.setPlayerCoins(player.getCoins());
-			database.addItemToPlayer(item);
-			return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
+		Integer amount = null;
+		try {
+			amount = Integer.parseInt(arguments.get(0));
+		} catch (NumberFormatException ignored) {
+		}
+		if (amount == null) return arguments.get(0) + " is not a valid amount.";
+		if (player.getCoins() < item.getPrice() * amount) {
+			return "You are too poor to buy " + amount + " x " + item.getName() + ".";
 		}
 
-		return "I am not selling any " + itemName + "s.";
+		npcController.buy(npc, player, item, amount);
+		database.setPlayerCoins(player.getCoins());
+		database.addItemToPlayer(item);
+
+		return "You bought " + amount + " x " + item.getName() + ", -" + item.getPrice() * amount + " coins.";
 	}
 
 	public String sellItem(ArrayList<String> arguments) {
@@ -425,7 +422,7 @@ public class GameEngine {
 	}
 
 	public String sellAllItem(ArrayList<String> arguments) {
-		NPC npc = player.getCurrentNPC();
+		NPC npc = database.getNpcForPlayer();
 		if (npc == null) return "You are not currently talking to anyone.\n";
 
 		String itemName = arguments.get(0).toLowerCase();
