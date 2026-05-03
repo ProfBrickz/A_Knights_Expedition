@@ -90,7 +90,7 @@
 
     .inventory {
       grid-column: 2;
-      grid-row: 1 / 3;
+      grid-row: 1 / 4;
       overflow-y: auto;
 
       ul {
@@ -116,6 +116,11 @@
     .input {
       grid-column: 1;
       grid-row: 3;
+    }
+
+    #command {
+      field-sizing: content;
+      min-width: 8rem;
     }
 
     .search {
@@ -246,11 +251,6 @@
 			<li>${command}</li>
 		</c:forEach>
 	</ol>
-    
-    <div class="search">
-      <input id="search" type="text" name="search" placeholder="Search item name..." />
-      <button type="submit">Submit</button>
-    </div>
 
   </div>
 
