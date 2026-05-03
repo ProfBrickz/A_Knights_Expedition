@@ -31,7 +31,7 @@ public interface Database {
 
 	// Items
 	HashMap<Integer, WeaponAbility> getAbilitiesForWeapon(Weapon weapon);
-	
+
 
 	// NPCs
 	HashMap<Integer, Item> getItemsForNPC(NPC npc);
@@ -43,6 +43,8 @@ public interface Database {
 	void addItemToEnemy(Enemy enemy, Item item);
 
 	void removeItemFromEnemy(Enemy enemy, Item item);
+
+	void setEnemyHealth(Room room, Enemy enemy, Integer health);
 
 
 	// Rooms
@@ -75,6 +77,8 @@ public interface Database {
 	void setPlayerRoom(Integer roomId);
 
 	void setPlayerCoins(Integer coins);
+
+	void setPlayerHealth(Integer health);
 
 	void setPlayerState(PlayerState playerState);
 

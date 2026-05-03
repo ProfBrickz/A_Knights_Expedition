@@ -1156,6 +1156,34 @@ public class DerbyDatabase implements Database {
 		});
 	}
 
+	@Override
+	public void setEnemyHealth(Room room, Enemy enemy, Integer health) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE room_enemies SET health = ? WHERE room_id = ? AND enemy_id = ?"
+					);
+					statement.setInt(1, health);
+					statement.setInt(2, room.getId());
+					statement.setInt(3, enemy.getId());
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
 
 	// Rooms
 	@Override
@@ -1803,6 +1831,34 @@ public class DerbyDatabase implements Database {
 	}
 
 	@Override
+	public void setPlayerHealth(Integer health) {
+		executeTransaction(new Transaction<Void>() {
+			@Override
+			public Void execute(Connection connection) throws SQLException {
+				PreparedStatement statement = null;
+
+				try {
+					statement = connection.prepareStatement(
+						"UPDATE player SET health = ?"
+					);
+
+					statement.setInt(1, health);
+
+					int rowsUpdated = statement.executeUpdate();
+
+					if (rowsUpdated == 0) {
+						throw new IllegalStateException("No player exists");
+					}
+
+					return null;
+				} finally {
+					DBUtil.closeQuietly(statement);
+				}
+			}
+		});
+	}
+
+	@Override
 	public void setPlayerState(PlayerState playerState) {
 		executeTransaction(new Transaction<Void>() {
 			@Override
@@ -1813,7 +1869,6 @@ public class DerbyDatabase implements Database {
 					statement = connection.prepareStatement(
 						"UPDATE player SET state = ?"
 					);
-
 					statement.setInt(1, playerState.ordinal());
 
 					int rowsUpdated = statement.executeUpdate();

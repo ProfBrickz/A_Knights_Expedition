@@ -465,6 +465,8 @@ public class GameEngine {
 //		System.out.println("Items:" + max);
 		String desc = attack.getAttackDescription();
 		pc.attack(enemy, attack);
+		database.setEnemyHealth(playerRoom, enemy, enemy.getHealth());
+
 
 		if (!roomController.hasAliveEnemies(playerRoom)) {
 			endBattle(true);
@@ -491,6 +493,7 @@ public class GameEngine {
 		}
 		//WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
 		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
+		database.setPlayerHealth(player.getHealth());
 
 		if (player.getHealth() <= 0) {
 			endBattle(false);
