@@ -119,7 +119,11 @@ public class PlayerControllerTests {
 	@Test
 	public void testInspectItem() {
 		Item item = new Item(0, "Key", "A small key", 1, 1);
-		Assertions.assertEquals("A small key", controller.inspectItem(item));
+		Assertions.assertEquals("""
+			Name: Key
+			Type: Item
+			Description: A small key
+			Value: 1""", controller.inspectItem(item));
 		Assertions.assertNull(controller.inspectItem(null));
 	}
 }
