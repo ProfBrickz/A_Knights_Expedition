@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface Database {
-	Integer MAX_HISTORY_SIZE = 10;
+	Integer MAX_HISTORY_SIZE = 15;
 
 	// General purpose methods
 	void loadInitialData();
