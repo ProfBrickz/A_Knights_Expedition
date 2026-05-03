@@ -64,6 +64,10 @@ public class GameEngine {
 		return player;
 	}
 
+	public HashMap<Integer, Enemy> getEnemies() {
+		return database.getEnemiesForRoom(player.getRoom());
+	}
+
 	public ArrayList<String> getCommandHistory() {
 		return database.getCommandHistory();
 	}

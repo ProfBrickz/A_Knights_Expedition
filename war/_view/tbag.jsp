@@ -169,15 +169,21 @@
       <div class="health player">
         <span>Player</span>
         <div class="bar">
-          <div class="fill" style="width: ${playerHealth}%"></div>
+          <div class="fill" style="width: ${player.health / player.maxHealth * 100}%"></div>
         </div>
+        <span>${player.health}/${player.maxHealth}</span>
       </div>
 
-      <div class="health enemy">
-        <span>Enemy</span>
-        <div class="bar">
-          <div class="fill" style="width: ${enemyHealth}%"></div>
-        </div>
+      <div>
+        <c:forEach var="enemy" items="${enemies.values()}">
+          <div class="health enemy">
+            <span>${enemy.name}</span>
+            <div class="bar">
+              <div class="fill" style="width: ${enemy.health / enemy.maxHealth * 100}%"></div>
+            </div>
+            <span>${enemy.health}/${enemy.maxHealth}</span>
+          </div>
+        </c:forEach>
       </div>
 
       <div class="location">
