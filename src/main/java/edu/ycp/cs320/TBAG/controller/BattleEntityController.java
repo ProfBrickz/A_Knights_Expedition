@@ -62,6 +62,8 @@ public class BattleEntityController {
 			newHealth = 0;
 		}
 
+		entity.getInventory().getItems().get(item.getId()).setAmount(item.getAmount() - 1);
+
 		entity.setHealth(newHealth);
 	}
 }
