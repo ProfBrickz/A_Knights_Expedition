@@ -1,5 +1,7 @@
 room_id,item_id,amount
 String,String,Integer
-ForestRooms,22,1
-CanyonRooms,23,1
-Spatula_Room_KC,24,1
+12_FR,22,1
+16_FR,22,1
+NE_FR,22,1
+8_FR,22,1
+Rick_FR,18,1

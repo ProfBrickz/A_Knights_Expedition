@@ -17,6 +17,7 @@ public class GameEngine {
 	private Player player;
 	private final InventoryController inventoryController = new InventoryController();
 	private final NPCController npcController = new NPCController(inventoryController);
+	private final RoomController roomController = new RoomController();
 
 	// Constructor
 	public GameEngine(Database database) {
@@ -115,13 +116,13 @@ public class GameEngine {
 	 * Validates direction and updates player position.
 	 */
 	public String move(ArrayList<String> arguments) {
+		Room playerRoom = player.getRoom();
 		String direction = arguments.get(0).toLowerCase();
 
-		player.getRoom().setRoomConnections(database.getConnectionsForRoom(player.getRoom()));
-		RoomController roomController = new RoomController(new HashMap<>());
+		playerRoom.setRoomConnections(database.getConnectionsForRoom(playerRoom));
 		PlayerController playerController = new PlayerController(player, new BattleEntityController());
 
-		if (!roomController.isValidDirection(player.getRoom(), direction)) {
+		if (!roomController.isValidDirection(playerRoom, direction)) {
 			return "Invalid direction for this room";
 		}
 
@@ -129,10 +130,27 @@ public class GameEngine {
 		if (!successfulMove) {
 			return "Move failed, either player, or the room does not exist";
 		}
+		playerRoom = player.getRoom();
 
-		database.setPlayerRoom(player.getRoom().getId());
+		HashMap<Integer, Enemy> enemies = database.getEnemiesForRoom(playerRoom);
+		playerRoom.addEnemies(enemies);
 
-		return player.getRoom().getDescription();
+		database.setPlayerRoom(playerRoom.getId());
+
+		String output = playerRoom.getDescription();
+
+		//  ENTER BATTLE IF NEEDED
+		if (roomController.hasAliveEnemies(playerRoom)) {
+			Enemy enemy = playerRoom.getEnemies().values().iterator().next();
+
+			player.setCurrentEnemy(enemy);   // required field
+			player.setState(PlayerState.BATTLE);
+			database.setPlayerState(PlayerState.BATTLE);
+
+			output += "\nYou encountered a " + enemy.getName() + "! Prepare for battle.\n";
+		}
+
+		return output;
 	}
 
 	/**
@@ -143,6 +161,10 @@ public class GameEngine {
 		Room playerRoom = player.getRoom();
 		playerRoom.addNPCs(database.getNPCsForRoom(playerRoom));
 		StringBuilder output = new StringBuilder(playerRoom.getDescription());
+
+		WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
+		System.out.println("other:" + attack);
+		System.out.println("Items:" + database.getAbilitiesForWeapon(inventoryController.getWeapons(player.getInventory()).get(3)).get(3));
 
 		if (!playerRoom.getNpcs().isEmpty()) {
 			if (!output.isEmpty()) output.append("\n");
@@ -157,7 +179,6 @@ public class GameEngine {
 
 		return output.toString();
 	}
-
 
 	/**
 	 * Handles the "inventory" command.
@@ -306,6 +327,7 @@ public class GameEngine {
 		if (currentNPC == null) return npcName + " is not in this room.";
 
 		database.setPlayerNPC(currentNPC);
+		player.setState(PlayerState.TALKING_TO_NPC);
 		database.setPlayerState(PlayerState.TALKING_TO_NPC);
 
 		return currentNPC.getGreeting();
@@ -318,6 +340,7 @@ public class GameEngine {
 		String goodbye = npc.getGoodbye();
 
 		database.setPlayerNPC(null);
+		player.setState(PlayerState.EXPLORING);
 		database.setPlayerState(PlayerState.EXPLORING);
 
 		return goodbye;
@@ -416,6 +439,165 @@ public class GameEngine {
 		database.setPlayerCoins(player.getCoins());
 
 		return "You sold " + amount + " x " + item.getName() + ", +" + item.getValue() * amount + " coins.\n";
+	}
+
+	public String attack(ArrayList<String> args) {
+		Room playerRoom = player.getRoom();
+		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		if (enemy == null) return "No enemy to attack.\n";
+
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		EnemyController ec = new EnemyController(new BattleEntityController());
+
+		//WeaponAbility attack = new WeaponAbility(0, 10, "Player attack");
+		int max = -1; // or 0 if you prefer
+
+		for (Integer itemId : inventoryController.getWeapons(player.getInventory()).keySet()) {
+			if (itemId >= 0 && itemId <= 4) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility attack = database.getAbilitiesForWeapon(inventoryController.getWeapons(player.getInventory()).get(max)).get(max);
+		System.out.println("Items:" + database.getAbilitiesForWeapon(inventoryController.getWeapons(player.getInventory()).get(max)));
+//		System.out.println("Items:" + max);
+		String desc = attack.getAttackDescription();
+		pc.attack(enemy, attack);
+
+		if (!roomController.hasAliveEnemies(playerRoom)) {
+			endBattle(true);
+			return desc + "\nYou defeated the enemy!\n";
+		}
+
+		for (Integer itemId : inventoryController.getWeapons(enemy.getInventory()).keySet()) {
+			if (itemId >= 0 && itemId <= 40) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility enemyAttack = new WeaponAbility(9, 15, "wacks with his cool stick");
+		if (max == 30) {
+			enemyAttack.setDamage(5);
+			enemyAttack.setAttackDescription("pokes with their crude spear");
+		} else if (max == 31) {
+			enemyAttack.setDamage(7);
+			enemyAttack.setAttackDescription("slashes with their sharp claws");
+		} else {
+			enemyAttack.setDamage(15);
+			enemyAttack.setAttackDescription("wacks with his cool stick");
+		}
+		//WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
+		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
+
+		if (player.getHealth() <= 0) {
+			endBattle(false);
+			return desc + "\nYou were defeated!\n";
+		}
+
+		return "You " + desc + "\nAttack Success!\n" + enemyTurn;
+	}
+
+	public String defend(ArrayList<String> args) {
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		EnemyController ec = new EnemyController(new BattleEntityController());
+
+		Armor armor = new Armor(0, "Defense", "Temporary defense", 5, true, 0);
+		pc.defend(armor);
+
+		//Enemy enemy = player.getCurrentEnemy();
+
+		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		int max = -1;
+		for (Integer itemId : database.getItemsForEnemy(enemy).keySet()) {
+			if (itemId >= 0 && itemId <= 40) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility enemyAttack = new WeaponAbility(9, 15, "wacks with his cool stick");
+		if (max == 30) {
+			enemyAttack.setDamage(5);
+			enemyAttack.setAttackDescription("pokes with their crude spear");
+		} else if (max == 31) {
+			enemyAttack.setDamage(7);
+			enemyAttack.setAttackDescription("slashes with their sharp claws");
+		} else {
+			enemyAttack.setDamage(15);
+			enemyAttack.setAttackDescription("wacks with his cool stick");
+		}
+//		WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
+		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
+//		System.out.println("Enemy:" + enemy);
+//		System.out.println("Enemy max:" + max);
+//		System.out.println("Enemy:" + inventoryController.getWeapons(enemy.getInventory()));
+//		System.out.println("Enemy attack:" + database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max));
+//		System.out.println("Enemy taking turn:" + enemyTurn);
+
+		return "You brace for impact!\n" + enemyTurn;
+	}
+
+	public String heal(ArrayList<String> args) {
+		String itemName = args.get(0);
+
+
+		InventoryController ic = new InventoryController();
+		HealingItem item = (HealingItem) ic.getItemByNameCaseInsensitive(player.getInventory(), itemName);
+
+
+		if (item == null) return "You don't have that item.\n";
+
+
+		PlayerController pc = new PlayerController(player, new BattleEntityController());
+		pc.heal(item);
+
+
+		EnemyController ec = new EnemyController(new BattleEntityController());
+		Enemy enemy = database.getEnemiesForRoom(player.getRoom()).get(0);
+		int max = -1;
+		for (Integer itemId : inventoryController.getWeapons(enemy.getInventory()).keySet()) {
+			if (itemId >= 0 && itemId <= 40) {
+				if (itemId > max) {
+					max = itemId;
+				}
+			}
+		}
+		WeaponAbility enemyAttack = new WeaponAbility(9, 15, "wacks with his cool stick");
+		if (max == 30) {
+			enemyAttack.setDamage(5);
+			enemyAttack.setAttackDescription("pokes with their crude spear");
+		} else if (max == 31) {
+			enemyAttack.setDamage(7);
+			enemyAttack.setAttackDescription("slashes with their sharp claws");
+		} else {
+			enemyAttack.setDamage(15);
+			enemyAttack.setAttackDescription("wacks with his cool stick");
+		}
+		//WeaponAbility enemyAttack = database.getAbilitiesForWeapon(inventoryController.getWeapons(enemy.getInventory()).get(max)).get(max);
+		String enemyTurn = ec.takeTurn(enemy, player, enemyAttack);
+
+		if (enemy == null) {
+			return "No enemy is attacking you.\n";
+		}
+
+		database.removeItemFromPlayer(item);
+
+		System.out.println("Enemy taking turn...");
+
+
+		return "You healed yourself.\n" + enemyTurn;
+	}
+
+	private void endBattle(boolean playerWon) {
+//		Enemy enemy = player.getCurrentEnemy();
+//
+//		if (playerWon) {
+//			player.getRoom().removeEnemy(enemy);
+//		}
+
+		database.setPlayerState(PlayerState.EXPLORING);
 	}
 
 	public String restart(ArrayList<String> arguments) {

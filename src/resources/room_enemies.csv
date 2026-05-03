@@ -1,3 +1,5 @@
 room_id,enemy_id,amount
 String,String,Integer
 10_FR,1,1
+7_FR,2,1
+Rick_FR,12,1
