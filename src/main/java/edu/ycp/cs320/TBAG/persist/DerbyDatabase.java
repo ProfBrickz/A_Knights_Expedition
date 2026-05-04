@@ -1411,7 +1411,8 @@ public class DerbyDatabase implements Database {
 					resultSet = selectStatement.executeQuery();
 
 					if (resultSet.next()) {
-						int newAmount = item.getAmount();
+						int existingAmount = resultSet.getInt(1);
+						int newAmount = existingAmount + item.getAmount();
 
 						updateStatement = connection.prepareStatement("""
 								UPDATE room_items
@@ -1471,8 +1472,9 @@ public class DerbyDatabase implements Database {
 					if (!resultSet.next()) {
 						return true;
 					}
-					
-					int newAmount = item.getAmount();
+
+					int existingAmount = resultSet.getInt(1);
+					int newAmount = existingAmount - item.getAmount();
 
 					if (newAmount > 0) {
 						updateStatement = connection.prepareStatement("""
@@ -1650,7 +1652,8 @@ public class DerbyDatabase implements Database {
 					resultSet = selectStatement.executeQuery();
 
 					if (resultSet.next()) {
-						int newAmount = item.getAmount();
+						int existingAmount = resultSet.getInt(1);
+						int newAmount = existingAmount + item.getAmount();
 
 						updateStatement = connection.prepareStatement("""
 								UPDATE player_items
@@ -1708,7 +1711,8 @@ public class DerbyDatabase implements Database {
 						return true;
 					}
 
-					int newAmount = item.getAmount();
+					int existingAmount = resultSet.getInt(1);
+					int newAmount = existingAmount - item.getAmount();
 
 					if (newAmount > 0) {
 						updateStatement = connection.prepareStatement("""

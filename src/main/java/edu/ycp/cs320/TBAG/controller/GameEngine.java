@@ -240,12 +240,12 @@ public class GameEngine {
 
 		String itemName = arguments.get(0).toLowerCase();
 		Item item = inventoryController.getItemByNameCaseInsensitive(playerRoom.getInventory(), itemName);
-		if (item == null) return "This room does not have a " + itemName + ".";
+		if (item == null) return "This room does not have a " + itemName + ".\n";
 
 		database.removeItemFromRoom(playerRoom, item);
 		database.addItemToPlayer(item);
 
-		return "You picked up " + getItemFormat(item) + ".";
+		return "You picked up " + getItemFormat(item) + ".\n";
 	}
 
 	public String pickupAllItems(ArrayList<String> arguments) {
@@ -253,7 +253,7 @@ public class GameEngine {
 		playerRoom.getInventory().addItems(database.getItemsForRoom(playerRoom));
 
 		if (playerRoom.getInventory().getItems().isEmpty()) {
-			return "You did not pick anything up from this room.";
+			return "You did not pick anything up from this room.\n";
 		}
 
 		StringBuilder output = new StringBuilder("You picked up:\n");
@@ -282,17 +282,17 @@ public class GameEngine {
 
 		String itemName = arguments.get(0).toLowerCase();
 		Item item = inventoryController.getItemByNameCaseInsensitive(player.getInventory(), itemName);
-		if (item == null) return "You do not have a " + itemName + ".";
+		if (item == null) return "You do not have a " + itemName + ".\n";
 
 		database.removeItemFromPlayer(item);
 		database.addItemToRoom(playerRoom, item);
 
-		return "You dropped " + getItemFormat(item) + ".";
+		return "You dropped " + getItemFormat(item) + ".\n";
 	}
 
 	public String dropAllItems(ArrayList<String> arguments) {
 		if (player.getInventory().getItems().isEmpty()) {
-			return "You do not have anything to drop.";
+			return "You do not have anything to drop.\n";
 		}
 
 		Room playerRoom = player.getRoom();
