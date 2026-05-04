@@ -140,19 +140,19 @@ public class InitialDataTests {
 		HashMap<Integer, ArrayList<NPC>> roomNPCs = InitialData.getRoomNPCs();
 
 		Assertions.assertEquals(1, roomNPCs.size());
-		Assertions.assertEquals(1, roomNPCs.get(2).size());
-		Assertions.assertEquals("Test NPC", roomNPCs.get(2).get(0).getName());
+		Assertions.assertEquals(1, roomNPCs.get(0).size());
+		Assertions.assertEquals("Test NPC", roomNPCs.get(0).get(0).getName());
 	}
 
 	@Test
-	public void testGetRoomEnemiesThrowsForInvalidEnemyReference() throws IOException {
+	public void testGetRoomEnemies() throws IOException {
 		InitialData.getRooms();
 		InitialData.getEnemies();
+		HashMap<Integer, ArrayList<Enemy>> roomEnemies = InitialData.getRoomEnemies();
 
-		Assertions.assertThrows(
-			IllegalStateException.class,
-			InitialData::getRoomEnemies
-		);
+		Assertions.assertEquals(1, roomEnemies.size());
+		Assertions.assertEquals(1, roomEnemies.get(0).size());
+		Assertions.assertEquals("Goblin", roomEnemies.get(0).get(0).getName());
 	}
 
 	@Test
