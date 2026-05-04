@@ -23,7 +23,7 @@ public class RoomControllerTests {
 		rooms.put(1, room1);
 		rooms.put(2, room2);
 
-		controller = new RoomController(rooms);
+		controller = new RoomController();
 	}
 
 	// addRoomConnection + isValidDirection
