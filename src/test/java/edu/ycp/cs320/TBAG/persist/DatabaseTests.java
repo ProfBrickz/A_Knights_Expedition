@@ -1,6 +1,9 @@
 package edu.ycp.cs320.TBAG.persist;
 
 import edu.ycp.cs320.TBAG.Utils;
+import edu.ycp.cs320.TBAG.model.Weapon;
+import edu.ycp.cs320.TBAG.model.WeaponAbility;
+
 import org.junit.jupiter.api.*;
 
 import java.io.File;
@@ -8,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DatabaseTests {
 	private final String databasePath = "test-database.db";
@@ -64,10 +68,14 @@ public class DatabaseTests {
 
 
 		// Items
+		@Test
+		public void getAbilitiesForWeapon(){
+			getAbilitiesForWeaponTest();
+		}
 
 
 		// NPCs
-
+			
 
 		// Enemies
 
@@ -124,6 +132,10 @@ public class DatabaseTests {
 
 
 		// Items
+		@Test
+		public void getAbilitiesForWeapon() {
+			getAbilitiesForWeaponTest();
+		}
 
 
 		// NPCs
@@ -224,6 +236,23 @@ public class DatabaseTests {
 
 
 	// Items
+	private void getAbilitiesForWeaponTest() {
+		Weapon weapon = new Weapon(1, "Test Weapon", "desc", 0);
+		HashMap<Integer, WeaponAbility> abilities = database.getAbilitiesForWeapon(weapon);
+		
+		// Verify exactly one ability is returned
+		Assertions.assertEquals(1, abilities.size());
+
+		// Verify the correct ability exists
+		Assertions.assertTrue(abilities.containsKey(1));
+
+		WeaponAbility ability = abilities.get(1);
+
+		// Verify all fields match the CSV data
+		Assertions.assertEquals(1, ability.getId());
+		Assertions.assertEquals(1, ability.getDamage());
+		Assertions.assertEquals("Test.", ability.getAttackDescription());
+}
 
 
 	// NPCs
